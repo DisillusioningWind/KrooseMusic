@@ -1,58 +1,40 @@
-import { app, shell, BrowserWindow, ipcMain } from 'electron'
+import { app, BrowserWindow } from 'electron/main'
 import { join } from 'path'
-import { electronApp, optimizer, is } from '@electron-toolkit/utils'
-import icon from '../../resources/icon.png?asset'
+import { bindIpcMain } from './api/file'
 
-function createWindow(): void {
-  // Create the browser window.
-  const mainWindow = new BrowserWindow({
-    width: 900,
-    height: 670,
-    show: false,
-    autoHideMenuBar: true,
-    ...(process.platform === 'linux' ? { icon } : {}),
-    webPreferences: {
-      preload: join(__dirname, '../preload/index.js'),
-      sandbox: false
+class MainWindow extends BrowserWindow {
+  constructor() {
+    const preloadFilePath = '../preload/index.js'
+    const rendererFilePath = '../renderer/index.html'
+    //窗口配置
+    super({
+      width: 900,
+      height: 670,
+      show: false,
+      autoHideMenuBar: true,
+      webPreferences: {
+        preload: join(__dirname, preloadFilePath),
+        // contextIsolation: false,
+        // nodeIntegration: true,
+        sandbox: false
+      }
+    })
+    //加载页面
+    if (process.env.NODE_ENV === 'development') {
+      this.loadURL('http://localhost:5173')
+    } else {
+      this.loadFile(join(__dirname, rendererFilePath))
     }
-  })
-
-  mainWindow.on('ready-to-show', () => {
-    mainWindow.show()
-  })
-
-  mainWindow.webContents.setWindowOpenHandler((details) => {
-    shell.openExternal(details.url)
-    return { action: 'deny' }
-  })
-
-  // HMR for renderer base on electron-vite cli.
-  // Load the remote URL for development or the local html file for production.
-  if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
-    mainWindow.loadURL(process.env['ELECTRON_RENDERER_URL'])
-  } else {
-    mainWindow.loadFile(join(__dirname, '../renderer/index.html'))
+    //事件监听
+    this.on('ready-to-show', () => {
+      super.show()
+    })
   }
 }
 
-// This method will be called when Electron has finished
-// initialization and is ready to create browser windows.
-// Some APIs can only be used after this event occurs.
 app.whenReady().then(() => {
-  // Set app user model id for windows
-  electronApp.setAppUserModelId('com.electron')
-
-  // Default open or close DevTools by F12 in development
-  // and ignore CommandOrControl + R in production.
-  // see https://github.com/alex8088/electron-toolkit/tree/master/packages/utils
-  app.on('browser-window-created', (_, window) => {
-    optimizer.watchWindowShortcuts(window)
-  })
-
-  // IPC test
-  ipcMain.on('ping', () => console.log('pong'))
-
-  createWindow()
+  const mainWindow = new MainWindow()
+  bindIpcMain(mainWindow)
 })
 
 app.on('window-all-closed', () => {
