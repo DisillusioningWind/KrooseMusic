@@ -71,9 +71,12 @@ function audioChangeTime(time) {
 }
 
 function onCanPlay() {
-  tolTime.value = audio.value.duration
-  audioState = 'stop'
-  audioPlay()
+  // 该事件在暂停更改时间后也会触发
+  if (audioState === 'unload') {
+    tolTime.value = audio.value.duration
+    audioState = 'stop'
+    audioPlay()
+  }
 }
 function onTimeUpdate() {
   if (sliderState === 'slide') {
@@ -93,7 +96,6 @@ async function butOpenFile() {
   if (filePath) {
     URL.revokeObjectURL(audio.value.src)
     URL.revokeObjectURL(pictureURL.value)
-    // @ts-ignore
     const { buffer } = await ipc.callMain('loadFile', filePath)
     musicTags.value = await ipc.callMain('loadMusicTagsFromBuffer', buffer)
     audio.value.src = URL.createObjectURL(new Blob([buffer]))
@@ -148,6 +150,7 @@ function toDateString(time: number) {
       max-width: 31.25%;
       :deep(.musicDetailBut) {
         justify-self: left;
+        display: v-bind('audioState === "unload" ? "none" : "inline-flex" ');
         height: 100%;
         max-width: 100%;
         margin: 0;

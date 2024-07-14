@@ -29,10 +29,10 @@ export async function loadMusicTagsFromFile(path: string) {
  */
 export async function getMainColorFromBuffer(buffer: Buffer) {
   const sharp = Sharp(buffer)
-  const { data } = await sharp.ensureAlpha().raw().toBuffer({ resolveWithObject: true })
-  const colorDic = {}
+  const { data } = await sharp.resize(50, 50).ensureAlpha().raw().toBuffer({ resolveWithObject: true })
   let maxColor = Color('#1a5d8e')
   let max = 0
+  const colorDic = new Map<string, number>()
   for (let i = 0; i < data.length; i += 4) {
     const color = Color(`rgba(${data[i]},${data[i + 1]},${data[i + 2]},${data[i + 3]})`)
     const l = color.lightness()
@@ -42,14 +42,11 @@ export async function getMainColorFromBuffer(buffer: Buffer) {
       && s < 60 && s > 40
       && ((h > 140 && h < 175) || h < 30 || h > 220)) {
       const key = color.hex()
-      if (colorDic[key]) {
-        colorDic[key]++
-        if (colorDic[key] > max) {
-          max = colorDic[key]
-          maxColor = color
-        }
-      } else {
-        colorDic[key] = 1
+      let count = (colorDic.get(key) || 0) + 1
+      colorDic.set(key, count)
+      if (count > max) {
+        max = count
+        maxColor = color
       }
     }
   }
