@@ -1,13 +1,17 @@
-import { dialog, getCurrentWindow } from '@electron/remote'
+import { dialog, BrowserWindow } from 'electron'
 import fs from 'fs'
+
+/** 需要window作为参数的API名称 */
+export const windowAPI = [
+  'openFileWindow'
+]
 
 /**
  * 打开文件对话框，选择音频文件
  * @param window 将对话框作为模态窗口附加到父窗口
  * @returns 选择的音频文件路径
  */
-export async function openFileWindow() {
-  const window = getCurrentWindow()
+export async function openFileWindow(window: BrowserWindow) {
   const { canceled, filePaths } = await dialog.showOpenDialog(
     window, {
     properties: ['openFile'],

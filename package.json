@@ -24,7 +24,6 @@
   },
   "devDependencies": {
     "@electron-toolkit/tsconfig": "^1.0.1",
-    "@electron/remote": "^2.1.2",
     "@element-plus/icons-vue": "^2.3.1",
     "@types/color": "^3.0.6",
     "@types/node": "^20.14.8",
@@ -32,6 +31,7 @@
     "color": "^4.2.3",
     "editorconfig": "^2.0.0",
     "electron": "^31.0.2",
+    "electron-better-ipc": "^2.0.1",
     "electron-builder": "^24.13.3",
     "electron-vite": "^2.3.0",
     "element-plus": "^2.7.6",
@@ -45,7 +45,6 @@
     "unplugin-auto-import": "^0.17.6",
     "unplugin-vue-components": "^0.27.2",
     "vite": "^5.3.1",
-    "vite-plugin-optimizer": "^1.4.3",
     "vue": "^3.4.30",
     "vue-router": "^4.4.0",
     "vue-tsc": "^2.0.22"

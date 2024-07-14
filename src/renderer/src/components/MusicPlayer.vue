@@ -27,8 +27,8 @@
 </template>
 
 <script setup lang="ts">
-import { openFileWindow, loadFile } from '@renderer/api/file'
-import { loadMusicTagsFromBuffer, getMainColorFromBuffer } from '@renderer/api/music'
+// @ts-ignore
+const ipc = window.ipc
 
 const audio = ref()
 let tolTime = ref(100)
@@ -89,16 +89,16 @@ function butTogglePlay() {
   }
 }
 async function butOpenFile() {
-  filePath = await openFileWindow() as string
+  filePath = await ipc.callMain('openFileWindow')
   if (filePath) {
     URL.revokeObjectURL(audio.value.src)
     URL.revokeObjectURL(pictureURL.value)
-    const { buffer } = loadFile(filePath)
-    musicTags.value = await loadMusicTagsFromBuffer(buffer)
-    pictureURL.value = URL.createObjectURL(new Blob([musicTags.value.picture[0].data]))
-    // musicBackgroundColor.value = getMainColorFromBuffer(musicTags.value.picture[0].data)
-    getMainColorFromBuffer(musicTags.value.picture[0].data)
+    // @ts-ignore
+    const { buffer } = await ipc.callMain('loadFile', filePath)
+    musicTags.value = await ipc.callMain('loadMusicTagsFromBuffer', buffer)
     audio.value.src = URL.createObjectURL(new Blob([buffer]))
+    pictureURL.value = URL.createObjectURL(new Blob([musicTags.value.picture[0].data]))
+    musicBackgroundColor.value = await ipc.callMain('getMainColorFromBuffer', musicTags.value.picture[0].data)
   }
 }
 
@@ -121,6 +121,10 @@ function toDateString(time: number) {
 
 .musicDiv {
   height: 100%;
+  background-color: v-bind('musicBackgroundColor');
+  .el-text {
+    color: white;
+  }
   .timeRow {
     margin: 0 12px;
     height: 30px;
@@ -163,21 +167,19 @@ function toDateString(time: number) {
           }
           .musicDetailButTextDiv {
             height: 100%;
-            max-width: calc(100% - 100px);
-            margin: 0;
-            padding: 0 0 0 10px;
+            width: calc(100% - 100px);
+            margin: 0 0 0 10px;
             display: flex;
             flex-direction: column;
-            align-items: flex-start;
             justify-content: center;
             .topText {
-              justify-self: left;
+              align-self: flex-start;
               font-size: 17.5px;
-              font-weight: lighter;
+              font-weight: 100;
               color: white;
             }
             .botText {
-              justify-self: left;
+              align-self: flex-start;
               font-size: 15px;
               font-weight: bold;
               color: white;
