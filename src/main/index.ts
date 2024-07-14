@@ -1,6 +1,6 @@
 import { app, BrowserWindow } from 'electron/main'
+import remote from '@electron/remote/main'
 import { join } from 'path'
-import { bindIpcMain } from './api/file'
 
 class MainWindow extends BrowserWindow {
   constructor() {
@@ -14,8 +14,8 @@ class MainWindow extends BrowserWindow {
       autoHideMenuBar: true,
       webPreferences: {
         preload: join(__dirname, preloadFilePath),
-        // contextIsolation: false,
-        // nodeIntegration: true,
+        contextIsolation: false,
+        nodeIntegration: true,
         sandbox: false
       }
     })
@@ -34,7 +34,8 @@ class MainWindow extends BrowserWindow {
 
 app.whenReady().then(() => {
   const mainWindow = new MainWindow()
-  bindIpcMain(mainWindow)
+  remote.initialize()
+  remote.enable(mainWindow.webContents)
 })
 
 app.on('window-all-closed', () => {

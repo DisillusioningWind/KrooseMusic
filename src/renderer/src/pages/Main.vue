@@ -4,7 +4,7 @@
       <el-aside><MainNav ref="nav"/></el-aside>
       <el-main><router-view /></el-main>
     </el-container>
-    <el-footer><MusicBar /></el-footer>
+    <el-footer><MusicPlayer/></el-footer>
   </el-container>
 </template>
 
@@ -21,7 +21,8 @@ let menuWidthStyle = computed(() => nav.value.menuWidthStyle)
     width: v-bind('menuWidthStyle');
   }
   .el-footer {
-    height: 90px;
+    height: 120px;
+    padding: 0px;
   }
 }
 </style>
