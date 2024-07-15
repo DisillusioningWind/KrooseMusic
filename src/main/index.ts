@@ -1,6 +1,7 @@
 import { app, BrowserWindow } from 'electron/main'
 import { join } from 'path'
 import { bindIpcMain } from './api/index'
+import { session } from 'electron'
 
 class MainWindow extends BrowserWindow {
   constructor() {
@@ -35,6 +36,7 @@ class MainWindow extends BrowserWindow {
 app.whenReady().then(() => {
   const mainWindow = new MainWindow()
   bindIpcMain(mainWindow)
+  session.defaultSession.loadExtension('C:/Users/WHR/AppData/Local/Microsoft/Edge/User Data/Default/Extensions/olofadcdnkkjdfgjcmjaadnlehnnihnl/6.6.3_0')
 })
 
 app.on('window-all-closed', () => {

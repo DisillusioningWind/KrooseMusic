@@ -1,7 +1,6 @@
 import { createRouter, createWebHashHistory } from 'vue-router'
 
 import Main from '@renderer/pages/Main.vue'
-import Detail from '@renderer/pages/Detail.vue'
 import Library from '@renderer/pages/Library.vue'
 import Like from '@renderer/pages/Like.vue'
 import List from '@renderer/pages/List.vue'
@@ -15,10 +14,6 @@ const router = createRouter({
       path: '/',
       component: Main,
       children: [
-        {
-          path: 'Detail',
-          component: Detail
-        },
         {
           path: 'Library',
           component: Library
