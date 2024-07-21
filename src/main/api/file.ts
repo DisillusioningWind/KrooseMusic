@@ -1,5 +1,6 @@
 import { dialog, BrowserWindow } from 'electron'
 import fs from 'fs'
+import { parseBuffer } from 'music-metadata'
 
 /** 需要window作为参数的API名称 */
 export const windowAPI = [
@@ -29,5 +30,13 @@ export function loadFile(path: string) {
   const size = fs.statSync(path).size
   const buffer = Buffer.alloc(size)
   fs.readSync(fs.openSync(path, 'r'), buffer, 0, size, 0)
-  return { buffer, size }
+  return buffer
+}
+
+export async function loadFileAndTag(path: string) {
+  const stime = performance.now()
+  const buffer = loadFile(path)
+  const { common:commonTags } = await parseBuffer(buffer)
+  console.log('loadFileAndTag', performance.now() - stime)
+  return { buffer, commonTags }
 }

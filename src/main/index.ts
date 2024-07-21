@@ -1,7 +1,6 @@
-import { app, BrowserWindow } from 'electron/main'
+import { app, BrowserWindow, session } from 'electron/main'
 import { join } from 'path'
 import { bindIpcMain } from './api/index'
-import { session } from 'electron'
 
 class MainWindow extends BrowserWindow {
   constructor() {
@@ -15,9 +14,9 @@ class MainWindow extends BrowserWindow {
       autoHideMenuBar: true,
       webPreferences: {
         preload: join(__dirname, preloadFilePath),
-        // contextIsolation: false,
-        // nodeIntegration: true,
-        sandbox: false
+        sandbox: false,
+        nodeIntegration: true,
+        contextIsolation: false,
       }
     })
     //加载页面

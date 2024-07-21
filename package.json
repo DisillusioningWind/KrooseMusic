@@ -20,7 +20,8 @@
   },
   "dependencies": {
     "@electron-toolkit/preload": "^3.0.0",
-    "@electron-toolkit/utils": "^3.0.0"
+    "@electron-toolkit/utils": "^3.0.0",
+    "sharp": "^0.33.4"
   },
   "devDependencies": {
     "@electron-toolkit/tsconfig": "^1.0.1",
@@ -28,6 +29,7 @@
     "@types/color": "^3.0.6",
     "@types/node": "^20.14.8",
     "@vitejs/plugin-vue": "^5.0.5",
+    "bassaudio-updated": "^2.1.1",
     "color": "^4.2.3",
     "editorconfig": "^2.0.0",
     "electron": "^31.0.2",
@@ -40,11 +42,11 @@
     "pinia": "^2.1.7",
     "prettier": "^3.3.2",
     "sass": "^1.77.6",
-    "sharp": "^0.33.4",
     "typescript": "^5.5.2",
     "unplugin-auto-import": "^0.17.6",
     "unplugin-vue-components": "^0.27.2",
     "vite": "^5.3.1",
+    "vite-plugin-optimizer": "^1.4.3",
     "vue": "^3.4.30",
     "vue-router": "^4.4.0",
     "vue-tsc": "^2.0.22"

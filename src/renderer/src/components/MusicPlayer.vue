@@ -34,7 +34,7 @@
 <script setup lang="ts">
 import { useMusicPlayer } from '@renderer/classes/MusicPlayer'
 import { useStore } from '@renderer/store'
-// @ts-ignore
+
 const ipc = window.ipc
 const store = useStore()
 const player = useMusicPlayer()
@@ -53,7 +53,6 @@ function sliderChangeInput() {
   }
 }
 function sliderChangeTime(time) {
-  console.log('audio change', toDateString(time))
   player.value.currentTime = time
   sliderState = 'slide'
 }
@@ -69,7 +68,7 @@ function sliderReset() {
 
 // 按钮功能
 function butToggleDetail() {
-  store.showDetail = !store.showDetail
+  store.toggleDetail()
 }
 function butTogglePlay() {
   if (player.value.audioState === 'play') {
@@ -79,12 +78,12 @@ function butTogglePlay() {
   }
 }
 async function butOpenFile() {
-  const filePath = await ipc.callMain('openFileWindow')
+  const filePath = await ipc.invoke('openFileWindow') as string | null
   if (filePath) {
     player.value.load(filePath)
   }
 }
-
+// 工具函数
 function toDateString(time: number) {
   const hour = Math.floor(time / 3600)
   const min = Math.floor((time % 3600) / 60)

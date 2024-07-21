@@ -13,4 +13,12 @@ app.config.globalProperties.emitter = emitter
 for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
   app.component(key, component)
 }
+// Auto preview
+// if (process.env.NODE_ENV === 'development') {
+//   import("autopreview/vue3").then(({ default: AutoPreview }) => {
+//     new AutoPreview("#app", (app) => {
+//       app.use(router).use(pinia)
+//     })
+//   })
+// }
 app.mount('#app')

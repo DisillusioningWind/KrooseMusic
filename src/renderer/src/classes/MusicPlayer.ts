@@ -1,9 +1,8 @@
 import type { ICommonTagsResult, IPicture } from 'music-metadata'
-import type { RendererProcessIpc } from 'electron-better-ipc'
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted } from 'vue'
+import { logExeTimeAsync } from '@renderer/utils/tools'
 
 class MusicPlayer {
-  ipc: RendererProcessIpc
   audio: HTMLAudioElement
   audioURL: string | null = null
   audioState:'unload' | 'play' | 'pause' | 'stop' = 'unload'
@@ -12,7 +11,6 @@ class MusicPlayer {
   commonTags: ICommonTagsResult | null = null
   title: string | null = null
   artist: string = ''
-  picture: IPicture | null = null
   pictureURL: string | null = null
   mainColor: string = '#1a5d8e'
   totalTime: number = 0
@@ -27,8 +25,6 @@ class MusicPlayer {
   constructor() {
     this.audio = new Audio()
     this.resetEvent = new Event('reset')
-    // @ts-ignore
-    this.ipc = window.ipc
   }
 
   reset() {
@@ -37,36 +33,28 @@ class MusicPlayer {
     this.commonTags = null
     this.title = null
     this.artist = ''
-    this.picture = null
     URL.revokeObjectURL(this.audioURL as string)
     URL.revokeObjectURL(this.pictureURL as string)
     this.audioURL = null
     this.pictureURL = null
     this.mainColor = '#1a5d8e'
-    this.audioState = 'unload'
     this.totalTime = 0
+    this.audioState = 'unload'
     this.audio.dispatchEvent(this.resetEvent)
   }
 
+  @logExeTimeAsync
   async load(filePath: string) {
     this.reset()
     // 读取音乐文件
-    // @ts-ignore
-    const { buffer, size } = await this.ipc.callMain('loadFile', filePath)
-    this.filePath = filePath
-    this.fileSize = size
-    // 加载音频
+    const { buffer, commonTags } = await window.ipc.invoke('loadFileAndTag', filePath) as { buffer: Buffer, commonTags: ICommonTagsResult }
     this.audioURL = URL.createObjectURL(new Blob([buffer]))
     this.audio.src = this.audioURL
-    // 加载音乐信息，包括标签和图片
-    this.commonTags! = await this.ipc.callMain('loadMusicTagsFromBuffer', buffer)
-    this.title = this.commonTags.title || filePath.slice(filePath.lastIndexOf('\\') + 1)
-    this.artist = this.commonTags.artist || '未知艺术家'
-    if (this.commonTags.picture) {
-      this.picture = this.commonTags.picture[0]
-      this.pictureURL = URL.createObjectURL(new Blob([this.picture.data]))
-      this.mainColor = await this.ipc.callMain('getMainColorFromBuffer', this.picture.data)
-    }
+    this.commonTags = commonTags
+    this.artist = commonTags.artist || '未知艺术家'
+    this.title = commonTags.title || filePath.slice(filePath.lastIndexOf('\\') + 1)
+    // this.mainColor = mainColor
+    // this.pictureURL = (commonTags.picture) ? URL.createObjectURL(new Blob([commonTags.picture[0].data])) : null
   }
 
   readyPlay() {
@@ -99,22 +87,22 @@ class MusicPlayer {
     }
   }
 
-  onTimeUpdate(callback: () => void) {
-    this.audio.ontimeupdate = () => callback()
+  onTimeUpdate(callback: (e: Event) => any) {
+    this.audio.ontimeupdate = callback
   }
 
-  onCanPlay(callback: () => void) {
-    this.audio.oncanplay = () => callback()
+  onCanPlay(callback: (e: Event) => any) {
+    this.audio.oncanplay = callback
   }
 
-  onReset(callback: () => void) {
-    this.audio.addEventListener('reset', () => callback())
+  onReset(callback: (e: Event) => any) {
+    this.audio.addEventListener('reset', callback)
   }
 }
 
 export function useMusicPlayer() {
   const musicPlayer = ref(new MusicPlayer())
-
+  //由Vue来接管事件绑定，否则无法监听到数据变化
   onMounted(() => {
     musicPlayer.value.onCanPlay(musicPlayer.value.readyPlay.bind(musicPlayer.value))
   })
