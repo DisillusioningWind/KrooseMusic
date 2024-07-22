@@ -24,7 +24,7 @@ export async function loadMusicTagsFromBuffer(buffer: Buffer) {
 
 /**
  * 从buffer中获取音乐文件图片的主色调
- * @param buffer 音乐文件的buffer
+ * @param buffer 音乐图片的buffer
  * @returns 音乐文件图片的主色调
  */
 export async function getMainColorFromBuffer(buffer: Uint8Array) {

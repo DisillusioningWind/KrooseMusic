@@ -1,5 +1,5 @@
-// import { ipcMain } from 'electron-better-ipc'
-import { BrowserWindow, ipcMain } from 'electron'
+import { ipcMain } from 'electron-better-ipc'
+import { BrowserWindow } from 'electron'
 import * as fileAPI from './file'
 import * as musicAPI from './music'
 
@@ -16,8 +16,8 @@ const allAPI = {
 export function bindIpcMain(window: BrowserWindow) {
   const { windowAPI, ...api } = allAPI
   for (const key of Object.keys(api)) {
-    ipcMain.handle(key, (_ev, ...args) => {
-      return windowAPI.includes(key) ? api[key](window, ...args) : api[key](...args)
+    ipcMain.answerRenderer(key, async (...args) => {
+      return windowAPI.includes(key) ? (await api[key](window, ...args)) : (await api[key](...args))
     })
   }
 }

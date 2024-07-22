@@ -1,4 +1,4 @@
-import type { ICommonTagsResult, IPicture } from 'music-metadata'
+import type { ICommonTagsResult } from 'music-metadata'
 import { ref, onMounted } from 'vue'
 import { logExeTimeAsync } from '@renderer/utils/tools'
 
@@ -47,14 +47,14 @@ class MusicPlayer {
   async load(filePath: string) {
     this.reset()
     // 读取音乐文件
-    const { buffer, commonTags } = await window.ipc.invoke('loadFileAndTag', filePath) as { buffer: Buffer, commonTags: ICommonTagsResult }
-    this.audioURL = URL.createObjectURL(new Blob([buffer]))
-    this.audio.src = this.audioURL
+    const { buffer, commonTags, mainColor } = await window.ipc.callMain('loadFileAndTag', filePath) as { buffer: Buffer, commonTags: ICommonTagsResult, mainColor: string }
     this.commonTags = commonTags
     this.artist = commonTags.artist || '未知艺术家'
     this.title = commonTags.title || filePath.slice(filePath.lastIndexOf('\\') + 1)
-    // this.mainColor = mainColor
-    // this.pictureURL = (commonTags.picture) ? URL.createObjectURL(new Blob([commonTags.picture[0].data])) : null
+    this.mainColor = mainColor
+    this.pictureURL = (commonTags.picture) ? URL.createObjectURL(new Blob([commonTags.picture[0].data])) : null
+    this.audioURL = URL.createObjectURL(new Blob([buffer]))
+    this.audio.src = this.audioURL
   }
 
   readyPlay() {

@@ -1,5 +1,5 @@
 <template>
-  <div class="KSlider-Full" ref="slider" @mousedown="startDrag">
+  <div class="KSlider-Full" ref="slider" @mousedown.left.prevent="startDrag">
     <div class="KSlider-Use"></div>
     <div class="KSlider-Button"></div>
     <div class="KSlider-Left"></div>
@@ -7,32 +7,65 @@
 </template>
 
 <script lang="tsx">
+import emitter from '@renderer/utils/emitter'
 import { defineComponent } from 'vue'
-
 const KSlider = defineComponent({
   name: 'KSlider',
   props: {
+    disable: Boolean,
     min: Number,
     max: Number,
+    cur: Number,
   },
-  setup() {
+  setup(props) {
     const slider = ref()
-    let totalHei = ref(21)
-    let totalLen = computed(() => slider.value?.offsetWidth)
-    let useLen = ref(60)
-    let leftLen = computed(() => totalLen.value - useLen.value)
-    // let usePer = computed(() => useLen.value / totalLen.value)
-    // let leftPer = computed(() => 1 - usePer.value)
-
-    function startDrag(e) {
-      console.log('startDrag', e)
+    let sliderState: 'drag' | 'slide' = 'slide'
+    let min = computed(() => props.min || 0)
+    let max = computed(() => props.max || 100)
+    let cur = ref(0)
+    let len = computed(() => max.value - min.value)
+    let perUse = computed(() => cur.value / len.value * 100)
+    let perUnuse = computed(() => 100 - perUse.value)
+    //工具函数
+    function getPerUseWhenDrag(clientX: number) {
+      return (clientX - slider.value.getBoundingClientRect().x) / slider.value.offsetWidth
     }
-
-    function endDrag(e) {
-      console.log('endDrag', e)
+    //监听
+    watch(() => props.cur, (newCur) => {
+      if (sliderState === 'slide') {
+        cur.value = newCur || 0
+      }
+    })
+    //事件绑定
+    onMounted(() => {
+      document.addEventListener('mouseup', endDrag)
+      document.addEventListener('mousemove', onDrag)
+      emitter.on('sliderReset', reset)
+    })
+    //事件处理
+    function startDrag(e: MouseEvent) {
+      if (props.disable) return
+      sliderState = 'drag'
+      cur.value = getPerUseWhenDrag(e.clientX) * len.value
+      console.log('startDrag', cur.value)
     }
-
-    return { slider, totalHei, useLen, leftLen, startDrag, endDrag }
+    function onDrag(e: MouseEvent) {
+      if (sliderState === 'drag') {
+        cur.value = getPerUseWhenDrag(e.clientX) * len.value
+      }
+    }
+    function endDrag(e: MouseEvent) {
+      if (sliderState === 'drag') {
+        cur.value = getPerUseWhenDrag(e.clientX) * len.value
+        sliderState = 'slide'
+        emitter.emit('sliderChangeTime', cur.value)
+      }
+    }
+    function reset() {
+      cur.value = 0
+      sliderState = 'slide'
+    }
+    return { slider, perUse, perUnuse, startDrag }
   },
 })
 export default KSlider
@@ -67,12 +100,12 @@ $track-left-color: #ffffff40;
   }
   .KSlider-Use {
     height: $track-height;
-    width: v-bind('(useLen - totalHei / 2) + "px"');
+    width: v-bind('perUse + "%"');
     background-color: $track-use-color;
   }
   .KSlider-Left {
     height: $track-height;
-    width: v-bind('(leftLen - totalHei / 2) + "px"');
+    width: v-bind('perUnuse + "%"');
     background-color: $track-left-color;
   }
   .KSlider-Button {

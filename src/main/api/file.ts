@@ -1,6 +1,7 @@
 import { dialog, BrowserWindow } from 'electron'
 import fs from 'fs'
 import { parseBuffer } from 'music-metadata'
+import { getMainColorFromBuffer } from './music'
 
 /** 需要window作为参数的API名称 */
 export const windowAPI = [
@@ -37,6 +38,7 @@ export async function loadFileAndTag(path: string) {
   const stime = performance.now()
   const buffer = loadFile(path)
   const { common:commonTags } = await parseBuffer(buffer)
+  const mainColor = commonTags.picture ? await getMainColorFromBuffer(commonTags.picture[0].data) : '#1a5d8e'
   console.log('loadFileAndTag', performance.now() - stime)
-  return { buffer, commonTags }
+  return { buffer, commonTags, mainColor }
 }

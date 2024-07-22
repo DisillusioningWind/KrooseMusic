@@ -3,7 +3,7 @@
     <el-row class="timeRow">
       <el-col :span="2" class="timeLeftText"><el-text>{{ toDateString(slideTime) }}</el-text></el-col>
       <el-col :span="20" class="timeSliderCol">
-        <el-slider :show-tooltip="false" v-model="slideTime" :max="player.totalTime" @change="sliderChangeTime" @input="sliderChangeInput"></el-slider>
+         <KSlider :min="0" :max="player.totalTime" :cur="slideTime" :disable="slideDisable"></KSlider>
       </el-col>
       <el-col :span="2" class="timeRightText"><el-text>{{ toDateString(player.totalTime) }}</el-text></el-col>
     </el-row>
@@ -34,38 +34,33 @@
 <script setup lang="ts">
 import { useMusicPlayer } from '@renderer/classes/MusicPlayer'
 import { useStore } from '@renderer/store'
+import emitter from '@renderer/utils/emitter';
 
 const ipc = window.ipc
 const store = useStore()
 const player = useMusicPlayer()
 let slideTime = ref(0)
-let sliderState: 'drag' | 'slide' = 'slide'
+let slideDisable = computed(() => player.value.audioState === 'unload')
 
 onMounted(() => {
   player.value.onTimeUpdate(sliderTickTime)
   player.value.onReset(sliderReset)
+  emitter.on('sliderChangeTime', sliderChangeTime)
 })
 
 // 进度条功能
-function sliderChangeInput() {
-  if (sliderState === 'slide') {
-    sliderState = 'drag'
-  }
-}
 function sliderChangeTime(time) {
   player.value.currentTime = time
-  sliderState = 'slide'
 }
 function sliderTickTime() {
-  if (sliderState === 'slide' && player.value.audioState === 'play') {
+  if (player.value.audioState === 'play') {
     slideTime.value = player.value.currentTime
   }
 }
 function sliderReset() {
   slideTime.value = 0
-  sliderState = 'slide'
+  emitter.emit('sliderReset')
 }
-
 // 按钮功能
 function butToggleDetail() {
   store.toggleDetail()
@@ -78,7 +73,7 @@ function butTogglePlay() {
   }
 }
 async function butOpenFile() {
-  const filePath = await ipc.invoke('openFileWindow') as string | null
+  const filePath = await ipc.callMain('openFileWindow') as string | null
   if (filePath) {
     player.value.load(filePath)
   }
