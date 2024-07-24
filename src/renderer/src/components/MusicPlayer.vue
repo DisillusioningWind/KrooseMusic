@@ -1,11 +1,11 @@
 <template>
   <div class="musicDiv">
     <el-row class="timeRow">
-      <el-col :span="2" class="timeLeftText"><el-text>{{ toDateString(slideTime) }}</el-text></el-col>
+      <el-col :span="2" class="timeLeftText"><el-text>{{ formatTime(showTime) }}</el-text></el-col>
       <el-col :span="20" class="timeSliderCol">
-         <KSlider :min="0" :max="player.totalTime" :cur="slideTime" :disable="slideDisable"></KSlider>
+         <KSlider :min="0" :max="player.totalTime" :cur="curTime" :disable="player.audioState === 'unload'" :color="player.mainColor"></KSlider>
       </el-col>
-      <el-col :span="2" class="timeRightText"><el-text>{{ toDateString(player.totalTime) }}</el-text></el-col>
+      <el-col :span="2" class="timeRightText"><el-text>{{ formatTime(player.totalTime) }}</el-text></el-col>
     </el-row>
     <div class="butRow">
       <div class="detailBar">
@@ -34,32 +34,31 @@
 <script setup lang="ts">
 import { useMusicPlayer } from '@renderer/classes/MusicPlayer'
 import { useStore } from '@renderer/store'
-import emitter from '@renderer/utils/emitter';
+import { emitter, events } from '@renderer/utils/emitter'
+import { formatTime } from '@renderer/utils/tools'
 
 const ipc = window.ipc
 const store = useStore()
 const player = useMusicPlayer()
-let slideTime = ref(0)
-let slideDisable = computed(() => player.value.audioState === 'unload')
+let curTime = ref(0)
+let showTime = ref(0)
 
 onMounted(() => {
-  player.value.onTimeUpdate(sliderTickTime)
+  player.value.onTimeUpdate(sliderTickCur)
   player.value.onReset(sliderReset)
-  emitter.on('sliderChangeTime', sliderChangeTime)
+  emitter.on(events.sliderDragCur, (time) => { player.value.currentTime = time as number })
+  emitter.on(events.sliderShowCur, (time) => { showTime.value = time as number })
 })
 
 // 进度条功能
-function sliderChangeTime(time) {
-  player.value.currentTime = time
-}
-function sliderTickTime() {
+function sliderTickCur() {
   if (player.value.audioState === 'play') {
-    slideTime.value = player.value.currentTime
+    curTime.value = player.value.currentTime
   }
 }
 function sliderReset() {
-  slideTime.value = 0
-  emitter.emit('sliderReset')
+  curTime.value = 0
+  emitter.emit(events.sliderReset)
 }
 // 按钮功能
 function butToggleDetail() {
@@ -78,20 +77,10 @@ async function butOpenFile() {
     player.value.load(filePath)
   }
 }
-// 工具函数
-function toDateString(time: number) {
-  const hour = Math.floor(time / 3600)
-  const min = Math.floor((time % 3600) / 60)
-  const sec = Math.floor(time % 60)
-
-  const minStr = min < 10 ? `0${min}` : min
-  const secStr = sec < 10 ? `0${sec}` : sec
-  return `${hour}:${minStr}:${secStr}`
-}
 </script>
 
 <style scoped lang="scss">
-%timeText {
+@mixin timeText {
   display: flex;
   align-items: center;
 }
@@ -103,7 +92,7 @@ function toDateString(time: number) {
     margin: 0 12px;
     height: 32px;
     .timeLeftText {
-      @extend %timeText;
+      @include timeText;
       justify-content: left;
       .el-text {
         font-size: 12px;
@@ -112,7 +101,7 @@ function toDateString(time: number) {
       }
     }
     .timeRightText {
-      @extend %timeText;
+      @include timeText;
       justify-content: right;
       .el-text {
         font-size: 12px;
@@ -124,51 +113,6 @@ function toDateString(time: number) {
       display: flex;
       flex-direction: column;
       justify-content: center;
-    }
-    :deep(.el-slider) {
-      height: 22px;
-      &:hover {
-        .el-slider__button {
-          border-color: #ffffffa0 !important;
-        }
-      }
-      &:active {
-        .el-slider__button {
-          background-color: white !important;
-        }
-      }
-      .el-slider__runway {
-        height: 2px;
-        padding: 0;
-        background-color: #ffffff40;
-        border-radius: 0;
-        cursor: default;
-        .el-slider__bar {
-          height: 2px;
-          background-color: white;
-          border-radius: 0;
-        }
-        .el-slider__button-wrapper {
-          top: -11px;
-          height: 22px;
-          width: 22px;
-          &:hover, &.hover {
-            cursor: default;
-            transform: translateX(-50%) scale(1);
-          }
-          .el-slider__button {
-            height: 16px;
-            width: 16px;
-            border: 3.5px solid white;
-            outline: 3px solid v-bind('player.mainColor');
-            background-color: v-bind('player.mainColor');
-            &:hover, &.hover {
-              cursor: default;
-              transform: scale(1);
-            }
-          }
-        }
-      }
     }
   }
   .butRow {
