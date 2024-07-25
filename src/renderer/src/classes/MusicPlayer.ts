@@ -1,6 +1,7 @@
 import type { ICommonTagsResult } from 'music-metadata'
 import { ref, onMounted } from 'vue'
 import { logExeTimeAsync } from '@renderer/utils/tools'
+import { emitter, events } from '@renderer/utils/emitter'
 
 class MusicPlayer {
   audio: HTMLAudioElement
@@ -40,7 +41,7 @@ class MusicPlayer {
     this.mainColor = '#1a5d8e'
     this.totalTime = 0
     this.audioState = 'unload'
-    this.audio.dispatchEvent(this.resetEvent)
+    emitter.emit(events.musicReset)
   }
 
   @logExeTimeAsync
@@ -87,16 +88,15 @@ class MusicPlayer {
     }
   }
 
-  onTimeUpdate(callback: (e: Event) => any) {
-    this.audio.ontimeupdate = callback
+  initialEvents() {
+    this.audio.ontimeupdate = () => { emitter.emit(events.musicUpdateCur, this.currentTime) }
+    this.audio.oncanplay = () => { emitter.emit(events.musicCanPlay) }
+    this.audio.onended = () => { emitter.emit(events.musicEnd) }
   }
 
-  onCanPlay(callback: (e: Event) => any) {
-    this.audio.oncanplay = callback
-  }
-
-  onReset(callback: (e: Event) => any) {
-    this.audio.addEventListener('reset', callback)
+  /** 初始化事件监听 */
+  initialHandlers() {
+    emitter.on(events.musicCanPlay, this.readyPlay.bind(this))
   }
 }
 
@@ -104,7 +104,8 @@ export function useMusicPlayer() {
   const musicPlayer = ref(new MusicPlayer())
   //由Vue来接管事件绑定，否则无法监听到数据变化
   onMounted(() => {
-    musicPlayer.value.onCanPlay(musicPlayer.value.readyPlay.bind(musicPlayer.value))
+    musicPlayer.value.initialEvents()
+    musicPlayer.value.initialHandlers()
   })
   return musicPlayer
 }

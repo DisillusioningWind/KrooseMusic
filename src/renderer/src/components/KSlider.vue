@@ -58,7 +58,7 @@ export default defineComponent({
     onMounted(() => {
       document.addEventListener('mouseup', endDrag)
       document.addEventListener('mousemove', onDrag)
-      emitter.on(events.sliderReset, reset)
+      emitter.on(events.musicReset, reset)
     })
     //内部事件处理
     function startDrag(e: MouseEvent) {

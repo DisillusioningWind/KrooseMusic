@@ -10,6 +10,7 @@ class MainWindow extends BrowserWindow {
     super({
       width: 900,
       height: 670,
+      frame: false,
       show: false,
       autoHideMenuBar: true,
       webPreferences: {

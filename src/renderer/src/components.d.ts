@@ -21,6 +21,7 @@ declare module 'vue' {
     ElRow: typeof import('element-plus/es')['ElRow']
     ElSlider: typeof import('element-plus/es')['ElSlider']
     ElText: typeof import('element-plus/es')['ElText']
+    KLyric: typeof import('./components/KLyric.vue')['default']
     KSlider: typeof import('./components/KSlider.vue')['default']
     Library: typeof import('./pages/Library.vue')['default']
     Like: typeof import('./pages/Like.vue')['default']

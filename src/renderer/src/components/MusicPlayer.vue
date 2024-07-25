@@ -44,22 +44,13 @@ let curTime = ref(0)
 let showTime = ref(0)
 
 onMounted(() => {
-  player.value.onTimeUpdate(sliderTickCur)
-  player.value.onReset(sliderReset)
+  emitter.on(events.musicCanPlay, () => { store.detailPicUrl = player.value.pictureURL as string})
+  emitter.on(events.musicUpdateCur, (time) => { curTime.value = time as number })
+  emitter.on(events.musicReset, () => { curTime.value = 0 })
   emitter.on(events.sliderDragCur, (time) => { player.value.currentTime = time as number })
   emitter.on(events.sliderShowCur, (time) => { showTime.value = time as number })
 })
 
-// 进度条功能
-function sliderTickCur() {
-  if (player.value.audioState === 'play') {
-    curTime.value = player.value.currentTime
-  }
-}
-function sliderReset() {
-  curTime.value = 0
-  emitter.emit(events.sliderReset)
-}
 // 按钮功能
 function butToggleDetail() {
   store.toggleDetail()

@@ -4,6 +4,7 @@ export const useStore = defineStore({
   id: "main",
   state: () => ({
     showDetail: false,
+    detailPicUrl: '',
   }),
   actions: {
     toggleDetail() {

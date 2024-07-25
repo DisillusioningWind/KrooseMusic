@@ -1,9 +1,47 @@
 <template>
-  <div>
-    <h1>Detail</h1>
+  <div class="Detail-Wrapper" :style="{ backgroundImage : `url(${ detailPicUrl })` }">
+    <div class="Detail-Container">
+      <div class="Detail-PicDiv"><img class="Detail-Pic" :src="detailPicUrl" /></div>
+      <div class="Detail-LrcDiv"><KLyric /></div>
+    </div>
   </div>
 </template>
 
-<script setup lang="ts"></script>
+<script setup lang="ts">
+import { useStore } from '@renderer/store'
+const store = useStore()
+const detailPicUrl = computed(() => store.detailPicUrl)
 
-<style></style>
+
+</script>
+
+<style scoped lang="scss">
+.Detail-Wrapper {
+  height: 100%;
+  width: 100%;
+  background-repeat: no-repeat;
+  background-position: 50% 0;
+  background-size: 100% auto;
+  .Detail-Container {
+    height: 100%;
+    width: 100%;
+    background-color: #0000005f;
+    backdrop-filter: blur(40px);
+    display: flex;
+    .Detail-PicDiv {
+      width: 27%;
+      padding: 12px;
+      max-width: 300px;
+      display: flex;
+      .Detail-Pic {
+        width: 100%;
+        align-self: flex-end;
+      }
+    }
+    .Detail-LrcDiv {
+      width: 73%;
+      padding-bottom: 12px;
+    }
+  }
+}
+</style>
