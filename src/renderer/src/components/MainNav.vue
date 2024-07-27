@@ -17,7 +17,7 @@ const menus = [
   { path: '/Setting', title: 'Setting', icon: 'Setting' }
 ]
 
-let menuWidth = 50
+let menuWidth = 48
 let menuWidthStyle = computed(() => `${menuWidth}px`)
 defineExpose({ menuWidthStyle })
 </script>

@@ -1,5 +1,5 @@
 <template>
-  <div class="Detail-Wrapper" :style="{ backgroundImage : `url(${ detailPicUrl })` }">
+  <div class="Detail-Wrapper">
     <div class="Detail-Container">
       <div class="Detail-PicDiv"><img class="Detail-Pic" :src="detailPicUrl" /></div>
       <div class="Detail-LrcDiv"><KLyric /></div>
@@ -19,14 +19,11 @@ const detailPicUrl = computed(() => store.detailPicUrl)
 .Detail-Wrapper {
   height: 100%;
   width: 100%;
-  background-repeat: no-repeat;
-  background-position: 50% 0;
-  background-size: 100% auto;
   .Detail-Container {
     height: 100%;
     width: 100%;
-    background-color: #0000005f;
-    backdrop-filter: blur(40px);
+    // background-color: #0000005f;
+    // backdrop-filter: blur(40px);
     display: flex;
     .Detail-PicDiv {
       width: 27%;

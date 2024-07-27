@@ -2,9 +2,10 @@ import { ipcMain } from 'electron-better-ipc'
 import { BrowserWindow } from 'electron'
 import * as fileAPI from './file'
 import * as musicAPI from './music'
+import * as windowAPI from './window'
 
 /** 所有API */
-const allAPI = {
+const API = {
   ...fileAPI,
   ...musicAPI
 }
@@ -14,10 +15,14 @@ const allAPI = {
  * @param window ipcMain绑定的窗口
  */
 export function bindIpcMain(window: BrowserWindow) {
-  const { windowAPI, ...api } = allAPI
-  for (const key of Object.keys(api)) {
+  for (const key of Object.keys(API)) {
     ipcMain.answerRenderer(key, async (...args) => {
-      return windowAPI.includes(key) ? (await api[key](window, ...args)) : (await api[key](...args))
+      return await API[key](...args)
+    })
+  }
+  for (const key of Object.keys(windowAPI)) {
+    ipcMain.answerRenderer(key, async (...args) => {
+      return await windowAPI[key](window, ...args)
     })
   }
 }
