@@ -22,8 +22,6 @@ const detailPicUrl = computed(() => store.detailPicUrl)
   .Detail-Container {
     height: 100%;
     width: 100%;
-    // background-color: #0000005f;
-    // backdrop-filter: blur(40px);
     display: flex;
     .Detail-PicDiv {
       width: 27%;

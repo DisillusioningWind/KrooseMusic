@@ -1,13 +1,11 @@
 <template>
   <div class="musicDiv">
-    <el-row class="timeRow">
-      <el-col :span="2" class="timeLeftText"><el-text>{{ formatTime(showTime) }}</el-text></el-col>
-      <el-col :span="20" class="timeSliderCol">
-         <KSlider :min="0" :max="player.totalTime" :cur="curTime" :disable="player.audioState === 'unload'" :color="player.mainColor"></KSlider>
-      </el-col>
-      <el-col :span="2" class="timeRightText"><el-text>{{ formatTime(player.totalTime) }}</el-text></el-col>
-    </el-row>
-    <div class="butRow">
+    <div class="sliderRow">
+      <el-text>{{ formatTime(showTime) }}</el-text>
+      <KSlider :min="0" :max="player.totalTime" :cur="curTime" :disable="player.audioState === 'unload'" :color="player.mainColor"></KSlider>
+      <el-text>{{ formatTime(player.totalTime) }}</el-text>
+    </div>
+    <div class="buttonRow">
       <div class="detailBar">
         <el-button type="primary" size="default" @click="butToggleDetail" class="musicDetailBut">
           <el-image class="musicDetailButImg" :src="player.pictureURL??''" fit="cover">
@@ -23,10 +21,13 @@
           </div>
         </el-button>
       </div>
-      <!-- <el-button type="primary" size="default" @click="">上一首</el-button> -->
-      <el-button type="primary" size="default" @click="butTogglePlay" class="controlBar">播放</el-button>
-      <!-- <el-button type="primary" size="default" @click="">下一首</el-button> -->
-      <el-button type="primary" size="default" @click="butOpenFile" class="toolBar">打开文件</el-button>
+      <div class="controlBar">
+        <el-button type="primary" size="default" @click="butTogglePlay" class="controlBar">播放</el-button>
+        <el-button type="primary" size="default" @click="butOpenFile" class="toolBar">打开文件</el-button>
+        <el-button type="primary" size="default" @click="butUnloadFile" class="toolBar">卸载文件</el-button>
+      </div>
+      <div class="toolBar">
+      </div>
     </div>
   </div>
 </template>
@@ -46,7 +47,7 @@ let showTime = ref(0)
 onMounted(() => {
   emitter.on(events.musicCanPlay, () => { store.detailPicUrl = player.value.pictureURL as string})
   emitter.on(events.musicUpdateCur, (time) => { curTime.value = time as number })
-  emitter.on(events.musicReset, () => { curTime.value = 0 })
+  emitter.on(events.musicReset, () => { curTime.value = 0; store.detailPicUrl = '' })
   emitter.on(events.sliderDragCur, (time) => { player.value.currentTime = time as number })
   emitter.on(events.sliderShowCur, (time) => { showTime.value = time as number })
 })
@@ -62,6 +63,9 @@ function butTogglePlay() {
     player.value.play()
   }
 }
+function butUnloadFile() {
+  player.value.unload()
+}
 async function butOpenFile() {
   const filePath = await ipc.callMain('openFileWindow') as string | null
   if (filePath) {
@@ -71,42 +75,27 @@ async function butOpenFile() {
 </script>
 
 <style scoped lang="scss">
-@mixin timeText {
-  display: flex;
-  align-items: center;
-}
-
 .musicDiv {
   height: 100%;
   background-color: v-bind('player.mainColor');
-  .timeRow {
+  .sliderRow {
     margin: 0 12px;
     height: 32px;
-    .timeLeftText {
-      @include timeText;
-      justify-content: left;
-      .el-text {
-        font-size: 12px;
-        font-weight: 400;
-        color: white;
+    display: flex;
+    align-items: center;
+    .el-text {
+      color: white;
+      font-size: 12px;
+      visibility: v-bind('player.audioState === "unload" ? "hidden" : "visible" ');
+      &:first-child {
+        margin-right: 22px;
       }
-    }
-    .timeRightText {
-      @include timeText;
-      justify-content: right;
-      .el-text {
-        font-size: 12px;
-        font-weight: 400;
-        color: white;
+      &:last-child {
+        margin-left: 22px;
       }
-    }
-    .timeSliderCol {
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
     }
   }
-  .butRow {
+  .buttonRow {
     margin: 0;
     height: 90px;
     display: flex;
@@ -181,6 +170,7 @@ async function butOpenFile() {
     .controlBar {
       flex: 37.5%;
       margin: 0;
+      display: flex;
     }
     .toolBar {
       flex: 31.25%;

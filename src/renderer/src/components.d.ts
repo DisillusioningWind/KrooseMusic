@@ -23,6 +23,7 @@ declare module 'vue' {
     ElSlider: typeof import('element-plus/es')['ElSlider']
     ElText: typeof import('element-plus/es')['ElText']
     KLyric: typeof import('./components/KLyric.vue')['default']
+    KMusicBar: typeof import('./components/KMusicBar.vue')['default']
     KSlider: typeof import('./components/KSlider.vue')['default']
     KTitleBar: typeof import('./components/KTitleBar.vue')['default']
     Library: typeof import('./pages/Library.vue')['default']

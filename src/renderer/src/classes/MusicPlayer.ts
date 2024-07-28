@@ -28,7 +28,8 @@ class MusicPlayer {
     this.resetEvent = new Event('reset')
   }
 
-  reset() {
+  unload() {
+    this.audio.pause()
     this.filePath = null
     this.fileSize = null
     this.commonTags = null
@@ -46,7 +47,7 @@ class MusicPlayer {
 
   @logExeTimeAsync
   async load(filePath: string) {
-    this.reset()
+    this.unload()
     // 读取音乐文件
     const { buffer, commonTags, mainColor } = await window.ipc.callMain('loadFileAndTag', filePath) as { buffer: Buffer, commonTags: ICommonTagsResult, mainColor: string }
     this.commonTags = commonTags
@@ -88,6 +89,7 @@ class MusicPlayer {
     }
   }
 
+  /** 将audio原生事件转化为emitter事件发射 */
   initialEvents() {
     this.audio.ontimeupdate = () => { emitter.emit(events.musicUpdateCur, this.currentTime) }
     this.audio.oncanplay = () => { emitter.emit(events.musicCanPlay) }
