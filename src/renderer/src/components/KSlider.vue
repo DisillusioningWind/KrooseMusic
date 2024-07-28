@@ -37,7 +37,7 @@ export default defineComponent({
     const tooltip = computed(() => props.tooltip || false)
     const tooltipFormat = computed(() => props.tooltipFormat || ((v: any) => v))
     const len = computed(() => max.value - min.value)
-    const cur = ref(0)
+    const cur = ref(props.cur || 0)
     const perUse = computed(() => cur.value / len.value * 100)
     //工具函数
     function getPerUseWhenDrag(clientX: number) {

@@ -1,5 +1,5 @@
 <template>
-  <div class="musicDiv">
+  <div class="controlDiv">
     <div class="sliderRow">
       <el-text>{{ formatTime(showTime) }}</el-text>
       <KSlider ref="timeSlider" :min="0" :max="player.totalTime" :cur="curTime" :disable="player.audioState === 'unload'"
@@ -25,11 +25,16 @@
         </el-button>
       </div>
       <div class="controlBar">
-        <el-button type="primary" size="default" @click="butTogglePlay" class="controlBar">播放</el-button>
-        <el-button type="primary" size="default" @click="butOpenFile" class="toolBar">打开文件</el-button>
-        <el-button type="primary" size="default" @click="butUnloadFile" class="toolBar">卸载文件</el-button>
+        <el-button type="primary" size="default" @click="butTogglePlay">播放</el-button>
+        <el-button type="primary" size="default" @click="butOpenFile">打开文件</el-button>
+        <el-button type="primary" size="default" @click="butUnloadFile">卸载文件</el-button>
       </div>
       <div class="toolBar">
+        <el-button type="primary" size="default">静音</el-button>
+        <KSlider :min="0" :max="100" :cur="100" :color="player.mainColor" :tooltip="true" :tooltip-format="(v: number) => Math.floor(v)"
+        @update-cur="(volume) => { player.audio.volume = volume * 0.01 }">
+        </KSlider>
+        <el-button type="primary" size="default">更多操作</el-button>
       </div>
     </div>
   </div>
@@ -45,8 +50,8 @@ import KSlider from './KSlider.vue'
 const ipc = window.ipc
 const store = useStore()
 const player = useMusicPlayer()
-let curTime = ref(0)
-let showTime = ref(0)
+const curTime = ref(0)
+const showTime = ref(0)
 const timeSlider = ref<InstanceType<typeof KSlider> | null>(null)
 
 onMounted(() => {
@@ -78,7 +83,7 @@ async function butOpenFile() {
 </script>
 
 <style scoped lang="scss">
-.musicDiv {
+.controlDiv {
   height: 100%;
   background-color: v-bind('player.mainColor');
   .sliderRow {
@@ -174,10 +179,13 @@ async function butOpenFile() {
       flex: 37.5%;
       margin: 0;
       display: flex;
+      justify-content: center;
     }
     .toolBar {
       flex: 31.25%;
       margin: 0;
+      display: flex;
+      align-items: center;
     }
   }
 }
