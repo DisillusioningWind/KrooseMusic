@@ -2,7 +2,10 @@
   <div class="musicDiv">
     <div class="sliderRow">
       <el-text>{{ formatTime(showTime) }}</el-text>
-      <KSlider :min="0" :max="player.totalTime" :cur="curTime" :disable="player.audioState === 'unload'" :color="player.mainColor"></KSlider>
+      <KSlider ref="timeSlider" :min="0" :max="player.totalTime" :cur="curTime" :disable="player.audioState === 'unload'"
+        :color="player.mainColor" :tooltip="true" :tooltip-format="(v: number) => formatTime(v, 'mm:ss')"
+        @update-cur="(time) => { showTime = time }" @drag-cur="(time) => { player.currentTime = time }">
+      </KSlider>
       <el-text>{{ formatTime(player.totalTime) }}</el-text>
     </div>
     <div class="buttonRow">
@@ -37,19 +40,19 @@ import { useMusicPlayer } from '@renderer/classes/MusicPlayer'
 import { useStore } from '@renderer/store'
 import { emitter, events } from '@renderer/utils/emitter'
 import { formatTime } from '@renderer/utils/tools'
+import KSlider from './KSlider.vue'
 
 const ipc = window.ipc
 const store = useStore()
 const player = useMusicPlayer()
 let curTime = ref(0)
 let showTime = ref(0)
+const timeSlider = ref<InstanceType<typeof KSlider> | null>(null)
 
 onMounted(() => {
   emitter.on(events.musicCanPlay, () => { store.detailPicUrl = player.value.pictureURL as string})
   emitter.on(events.musicUpdateCur, (time) => { curTime.value = time as number })
-  emitter.on(events.musicReset, () => { curTime.value = 0; store.detailPicUrl = '' })
-  emitter.on(events.sliderDragCur, (time) => { player.value.currentTime = time as number })
-  emitter.on(events.sliderShowCur, (time) => { showTime.value = time as number })
+  emitter.on(events.musicReset, () => { curTime.value = 0; store.detailPicUrl = ''; timeSlider.value?.reset() })
 })
 
 // 按钮功能

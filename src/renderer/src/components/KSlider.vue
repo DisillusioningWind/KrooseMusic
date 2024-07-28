@@ -3,7 +3,7 @@
     <div class="KSlider-Left"></div>
     <div class="KSlider-Track" ref="slider" @mousedown.left.prevent="startDrag">
       <div class="KSlider-Use"></div>
-      <div class="KSlider-Button" :cur="formatTime(cur, 'mm:ss')"></div>
+      <div class="KSlider-Button" :cur="tooltipFormat(cur)"></div>
       <div class="KSlider-Unuse"></div>
     </div>
     <div class="KSlider-Right"></div>
@@ -11,8 +11,6 @@
 </template>
 
 <script lang="tsx">
-import { emitter, events } from '@renderer/utils/emitter'
-import { formatTime } from '@renderer/utils/tools'
 import { defineComponent } from 'vue'
 export default defineComponent({
   name: 'KSlider',
@@ -22,17 +20,25 @@ export default defineComponent({
     cur: Number,
     disable: Boolean,
     color: String,
+    tooltip: Boolean,
+    tooltipFormat: Function,
   },
-  setup(props) {
+  emits: [
+    'updateCur',//更新当前值
+    'dragCur',//拖动当前值
+  ],
+  setup(props, { emit }) {
     //属性
-    const slider = ref()
     let sliderState: 'drag' | 'slide' = 'slide'
-    let min = computed(() => props.min || 0)
-    let max = computed(() => props.max || 100)
-    let len = computed(() => max.value - min.value)
-    let cur = ref(0)
-    let perUse = computed(() => cur.value / len.value * 100)
-    let color = computed(() => props.color || '#ffffff')
+    const slider = ref()
+    const min = computed(() => props.min || 0)
+    const max = computed(() => props.max || 100)
+    const color = computed(() => props.color || '#ffffff')
+    const tooltip = computed(() => props.tooltip || false)
+    const tooltipFormat = computed(() => props.tooltipFormat || ((v: any) => v))
+    const len = computed(() => max.value - min.value)
+    const cur = ref(0)
+    const perUse = computed(() => cur.value / len.value * 100)
     //工具函数
     function getPerUseWhenDrag(clientX: number) {
       return (clientX - slider.value.getBoundingClientRect().x) / slider.value.offsetWidth
@@ -52,13 +58,16 @@ export default defineComponent({
       }
       //如果新旧值相等则不通知，避免死循环
       if (newCur === oldCur) return
-      emitter.emit(events.sliderShowCur, cur.value)
+      emit('updateCur', cur.value)
     })
     //事件绑定
     onMounted(() => {
       document.addEventListener('mouseup', endDrag)
       document.addEventListener('mousemove', onDrag)
-      emitter.on(events.musicReset, reset)
+    })
+    onUnmounted(() => {
+      document.removeEventListener('mouseup', endDrag)
+      document.removeEventListener('mousemove', onDrag)
     })
     //内部事件处理
     function startDrag(e: MouseEvent) {
@@ -74,14 +83,14 @@ export default defineComponent({
       if (sliderState !== 'drag') return
       cur.value = getPerUseWhenDrag(e.clientX) * len.value
       sliderState = 'slide'
-      emitter.emit(events.sliderDragCur, cur.value)
+      emit('dragCur', cur.value)
     }
-    //外部事件处理
+    /** 重置滑块 */
     function reset() {
       cur.value = 0
       sliderState = 'slide'
     }
-    return { slider, perUse, color, cur, startDrag, formatTime }
+    return { slider, perUse, color, cur, startDrag, reset, tooltip, tooltipFormat}
   },
 })
 </script>
@@ -127,7 +136,7 @@ $track-left-color: #ffffff40;
       .KSlider-Button {
         background-color: $track-use-color;
         &::before {
-          visibility: visible;
+          visibility: v-bind('tooltip ? "visible" : "hidden"');
         }
       }
     }

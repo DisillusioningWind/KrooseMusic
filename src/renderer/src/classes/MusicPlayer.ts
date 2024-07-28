@@ -29,7 +29,7 @@ class MusicPlayer {
   }
 
   unload() {
-    this.audio.pause()
+    this.audio.src = ''
     this.filePath = null
     this.fileSize = null
     this.commonTags = null
@@ -47,7 +47,9 @@ class MusicPlayer {
 
   @logExeTimeAsync
   async load(filePath: string) {
-    this.unload()
+    if (this.audioState !== 'unload') {
+      this.unload()
+    }
     // 读取音乐文件
     const { buffer, commonTags, mainColor } = await window.ipc.callMain('loadFileAndTag', filePath) as { buffer: Buffer, commonTags: ICommonTagsResult, mainColor: string }
     this.commonTags = commonTags
@@ -83,8 +85,8 @@ class MusicPlayer {
 
   stop() {
     if (this.audioState === 'play' || this.audioState === 'pause') {
-      this.audio.pause()
       this.audio.currentTime = 0
+      this.audio.pause()
       this.audioState = 'stop'
     }
   }
