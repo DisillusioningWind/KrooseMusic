@@ -1,5 +1,5 @@
 <template>
-  <div class="KSlider-Wrapper">
+  <div class="KSlider">
     <div class="KSlider-Left"></div>
     <div class="KSlider-Track" ref="slider" @mousedown.left.prevent="startDrag">
       <div class="KSlider-Use"></div>
@@ -106,9 +106,10 @@ $button-hover-color: #ffffffa0;
 $track-use-color: #ffffffff;
 $track-left-color: #ffffff40;
 
-.KSlider-Wrapper {
+.KSlider {
   height: $slider-height;
   width: 100%;
+  flex: 1;
   display: flex;
   align-items: center;
   .KSlider-Left {

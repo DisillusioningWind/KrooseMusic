@@ -3,7 +3,7 @@
     <div class="sliderRow">
       <el-text>{{ formatTime(showTime) }}</el-text>
       <KSlider ref="timeSlider" :min="0" :max="player.totalTime" :cur="curTime" :disable="player.audioState === 'unload'"
-        :color="player.mainColor" :tooltip="true" :tooltip-format="(v: number) => formatTime(v, 'mm:ss')"
+        :color="player.mainColor" :tooltip="player.audioState !== 'unload'" :tooltip-format="(v: number) => formatTime(v, 'mm:ss')"
         @update-cur="(time) => { showTime = time }" @drag-cur="(time) => { player.currentTime = time }">
       </KSlider>
       <el-text>{{ formatTime(player.totalTime) }}</el-text>
@@ -25,16 +25,39 @@
         </el-button>
       </div>
       <div class="controlBar">
-        <el-button type="primary" size="default" @click="butTogglePlay">播放</el-button>
-        <el-button type="primary" size="default" @click="butOpenFile">打开文件</el-button>
-        <el-button type="primary" size="default" @click="butUnloadFile">卸载文件</el-button>
+        <el-button round @click="butTogglePlay">播放</el-button>
+        <el-button round @click="butOpenFile">打开文件</el-button>
+        <el-button round @click="butUnloadFile">卸载文件</el-button>
       </div>
       <div class="toolBar">
-        <el-button type="primary" size="default">静音</el-button>
+        <button>
+          <svg>
+            <path d="m7,14.5 l0,6 l3,0 l4,4 l0,-14 l-4,4 l-3,0 z"/>
+            <path d="m18,14 a 5 5 0 0 1 0,7" :visibility="curVolume == 0 ? 'hidden' : 'visible'"/>
+            <path d="m21,11.5 a 9 9 0 0 1 0,12" :visibility="curVolume < 0.33 ? 'hidden' : 'visible'"/>
+            <path d="m23.5,8.5 a 13 13 0 0 1 0,18" :visibility="curVolume < 0.66 ? 'hidden' : 'visible'"/>
+            <path d="m18,14 l7,7" :visibility="curVolume == 0 ? 'visible' : 'hidden'"/>
+            <path d="m18,21 l7,-7" :visibility="curVolume == 0 ? 'visible' : 'hidden'"/>
+          </svg>
+        </button>
         <KSlider :min="0" :max="100" :cur="100" :color="player.mainColor" :tooltip="true" :tooltip-format="(v: number) => Math.floor(v)"
-        @update-cur="(volume) => { player.audio.volume = volume * 0.01 }">
+        @update-cur="(volume) => { player.audio.volume = curVolume = volume * 0.01 }">
         </KSlider>
-        <el-button type="primary" size="default">更多操作</el-button>
+        <button>
+          <svg>
+            <path d="m8.5,10 l0,4 l3,-2 z" stroke-width="1px" fill="white"/>
+            <path d="m14,12 l13,0" stroke-width="1px"/>
+            <path d="m8,17.5 l19,0" stroke-width="1px"/>
+            <path d="m8,23 l19,0" stroke-width="1px"/>
+          </svg>
+        </button>
+        <button>
+          <svg>
+            <circle cx="32%" cy="50%" r="0.5"/>
+            <circle cx="50%" cy="50%" r="0.5"/>
+            <circle cx="68%" cy="50%" r="0.5"/>
+          </svg>
+        </button>
       </div>
     </div>
   </div>
@@ -52,6 +75,7 @@ const store = useStore()
 const player = useMusicPlayer()
 const curTime = ref(0)
 const showTime = ref(0)
+const curVolume = ref(100)
 const timeSlider = ref<InstanceType<typeof KSlider> | null>(null)
 
 onMounted(() => {
@@ -110,7 +134,7 @@ async function butOpenFile() {
     justify-items: center;
     align-items: center;
     .detailBar {
-      flex: 31.25%;
+      flex: 1;
       max-width: 31.25%;
       :deep(.musicDetailBut) {
         justify-self: left;
@@ -176,16 +200,44 @@ async function butOpenFile() {
       }
     }
     .controlBar {
-      flex: 37.5%;
+      flex: 1.2;
       margin: 0;
       display: flex;
       justify-content: center;
     }
     .toolBar {
-      flex: 31.25%;
+      flex: 1;
       margin: 0;
       display: flex;
       align-items: center;
+      &>* {
+        margin-right: 8px;
+        &:first-child {
+          margin-left: 50px;
+        }
+      }
+      button {
+        height: 35px;
+        width: 35px;
+        padding: 0;
+        border: none;
+        border-radius: 50%;
+        background-color: transparent;
+        &:hover {
+          background-color: #00000030;
+        }
+        &:active {
+          background-color: #00000050;
+        }
+        svg {
+          height: 100%;
+          width: 100%;
+          stroke: white;
+          stroke-width: 1.5px;
+          stroke-linejoin: bevel;
+          fill: transparent;
+        }
+      }
     }
   }
 }
