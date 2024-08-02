@@ -6,7 +6,7 @@ import { emitter, events } from '@renderer/utils/emitter'
 class MusicPlayer {
   audio: HTMLAudioElement
   audioURL: string | null = null
-  audioState:'unload' | 'play' | 'pause' | 'stop' = 'unload'
+  private audioState:'unload' | 'play' | 'pause' | 'stop' = 'unload'
   filePath: string | null = null
   fileSize: number | null = null
   commonTags: ICommonTagsResult | null = null
@@ -15,7 +15,11 @@ class MusicPlayer {
   pictureURL: string | null = null
   mainColor: string = '#1a5d8e'
   totalTime: number = 0
+  lyrics: ILyric[] = []
   resetEvent: Event
+  get playerState () {
+    return this.audioState
+  }
   get currentTime() {
     return this.audio.currentTime
   }
@@ -41,6 +45,7 @@ class MusicPlayer {
     this.pictureURL = null
     this.mainColor = '#1a5d8e'
     this.totalTime = 0
+    this.lyrics = []
     this.audioState = 'unload'
     emitter.emit(events.musicReset)
   }
@@ -51,14 +56,16 @@ class MusicPlayer {
       this.unload()
     }
     // 读取音乐文件
-    const { buffer, commonTags, mainColor } = await window.ipc.callMain('loadFileAndTag', filePath) as { buffer: Buffer, commonTags: ICommonTagsResult, mainColor: string }
-    this.commonTags = commonTags
-    this.artist = commonTags.artist || '未知艺术家'
-    this.title = commonTags.title || filePath.slice(filePath.lastIndexOf('\\') + 1)
-    this.mainColor = mainColor
-    this.pictureURL = (commonTags.picture) ? URL.createObjectURL(new Blob([commonTags.picture[0].data])) : null
-    this.audioURL = URL.createObjectURL(new Blob([buffer]))
-    this.audio.src = this.audioURL
+    const res = await window.ipc.callMain('loadFile', filePath) as { buffer?: Buffer, commonTags?: ICommonTagsResult, mainColor?: string, success: boolean }
+    if (res.success) {
+      this.commonTags = res.commonTags!
+      this.artist = res.commonTags!.artist || '未知艺术家'
+      this.title = res.commonTags!.title || filePath.slice(filePath.lastIndexOf('\\') + 1)
+      this.mainColor = res.mainColor!
+      this.pictureURL = (res.commonTags!.picture) ? URL.createObjectURL(new Blob([res.commonTags!.picture[0].data])) : null
+      this.audioURL = URL.createObjectURL(new Blob([res.buffer!]))
+      this.audio.src = this.audioURL
+    }
   }
 
   readyPlay() {

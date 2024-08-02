@@ -1,5 +1,5 @@
 <template>
-  <el-container class="BackCon" :style="{ backgroundImage : showDetailCom ? `url(${ showDetailPicUrl })` : '' }">
+  <el-container class="BackCon" :style="{ backgroundImage : showDetailCom ? `url(${ store.musicPicURL })` : '' }">
   <el-container :class=" showDetailCom ? 'TopCon' : ''">
     <el-header><KTitleBar /></el-header>
     <el-container v-show="!showDetailCom">
@@ -17,7 +17,6 @@ import { useStore } from '@renderer/store'
 const nav = ref()
 const store = useStore()
 const showDetailCom = computed(() => store.showDetail)
-const showDetailPicUrl = computed(() => store.detailPicUrl)
 const menuWidthStyle = computed(() => nav.value.menuWidthStyle)
 </script>
 

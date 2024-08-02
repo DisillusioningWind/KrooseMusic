@@ -2,15 +2,15 @@
   <div class="controlDiv">
     <div class="sliderRow">
       <el-text>{{ formatTime(showTime) }}</el-text>
-      <KSlider ref="timeSlider" :min="0" :max="player.totalTime" :cur="curTime" :disable="player.audioState === 'unload'"
-        :color="player.mainColor" :tooltip="player.audioState !== 'unload'" :tooltip-format="(v: number) => formatTime(v, 'mm:ss')"
+      <KSlider ref="timeSlider" :min="0" :max="player.totalTime" :cur="curTime" :disable="player.playerState === 'unload'"
+        :color="player.mainColor" :tooltip="player.playerState !== 'unload'" :tooltip-format="(v: number) => formatTime(v, 'mm:ss')"
         @update-cur="(time) => { showTime = time }" @drag-cur="(time) => { player.currentTime = time }">
       </KSlider>
       <el-text>{{ formatTime(player.totalTime) }}</el-text>
     </div>
     <div class="buttonRow">
       <div class="detailBar">
-        <el-button type="primary" size="default" @click="butToggleDetail" class="musicDetailBut">
+        <el-button type="primary" size="default" @click="btnToggleDetail" class="musicDetailBut">
           <el-image class="musicDetailButImg" :src="player.pictureURL??''" fit="cover">
             <template #error>
               <div class="image-failed">
@@ -25,9 +25,38 @@
         </el-button>
       </div>
       <div class="controlBar">
-        <el-button round @click="butTogglePlay">播放</el-button>
-        <el-button round @click="butOpenFile">打开文件</el-button>
-        <el-button round @click="butUnloadFile">卸载文件</el-button>
+        <button>
+          <svg>
+            <path d="m10,9 l0,17"/>
+            <path d="m25,10 l0,15 l-10,-7.5 z"/>
+          </svg>
+        </button>
+        <button @click="btnFastBackward">
+          <svg>
+            <path d="m7.5,17.5 a 10 10 0 1 0 10,-10"/>
+            <path d="m17.5,4.5 l0,6 l-5,-3 z" fill="white"/>
+            <text x="50%" y="60%">10</text>
+          </svg>
+        </button>
+        <button class="playButton" @click="btnTogglePlay">
+          <svg>
+            <path v-show="player.playerState === 'play'" d="m19,12 l0,22 m8,0 l0,-22"/>
+            <path v-show="player.playerState !== 'play'" d="m17,13.5 l0,20 l15,-10 z"/>
+          </svg>
+        </button>
+        <button @click="btnFastForward">
+          <svg>
+            <path d="m27.5,17.5 a 10 10 0 1 1 -10,-10"/>
+            <path d="m17.5,4.5 l0,6 l5,-3 z" fill="white"/>
+            <text x="50%" y="60%">10</text>
+          </svg>
+        </button>
+        <button>
+          <svg>
+            <path d="m10,10 l0,15 l10,-7.5 z"/>
+            <path d="m25,9 l0,17"/>
+          </svg>
+        </button>
       </div>
       <div class="toolBar">
         <button>
@@ -43,7 +72,7 @@
         <KSlider :min="0" :max="100" :cur="100" :color="player.mainColor" :tooltip="true" :tooltip-format="(v: number) => Math.floor(v)"
         @update-cur="(volume) => { player.audio.volume = curVolume = volume * 0.01 }">
         </KSlider>
-        <button>
+        <button @click="btnOpenFile">
           <svg>
             <path d="m8.5,10 l0,4 l3,-2 z" stroke-width="1px" fill="white"/>
             <path d="m14,12 l13,0" stroke-width="1px"/>
@@ -51,7 +80,7 @@
             <path d="m8,23 l19,0" stroke-width="1px"/>
           </svg>
         </button>
-        <button>
+        <button @click="btnUnloadFile">
           <svg>
             <circle cx="32%" cy="50%" r="0.5"/>
             <circle cx="50%" cy="50%" r="0.5"/>
@@ -79,34 +108,73 @@ const curVolume = ref(100)
 const timeSlider = ref<InstanceType<typeof KSlider> | null>(null)
 
 onMounted(() => {
-  emitter.on(events.musicCanPlay, () => { store.detailPicUrl = player.value.pictureURL as string})
-  emitter.on(events.musicUpdateCur, (time) => { curTime.value = time as number })
-  emitter.on(events.musicReset, () => { curTime.value = 0; store.detailPicUrl = ''; timeSlider.value?.reset() })
+  emitter.on(events.musicCanPlay, () => { store.musicPicURL = player.value.pictureURL as string})
+  emitter.on(events.musicUpdateCur, (time) => { store.musicCurTime = curTime.value = time as number })
+  emitter.on(events.musicReset, () => { curTime.value = 0; store.musicPicURL = ''; timeSlider.value?.reset() })
 })
 
 // 按钮功能
-function butToggleDetail() {
+function btnToggleDetail() {
   store.toggleDetail()
 }
-function butTogglePlay() {
-  if (player.value.audioState === 'play') {
+function btnTogglePlay() {
+  if (player.value.playerState === 'play') {
     player.value.pause()
-  } else if (player.value.audioState === 'pause' || player.value.audioState === 'stop') {
+  } else if (player.value.playerState === 'pause' || player.value.playerState === 'stop') {
     player.value.play()
   }
 }
-function butUnloadFile() {
+function btnFastForward() {
+  player.value.currentTime += 10
+}
+function btnFastBackward() {
+  player.value.currentTime -= 10
+}
+function btnUnloadFile() {
   player.value.unload()
 }
-async function butOpenFile() {
+async function btnOpenFile() {
   const filePath = await ipc.callMain('openFileWindow') as string | null
   if (filePath) {
     player.value.load(filePath)
+    const res = await ipc.callMain('loadLyric', filePath) as { lyrics?: ILyric[], success: boolean }
+    store.musicLyrics = res.success ? res.lyrics as ILyric[] : []
   }
 }
 </script>
 
 <style scoped lang="scss">
+@mixin svgButton($size: 35px) {
+  height: $size;
+  width: $size;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background-color: transparent;
+  &:hover {
+    background-color: #00000030;
+  }
+  &:active {
+    background-color: #00000050;
+  }
+  svg {
+    height: 100%;
+    width: 100%;
+    stroke: white;
+    stroke-width: 1.5px;
+    stroke-linejoin: bevel;
+    fill: transparent;
+    text {
+      text-anchor: middle;
+      font-size: 10px;
+      font-weight: 100;
+      font-family: 'Segoe UI';
+      stroke-width: 0.5px;
+      letter-spacing: 0.5px;
+    }
+  }
+}
+
 .controlDiv {
   height: 100%;
   background-color: v-bind('player.mainColor');
@@ -118,7 +186,7 @@ async function butOpenFile() {
     .el-text {
       color: white;
       font-size: 12px;
-      visibility: v-bind('player.audioState === "unload" ? "hidden" : "visible" ');
+      visibility: v-bind('player.playerState === "unload" ? "hidden" : "visible" ');
       &:first-child {
         margin-right: 22px;
       }
@@ -138,7 +206,7 @@ async function butOpenFile() {
       max-width: 31.25%;
       :deep(.musicDetailBut) {
         justify-self: left;
-        display: v-bind('player.audioState === "unload" ? "none" : "inline-flex" ');
+        display: v-bind('player.playerState === "unload" ? "none" : "inline-flex" ');
         height: 100%;
         max-width: 100%;
         margin: 0;
@@ -204,6 +272,21 @@ async function butOpenFile() {
       margin: 0;
       display: flex;
       justify-content: center;
+      align-items: center;
+      &>* {
+        margin: 0 8px 0 8px;
+      }
+      button {
+        @include svgButton(35px);
+      }
+      .playButton {
+        @include svgButton(50px);
+        border: 2px solid #ffffff40;
+        &:active {
+          background-color: transparent;
+          border: 2px solid #ffffff;
+        }
+      }
     }
     .toolBar {
       flex: 1;
@@ -217,26 +300,7 @@ async function butOpenFile() {
         }
       }
       button {
-        height: 35px;
-        width: 35px;
-        padding: 0;
-        border: none;
-        border-radius: 50%;
-        background-color: transparent;
-        &:hover {
-          background-color: #00000030;
-        }
-        &:active {
-          background-color: #00000050;
-        }
-        svg {
-          height: 100%;
-          width: 100%;
-          stroke: white;
-          stroke-width: 1.5px;
-          stroke-linejoin: bevel;
-          fill: transparent;
-        }
+        @include svgButton(35px);
       }
     }
   }

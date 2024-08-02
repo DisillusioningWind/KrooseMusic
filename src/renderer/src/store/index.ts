@@ -4,7 +4,9 @@ export const useStore = defineStore({
   id: "main",
   state: () => ({
     showDetail: false,
-    detailPicUrl: '',
+    musicPicURL: '',
+    musicLyrics: [] as ILyric[],
+    musicCurTime: 0,
   }),
   actions: {
     toggleDetail() {

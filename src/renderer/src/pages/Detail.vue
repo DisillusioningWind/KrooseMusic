@@ -1,7 +1,7 @@
 <template>
   <div class="Detail-Wrapper">
     <div class="Detail-Container">
-      <div class="Detail-PicDiv"><img class="Detail-Pic" :src="detailPicUrl" /></div>
+      <div class="Detail-PicDiv"><img class="Detail-Pic" :src="store.musicPicURL" /></div>
       <div class="Detail-LrcDiv"><KLyric /></div>
     </div>
   </div>
@@ -10,9 +10,6 @@
 <script setup lang="ts">
 import { useStore } from '@renderer/store'
 const store = useStore()
-const detailPicUrl = computed(() => store.detailPicUrl)
-
-
 </script>
 
 <style scoped lang="scss">
@@ -35,6 +32,7 @@ const detailPicUrl = computed(() => store.detailPicUrl)
     }
     .Detail-LrcDiv {
       width: 73%;
+      padding-top: 12px;
       padding-bottom: 12px;
     }
   }
