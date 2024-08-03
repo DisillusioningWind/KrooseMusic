@@ -59,7 +59,7 @@
         </button>
       </div>
       <div class="toolBar">
-        <button>
+        <button @click="btnOpenDir">
           <svg>
             <path d="m7,14.5 l0,6 l3,0 l4,4 l0,-14 l-4,4 l-3,0 z"/>
             <path d="m18,14 a 5 5 0 0 1 0,7" :visibility="curVolume == 0 ? 'hidden' : 'visible'"/>
@@ -106,11 +106,12 @@ const curTime = ref(0)
 const showTime = ref(0)
 const curVolume = ref(100)
 const timeSlider = ref<InstanceType<typeof KSlider> | null>(null)
+const mainDirHandle = ref<FileSystemDirectoryHandle | null>(null)
 
 onMounted(() => {
   emitter.on(events.musicCanPlay, () => { store.musicPicURL = player.value.pictureURL as string})
   emitter.on(events.musicUpdateCur, (time) => { store.musicCurTime = curTime.value = time as number })
-  emitter.on(events.musicReset, () => { curTime.value = 0; store.musicPicURL = ''; timeSlider.value?.reset() })
+  emitter.on(events.musicReset, () => { curTime.value = 0; store.musicPicURL = ''; store.musicLyrics = []; timeSlider.value?.reset() })
 })
 
 // 按钮功能
@@ -133,13 +134,61 @@ function btnFastBackward() {
 function btnUnloadFile() {
   player.value.unload()
 }
-async function btnOpenFile() {
-  const filePath = await ipc.callMain('openFileWindow') as string | null
-  if (filePath) {
-    player.value.load(filePath)
-    const res = await ipc.callMain('loadLyric', filePath) as { lyrics?: ILyric[], success: boolean }
-    store.musicLyrics = res.success ? res.lyrics as ILyric[] : []
+async function btnOpenDir() {
+  // @ts-ignore
+  const directoryHandle = await window.showDirectoryPicker()
+  if (!directoryHandle) return
+  const req = window.indexedDB.open('KrooseDB')
+  req.onupgradeneeded = (ev) => {
+    // @ts-ignore
+    const db = ev.target.result as IDBDatabase
+    const objStore = db.createObjectStore('Library', { keyPath: 'id', autoIncrement: true })
+    objStore.createIndex('dir', 'dir', { unique: true })
+    objStore.transaction.oncomplete = () => {
+      const res = db.transaction('Library', 'readwrite').objectStore('Library').add({ id: 1, dir: directoryHandle })
+      res.onsuccess = () => console.log('音乐目录添加成功')
+      res.onerror = () => console.log('音乐目录添加失败')
+    }
   }
+}
+function btnOpenFile() {
+  if (mainDirHandle.value) {
+    openFile()
+  } else {
+    const req = window.indexedDB.open('KrooseDB')
+    req.onerror = () => console.log('KrooseDB打开失败')
+    req.onsuccess = () => {
+      const db = req.result
+      const res = db.transaction('Library').objectStore('Library').get(1)
+      res.onsuccess = () => {
+        mainDirHandle.value = res.result.dir
+        openFile()
+      }
+    }
+  }
+}
+async function openFile() {
+  //申请权限
+  if (!mainDirHandle.value) return
+  // @ts-ignore 2339
+  const perRes = await mainDirHandle.value.queryPermission({ mode: 'read' })
+  if (perRes !== 'granted') {
+    // @ts-ignore 2339
+    console.log('申请权限:', await mainDirHandle.value.requestPermission({ mode: 'read' }))
+  }
+  //打开文件
+  const filePath = await ipc.callMain('openFileWindow') as string | null
+  if (!filePath) return
+  const relPaths = filePath.slice(filePath.lastIndexOf(`\\${ mainDirHandle.value.name }\\`) + mainDirHandle.value.name.length + 2).split('\\')
+  let dirHandle = mainDirHandle.value
+  for (let i = 0; i < relPaths.length - 1; i++) {
+    dirHandle = await dirHandle.getDirectoryHandle(relPaths[i])
+  }
+  player.value.load(await (await dirHandle.getFileHandle(relPaths.at(-1) as string)).getFile())
+  const colorRes = ipc.callMain('getMainColorFromFile', filePath)
+  const lyricRes = ipc.callMain('loadLyric', filePath)
+  player.value.mainColor = await colorRes as string
+  store.musicLyrics = await lyricRes as ILyric[]
 }
 </script>
 

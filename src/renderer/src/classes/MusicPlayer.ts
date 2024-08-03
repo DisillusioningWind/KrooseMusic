@@ -1,4 +1,4 @@
-import type { ICommonTagsResult } from 'music-metadata'
+import { ICommonTagsResult, parseBlob } from 'music-metadata'
 import { ref, onMounted } from 'vue'
 import { logExeTimeAsync } from '@renderer/utils/tools'
 import { emitter, events } from '@renderer/utils/emitter'
@@ -50,21 +50,35 @@ class MusicPlayer {
     emitter.emit(events.musicReset)
   }
 
+  async load(filePath: string): Promise<void>
+  async load(file: File): Promise<void>
+
   @logExeTimeAsync
-  async load(filePath: string) {
+  async load(input: string | File) {
     if (this.audioState !== 'unload') {
       this.unload()
     }
-    // 读取音乐文件
-    const res = await window.ipc.callMain('loadFile', filePath) as { buffer?: Buffer, commonTags?: ICommonTagsResult, mainColor?: string, success: boolean }
-    if (res.success) {
-      this.commonTags = res.commonTags!
-      this.artist = res.commonTags!.artist || '未知艺术家'
-      this.title = res.commonTags!.title || filePath.slice(filePath.lastIndexOf('\\') + 1)
-      this.mainColor = res.mainColor!
-      this.pictureURL = (res.commonTags!.picture) ? URL.createObjectURL(new Blob([res.commonTags!.picture[0].data])) : null
-      this.audioURL = URL.createObjectURL(new Blob([res.buffer!]))
+    if (typeof input === 'string') {
+      // 读取音乐文件
+      const filePath = input
+      const res = await window.ipc.callMain('loadFile', filePath) as { buffer?: Buffer, commonTags?: ICommonTagsResult, mainColor?: string, success: boolean }
+      if (res.success) {
+        this.commonTags = res.commonTags!
+        this.artist = res.commonTags!.artist || '未知艺术家'
+        this.title = res.commonTags!.title || filePath.slice(filePath.lastIndexOf('\\') + 1)
+        this.mainColor = res.mainColor!
+        this.pictureURL = (res.commonTags!.picture) ? URL.createObjectURL(new Blob([res.commonTags!.picture[0].data])) : null
+        this.audioURL = URL.createObjectURL(new Blob([res.buffer!]))
+        this.audio.src = this.audioURL
+      }
+    } else {
+      this.audioURL = URL.createObjectURL(input)
       this.audio.src = this.audioURL
+      const tags = (await parseBlob(input)).common
+      this.commonTags = tags
+      this.artist = tags.artist || '未知艺术家'
+      this.title = tags.title || input.name
+      this.pictureURL = (tags.picture) ? URL.createObjectURL(new Blob([tags.picture[0].data])) : null
     }
   }
 

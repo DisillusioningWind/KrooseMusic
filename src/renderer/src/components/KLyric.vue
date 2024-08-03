@@ -1,6 +1,6 @@
 <template>
   <div class="KLyric">
-    <div class="list" ref="list" @scroll="startScroll">
+    <div class="list" ref="list" @wheel="startScroll">
       <span v-for="(item, i) in store.musicLyrics" :key="item.uid" :class=" i == index ? 'active' : ''">
         {{ item.lyric }}
       </span>
@@ -19,7 +19,7 @@ watch(() => store.musicCurTime, (val) => {
   index.value = store.musicLyrics.findIndex((item) => item.time >= val) - 1
   if (index.value >= 0 && !scrolled.value) {
     list.value?.scrollTo({
-      top: (index.value - 11) * 22,
+      top: (index.value - 10) * 22,
       behavior: 'smooth'
     })
   }
@@ -29,7 +29,7 @@ function startScroll() {
   scrolled.value = true
   setTimeout(() => {
     scrolled.value = false
-  }, 10000)
+  }, 7000)
 }
 </script>
 
@@ -44,16 +44,20 @@ function startScroll() {
     position: absolute;
     display: flex;
     flex-direction: column;
-    align-items: center;
+    align-items: stretch;
     overflow: auto;
     span {
       font-size: 18px;
       font-weight: 500;
-      min-height: 22px;
       text-shadow: 0 0.5px 0 #484848;
+      text-align: center;
       color: #bdbdbd;
+      &:empty {
+        min-height: 22px;
+      }
       &.active {
         color: #fff;
+        text-shadow: none;
         filter: brightness(1.5);
       }
     }
