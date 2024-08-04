@@ -10,19 +10,9 @@
     </div>
     <div class="buttonRow">
       <div class="detailBar">
-        <el-button type="primary" size="default" @click="btnToggleDetail" class="musicDetailBut">
-          <el-image class="musicDetailButImg" :src="player.pictureURL??''" fit="cover">
-            <template #error>
-              <div class="image-failed">
-                <el-icon ><Picture /></el-icon>
-              </div>
-            </template>
-          </el-image>
-          <div class="musicDetailButTextDiv">
-            <el-text class="topText">{{ player.title }}</el-text>
-            <el-text class="botText">{{ player.artist }}</el-text>
-          </div>
-        </el-button>
+        <KDetailBtn :title="player.title" :artist="player.artist" :picURL="player.pictureURL || ''"
+          :showPic="!store.showDetail" v-show="player.playerState !== 'unload'" @click="btnToggleDetail">
+        </KDetailBtn>
       </div>
       <div class="controlBar">
         <button>
@@ -253,68 +243,6 @@ async function openFile() {
     .detailBar {
       flex: 1;
       max-width: 31.25%;
-      :deep(.musicDetailBut) {
-        justify-self: left;
-        display: v-bind('player.playerState === "unload" ? "none" : "inline-flex" ');
-        height: 100%;
-        max-width: 100%;
-        margin: 0;
-        padding: 0;
-        border: none;
-        border-radius: 0;
-        background-color: transparent;
-        &:hover {
-          background-color: #00000030;
-        }
-        &:active {
-          background-color: #00000050;
-        }
-        &>span {
-          display: flex;
-          justify-content: left;
-          margin: 0 10px 0 0;
-          max-width: calc(100% - 10px);
-          overflow: hidden;
-          .musicDetailButImg {
-            width: 90px;
-            height: 90px;
-            .image-failed {
-              display: flex;
-              justify-content: center;
-              align-items: center;
-              width: 100%;
-              height: 100%;
-              background-color: #f2f2f2;
-              color: #616161;
-              .el-icon {
-                font-size: 30px;
-                padding: 0;
-              }
-            }
-          }
-          .musicDetailButTextDiv {
-            height: 100%;
-            width: calc(100% - 100px);
-            margin: 0 0 0 10px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            .topText {
-              align-self: flex-start;
-              font-size: 17.5px;
-              font-weight: 100;
-              color: white;
-            }
-            .botText {
-              align-self: flex-start;
-              font-size: 15px;
-              font-weight: bold;
-              color: white;
-              margin-top: 5px;
-            }
-          }
-        }
-      }
     }
     .controlBar {
       flex: 1.2;

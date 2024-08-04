@@ -8,15 +8,13 @@ class MusicPlayer {
   audioURL: string | null = null
   private audioState:'unload' | 'play' | 'pause' | 'stop' = 'unload'
   filePath: string | null = null
-  fileSize: number | null = null
   commonTags: ICommonTagsResult | null = null
-  title: string | null = null
+  title: string = ''
   artist: string = ''
   pictureURL: string | null = null
   mainColor: string = '#1a5d8e'
   totalTime: number = 0
   lyrics: ILyric[] = []
-  resetEvent: Event
   get playerState () {
     return this.audioState
   }
@@ -29,15 +27,13 @@ class MusicPlayer {
 
   constructor() {
     this.audio = new Audio()
-    this.resetEvent = new Event('reset')
   }
 
   unload() {
     this.audio.src = ''
     this.filePath = null
-    this.fileSize = null
     this.commonTags = null
-    this.title = null
+    this.title = ''
     this.artist = ''
     URL.revokeObjectURL(this.audioURL as string)
     URL.revokeObjectURL(this.pictureURL as string)

@@ -68,7 +68,7 @@ export async function loadFile(path: string): Promise<{ buffer?: Buffer, commonT
  */
 export async function loadLyric(path: string): Promise<ILyric[]> {
   const lyricRes = loadFileText(path.slice(0, path.lastIndexOf('.')) + '.lrc')
-  if (!lyricRes.success) return []
+  if (!lyricRes.success) return [{ time: 0, lyric: '未找到歌词文件', uid: '0' }]
   return formatLyrics(lyricRes.text as string)
 }
 
