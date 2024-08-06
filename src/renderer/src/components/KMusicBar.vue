@@ -1,86 +1,85 @@
 <template>
-  <div class="controlDiv">
-    <KContextMenu :menu="menu">
-      <div class="sliderRow">
-        <el-text>{{ formatTime(showTime) }}</el-text>
-        <KSlider ref="timeSlider" :min="0" :max="player.totalTime" :cur="curTime" :disable="player.playerState === 'unload'"
-          :color="player.mainColor" :tooltip="player.playerState !== 'unload'" :tooltip-format="(v: number) => formatTime(v, 'mm:ss')"
-          @update-cur="(time) => { showTime = time }" @drag-cur="(time) => { player.currentTime = time }">
+  <div class="KMusicBar" ref="musicBar">
+    <KContextMenu ref="ctxMenu" :menu="menu" :menu-div="musicBar!" @select="onMenuSelect"/>
+    <div class="sliderRow" v-no-menu>
+      <el-text>{{ formatTime(showTime) }}</el-text>
+      <KSlider ref="timeSlider" :min="0" :max="player.totalTime" :cur="curTime" :disable="player.playerState === 'unload'"
+        :color="player.mainColor" :tooltip="player.playerState !== 'unload'" :tooltip-format="(v: number) => formatTime(v, 'mm:ss')"
+        @update-cur="(time) => { showTime = time }" @drag-cur="(time) => { player.currentTime = time }">
+      </KSlider>
+      <el-text>{{ formatTime(player.totalTime) }}</el-text>
+    </div>
+    <div class="buttonRow">
+      <div class="detailBar">
+        <KDetailBtn :title="player.title" :artist="player.artist" :picURL="player.pictureURL || ''"
+          :showPic="!store.showDetail" v-show="player.playerState !== 'unload'" @click="btnToggleDetail">
+        </KDetailBtn>
+      </div>
+      <div class="controlBar" v-no-menu>
+        <button>
+          <svg>
+            <path d="m10,9 l0,17"/>
+            <path d="m25,10 l0,15 l-10,-7.5 z"/>
+          </svg>
+        </button>
+        <button @click="btnFastBackward">
+          <svg>
+            <path d="m7.5,17.5 a 10 10 0 1 0 10,-10"/>
+            <path class="forwardPath" d="m17.5,4.5 l0,6 l-5,-3 z"/>
+            <text x="50%" y="60%">10</text>
+          </svg>
+        </button>
+        <button class="playButton" @click="btnTogglePlay">
+          <svg>
+            <path v-show="player.playerState === 'play'" d="m19,12 l0,22 m8,0 l0,-22"/>
+            <path v-show="player.playerState !== 'play'" d="m17,13.5 l0,20 l15,-10 z"/>
+          </svg>
+        </button>
+        <button @click="btnFastForward">
+          <svg>
+            <path d="m27.5,17.5 a 10 10 0 1 1 -10,-10"/>
+            <path class="forwardPath" d="m17.5,4.5 l0,6 l5,-3 z"/>
+            <text x="50%" y="60%">10</text>
+          </svg>
+        </button>
+        <button>
+          <svg>
+            <path d="m10,10 l0,15 l10,-7.5 z"/>
+            <path d="m25,9 l0,17"/>
+          </svg>
+        </button>
+      </div>
+      <div class="toolBar">
+        <button v-no-menu>
+          <svg>
+            <path d="m7,14.5 l0,6 l3,0 l4,4 l0,-14 l-4,4 l-3,0 z"/>
+            <path d="m18,14 a 5 5 0 0 1 0,7" :visibility="curVolume == 0 ? 'hidden' : 'visible'"/>
+            <path d="m21,11.5 a 9 9 0 0 1 0,12" :visibility="curVolume < 0.33 ? 'hidden' : 'visible'"/>
+            <path d="m23.5,8.5 a 13 13 0 0 1 0,18" :visibility="curVolume < 0.66 ? 'hidden' : 'visible'"/>
+            <path d="m18,14 l7,7" :visibility="curVolume == 0 ? 'visible' : 'hidden'"/>
+            <path d="m18,21 l7,-7" :visibility="curVolume == 0 ? 'visible' : 'hidden'"/>
+          </svg>
+        </button>
+        <KSlider v-no-menu :min="0" :max="100" :cur="curVolume" :color="player.mainColor" :tooltip="true" :tooltip-format="(v: number) => Math.floor(v)"
+        @update-cur="(volume) => { player.audio.volume = curVolume = volume * 0.01 }">
         </KSlider>
-        <el-text>{{ formatTime(player.totalTime) }}</el-text>
+        <button v-no-menu>
+          <svg>
+            <path d="m8.5,10 l0,4 l3,-2 z" stroke-width="1px" fill="white"/>
+            <path d="m14,12 l13,0" stroke-width="1px"/>
+            <path d="m8,17.5 l19,0" stroke-width="1px"/>
+            <path d="m8,23 l19,0" stroke-width="1px"/>
+          </svg>
+        </button>
+        <button @click="onMenuOpen">
+          <svg>
+            <circle cx="32%" cy="50%" r="0.5"/>
+            <circle cx="50%" cy="50%" r="0.5"/>
+            <circle cx="68%" cy="50%" r="0.5"/>
+          </svg>
+        </button>
       </div>
-      <div class="buttonRow">
-        <div class="detailBar">
-          <KDetailBtn :title="player.title" :artist="player.artist" :picURL="player.pictureURL || ''"
-            :showPic="!store.showDetail" v-show="player.playerState !== 'unload'" @click="btnToggleDetail">
-          </KDetailBtn>
-        </div>
-        <div class="controlBar">
-          <button>
-            <svg>
-              <path d="m10,9 l0,17"/>
-              <path d="m25,10 l0,15 l-10,-7.5 z"/>
-            </svg>
-          </button>
-          <button @click="btnFastBackward">
-            <svg>
-              <path d="m7.5,17.5 a 10 10 0 1 0 10,-10"/>
-              <path d="m17.5,4.5 l0,6 l-5,-3 z" fill="white"/>
-              <text x="50%" y="60%">10</text>
-            </svg>
-          </button>
-          <button class="playButton" @click="btnTogglePlay">
-            <svg>
-              <path v-show="player.playerState === 'play'" d="m19,12 l0,22 m8,0 l0,-22"/>
-              <path v-show="player.playerState !== 'play'" d="m17,13.5 l0,20 l15,-10 z"/>
-            </svg>
-          </button>
-          <button @click="btnFastForward">
-            <svg>
-              <path d="m27.5,17.5 a 10 10 0 1 1 -10,-10"/>
-              <path d="m17.5,4.5 l0,6 l5,-3 z" fill="white"/>
-              <text x="50%" y="60%">10</text>
-            </svg>
-          </button>
-          <button>
-            <svg>
-              <path d="m10,10 l0,15 l10,-7.5 z"/>
-              <path d="m25,9 l0,17"/>
-            </svg>
-          </button>
-        </div>
-        <div class="toolBar">
-          <button @click="btnOpenDir">
-            <svg>
-              <path d="m7,14.5 l0,6 l3,0 l4,4 l0,-14 l-4,4 l-3,0 z"/>
-              <path d="m18,14 a 5 5 0 0 1 0,7" :visibility="curVolume == 0 ? 'hidden' : 'visible'"/>
-              <path d="m21,11.5 a 9 9 0 0 1 0,12" :visibility="curVolume < 0.33 ? 'hidden' : 'visible'"/>
-              <path d="m23.5,8.5 a 13 13 0 0 1 0,18" :visibility="curVolume < 0.66 ? 'hidden' : 'visible'"/>
-              <path d="m18,14 l7,7" :visibility="curVolume == 0 ? 'visible' : 'hidden'"/>
-              <path d="m18,21 l7,-7" :visibility="curVolume == 0 ? 'visible' : 'hidden'"/>
-            </svg>
-          </button>
-          <KSlider :min="0" :max="100" :cur="curVolume" :color="player.mainColor" :tooltip="true" :tooltip-format="(v: number) => Math.floor(v)"
-          @update-cur="(volume) => { player.audio.volume = curVolume = volume * 0.01 }">
-          </KSlider>
-          <button @click="btnOpenFile">
-            <svg>
-              <path d="m8.5,10 l0,4 l3,-2 z" stroke-width="1px" fill="white"/>
-              <path d="m14,12 l13,0" stroke-width="1px"/>
-              <path d="m8,17.5 l19,0" stroke-width="1px"/>
-              <path d="m8,23 l19,0" stroke-width="1px"/>
-            </svg>
-          </button>
-          <button @click="btnUnloadFile">
-            <svg>
-              <circle cx="32%" cy="50%" r="0.5"/>
-              <circle cx="50%" cy="50%" r="0.5"/>
-              <circle cx="68%" cy="50%" r="0.5"/>
-            </svg>
-          </button>
-        </div>
-      </div>
-    </KContextMenu>
+    </div>
   </div>
 </template>
 
@@ -90,6 +89,7 @@ import { useStore } from '@renderer/store'
 import { emitter, events } from '@renderer/utils/emitter'
 import { formatTime } from '@renderer/utils/tools'
 import KSlider from './KSlider.vue'
+import KContextMenu from './KContextMenu.vue'
 import svgOpenFile from '@renderer/assets/icons/openFile.svg?url'
 import svgOpenDir from '@renderer/assets/icons/openDir.svg?url'
 import svgCloseFile from '@renderer/assets/icons/closeFile.svg?url'
@@ -100,19 +100,38 @@ const player = useMusicPlayer()
 const curTime = ref(0)
 const showTime = ref(0)
 const curVolume = ref(100)
+const musicBar = ref<HTMLDivElement | null>(null)
+const ctxMenu = ref<InstanceType<typeof KContextMenu> | null>(null)
 const timeSlider = ref<InstanceType<typeof KSlider> | null>(null)
 const mainDirHandle = ref<FileSystemDirectoryHandle | null>(null)
 const menu = [
-  { label: '打开目录', icon: svgOpenDir },
-  { label: '打开文件', icon: svgOpenFile },
-  { label: '卸载文件', icon: svgCloseFile }
+  { label: '打开目录', icon: svgOpenDir, action: btnOpenDir},
+  { label: '打开文件', icon: svgOpenFile, action: btnOpenFile },
+  { label: '卸载文件', icon: svgCloseFile, action: btnUnloadFile }
 ]
+const vNoMenu = {
+  mounted: (el: HTMLElement) => el.addEventListener('contextmenu', (ev) => { ev.preventDefault(); ev.stopPropagation() })
+}
 // 事件绑定
 onMounted(() => {
   emitter.on(events.musicCanPlay, () => { store.musicPicURL = player.value.pictureURL as string})
   emitter.on(events.musicUpdateCur, (time) => { store.musicCurTime = curTime.value = time as number })
-  emitter.on(events.musicReset, () => { curTime.value = 0; store.musicPicURL = ''; store.musicLyrics = []; timeSlider.value?.reset() })
+  emitter.on(events.musicReset, onMusicReset)
 })
+// 事件处理
+function onMusicReset() {
+  curTime.value = 0
+  store.musicPicURL = ''
+  store.musicLyrics = []
+  store.showDetail = false
+  timeSlider.value?.reset()
+}
+function onMenuOpen(ev: MouseEvent) {
+  ctxMenu.value?.menuCon?.onOpenMenu(ev)
+}
+function onMenuSelect(label: string) {
+  menu.find(item => item.label === label)?.action()
+}
 // 按钮功能
 function btnToggleDetail() {
   store.toggleDetail()
@@ -223,7 +242,7 @@ async function openFile() {
   }
 }
 
-.controlDiv {
+.KMusicBar {
   height: 100%;
   background-color: v-bind('player.mainColor');
   .sliderRow {
@@ -264,13 +283,35 @@ async function openFile() {
       }
       button {
         @include svgButton(35px);
+        &:hover {
+          background-color: v-bind('player.playerState === "unload" ? "transparent" : "#00000030"');
+        }
+        &:active {
+          background-color: v-bind('player.playerState === "unload" ? "transparent" : "#00000050"');
+        }
+        svg {
+          stroke: v-bind('player.playerState === "unload" ? "#ffffff40" : "white"');
+          .forwardPath {
+            fill: v-bind('player.playerState === "unload" ? "#ffffff40" : "white"');
+          }
+        }
       }
       .playButton {
         @include svgButton(50px);
+        &:hover {
+          background-color: v-bind('player.playerState === "unload" ? "transparent" : "#00000030"');
+        }
+        &:active {
+          background-color: v-bind('player.playerState === "unload" ? "transparent" : "#00000050"');
+        }
+        svg {
+          stroke: v-bind('player.playerState === "unload" ? "#ffffff40" : "white"');
+        }
         border: 2px solid #ffffff40;
         &:active {
           background-color: transparent;
-          border: 2px solid #ffffff;
+          border-width: 2px;
+          border-color: v-bind('player.playerState === "unload" ? "#ffffff40" : "white"');
         }
       }
     }

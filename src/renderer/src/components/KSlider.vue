@@ -29,6 +29,7 @@ export default defineComponent({
     const slider = ref<HTMLElement | null>(null)
     const min = computed(() => props.min || 0)
     const max = computed(() => props.max || 100)
+    const disable = computed(() => props.disable || false)
     const color = computed(() => props.color || '#ffffff')
     const tooltip = computed(() => props.tooltip || false)
     const tooltipFormat = computed(() => props.tooltipFormat || ((v: any) => v))
@@ -73,7 +74,7 @@ export default defineComponent({
     })
     //内部事件处理
     function startDrag(e: MouseEvent) {
-      if (props.disable) return
+      if (disable.value) return
       sliderState = 'drag'
       cur.value = getPerCur(e.clientX) * len.value
     }
@@ -92,7 +93,7 @@ export default defineComponent({
       cur.value = 0
       sliderState = 'slide'
     }
-    return { slider, perUse, color, cur, startDrag, reset, tooltip, tooltipFormat}
+    return { slider, perUse, color, cur, disable, tooltip, tooltipFormat, startDrag, reset}
   },
 })
 </script>
@@ -139,6 +140,7 @@ $track-left-color: #ffffff40;
   }
   .Btn {
     position: relative;
+    display: v-bind('disable ? "none" : "block"');
     box-sizing: border-box;
     height: $button-width;
     width: $button-width;
@@ -149,6 +151,7 @@ $track-left-color: #ffffff40;
     // 当前时间提示
     &::before {
       @include tool-tip;
+      position: absolute;
       left: -17px;
       bottom: 28px;
       width: 44px;

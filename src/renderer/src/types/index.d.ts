@@ -4,4 +4,8 @@ export global {
     lyric: string
     uid: string
   }
+  interface IMenuItem {
+    icon?: string
+    label: string
+  }
 }

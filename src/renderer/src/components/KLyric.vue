@@ -1,6 +1,6 @@
 <template>
   <div class="KLyric">
-    <div class="list" ref="list" @wheel="startScroll">
+    <div class="List" ref="list" @wheel="startScroll">
       <span v-for="(item, i) in store.musicLyrics" :key="item.uid" :class=" i == index ? 'active' : ''">
         {{ item.lyric }}
       </span>
@@ -13,11 +13,11 @@ import { useStore } from '@renderer/store'
 const store = useStore()
 const list = ref<HTMLElement | null>(null)
 const index = ref(0)
-const scrolled = ref(false)
+let scrolled = false
 // 根据当前时间自动滚动歌词
 watch(() => store.musicCurTime, (val) => {
   index.value = store.musicLyrics.findIndex((item) => item.time >= val) - 1
-  if (index.value >= 0 && !scrolled.value) {
+  if (index.value >= 0 && !scrolled) {
     list.value?.scrollTo({
       top: (index.value - 10) * 22,
       behavior: 'smooth'
@@ -26,9 +26,9 @@ watch(() => store.musicCurTime, (val) => {
 })
 // 鼠标滚动时停止自动滚动
 function startScroll() {
-  scrolled.value = true
+  scrolled = true
   setTimeout(() => {
-    scrolled.value = false
+    scrolled = false
   }, 7000)
 }
 </script>
@@ -38,7 +38,7 @@ function startScroll() {
   height: 100%;
   width: 100%;
   position: relative;
-  .list {
+  .List {
     height: 100%;
     width: 100%;
     position: absolute;
