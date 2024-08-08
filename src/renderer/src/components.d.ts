@@ -25,6 +25,7 @@ declare module 'vue' {
     KMusicBar: typeof import('./components/KMusicBar.vue')['default']
     KSlider: typeof import('./components/KSlider.vue')['default']
     KTitleBar: typeof import('./components/KTitleBar.vue')['default']
+    KTooltip: typeof import('./components/KTooltip.vue')['default']
     Library: typeof import('./pages/Library.vue')['default']
     Like: typeof import('./pages/Like.vue')['default']
     List: typeof import('./pages/List.vue')['default']

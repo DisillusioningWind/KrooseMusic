@@ -50,7 +50,7 @@
         </button>
       </div>
       <div class="toolBar">
-        <button v-no-menu>
+        <button v-no-menu v-tooltip="'开启静音'">
           <svg>
             <path d="m7,14.5 l0,6 l3,0 l4,4 l0,-14 l-4,4 l-3,0 z"/>
             <path d="m18,14 a 5 5 0 0 1 0,7" :visibility="curVolume == 0 ? 'hidden' : 'visible'"/>
@@ -63,7 +63,7 @@
         <KSlider v-no-menu :min="0" :max="100" :cur="curVolume" :color="player.mainColor" :tooltip="true" :tooltip-format="(v: number) => Math.floor(v)"
         @update-cur="(volume) => { player.audio.volume = curVolume = volume * 0.01 }">
         </KSlider>
-        <button v-no-menu>
+        <button v-no-menu v-tooltip="'播放列表'">
           <svg>
             <path d="m8.5,10 l0,4 l3,-2 z" stroke-width="1px" fill="white"/>
             <path d="m14,12 l13,0" stroke-width="1px"/>
@@ -71,7 +71,7 @@
             <path d="m8,23 l19,0" stroke-width="1px"/>
           </svg>
         </button>
-        <button @click="onMenuOpen">
+        <button v-tooltip="'更多'" @click="onMenuOpen">
           <svg>
             <circle cx="32%" cy="50%" r="0.5"/>
             <circle cx="50%" cy="50%" r="0.5"/>
@@ -93,6 +93,8 @@ import KContextMenu from './KContextMenu.vue'
 import svgOpenFile from '@renderer/assets/icons/openFile.svg?url'
 import svgOpenDir from '@renderer/assets/icons/openDir.svg?url'
 import svgCloseFile from '@renderer/assets/icons/closeFile.svg?url'
+import { vTooltip } from '@renderer/directives/Tooltip'
+import { vNoMenu } from '@renderer/directives/NoMenu'
 
 const ipc = window.ipc
 const store = useStore()
@@ -109,9 +111,6 @@ const menu = [
   { label: '打开文件', icon: svgOpenFile, action: btnOpenFile },
   { label: '卸载文件', icon: svgCloseFile, action: btnUnloadFile }
 ]
-const vNoMenu = {
-  mounted: (el: HTMLElement) => el.addEventListener('contextmenu', (ev) => { ev.preventDefault(); ev.stopPropagation() })
-}
 // 事件绑定
 onMounted(() => {
   emitter.on(events.musicCanPlay, () => { store.musicPicURL = player.value.pictureURL as string})
