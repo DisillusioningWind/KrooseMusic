@@ -20,4 +20,10 @@ export const events = {
   musicCanPlay: 'musicCanPlay',
   /** 音乐更新当前值 @param number 当前值 */
   musicUpdateCur: 'musicUpdateCur',
+  /**
+   * 菜单选择选项
+   * @param number uid, 监听组件标识
+   * @param string value, 选项名称
+   */
+  menuSelect: 'menuSelect',
 }

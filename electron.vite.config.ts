@@ -31,13 +31,13 @@ export default defineConfig({
       AutoImport({
         imports: ['vue', 'vue-router', 'pinia'],
         resolvers: [ElementPlusResolver()],
-        dts: 'src/auto-imports.d.ts'
+        dts: 'src/types/auto-imports.d.ts'
       }),
       Components({
-        dirs: ['src/components', 'src/pages'],
+        dirs: ['src/components', 'src/pages', 'src/directives'],
         resolvers: [ElementPlusResolver()],
         extensions: ['vue'],
-        dts: 'src/components.d.ts'
+        dts: 'src/types/components.d.ts'
       }),
       optimizer({
         electron: `const { ipcRenderer } = require('electron');export { ipcRenderer };`

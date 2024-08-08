@@ -1,33 +1,22 @@
 <template>
-  <Teleport to="body">
-    <div class="KMenu" ref="menuCon">
-      <div class="List" :class="menuShow ? 'visible' : ''">
-        <div class="Item" v-for="item in menuItems" :key="item.label" @click="onClick(item)">
-          <img class="Icon" v-if="item.icon" :src="item.icon" />
-          <span>{{ item.label }}</span>
-        </div>
+  <div class="KMenu" ref="menuCon">
+    <div class="List" :class="menuShow ? 'visible' : ''">
+      <div class="Item" v-for="item in menuItems" :key="item.label" @click="onClick(item)">
+        <img class="Icon" v-if="item.icon" :src="item.icon" />
+        <span>{{ item.label }}</span>
       </div>
     </div>
-  </Teleport>
+  </div>
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
+import { emitter, events } from '@renderer/utils/emitter'
 export default defineComponent({
-  name: 'KMenu',
-  props: {
-    menu: {
-      type: Array,
-      default: () => []
-    }
-  },
-  emits: [
-    'select'
-  ],
-  setup(props, { emit }) {
+  setup() {
     const menuCon = ref<HTMLDivElement | null>(null)
-    const menuItems = ref<IMenuItem[]>(props.menu as IMenuItem[])
+    const menuItems = ref<IMenuItem[]>([])
     const menuShow = ref(false)
+    const menuUID = ref(0)
     const x = ref(0)
     const y = ref(0)
     // 事件绑定
@@ -43,18 +32,23 @@ export default defineComponent({
     function onOpenMenu(e: MouseEvent) {
       e.preventDefault()
       e.stopPropagation()
-      x.value = e.clientX + menuCon.value!.offsetWidth > window.innerWidth ? e.clientX - menuCon.value!.offsetWidth : e.clientX
-      y.value = e.clientY + menuCon.value!.offsetHeight > window.innerHeight ? e.clientY - menuCon.value!.offsetHeight : e.clientY
-      menuShow.value = true
+      nextTick(() => {
+        x.value = e.clientX + menuCon.value!.offsetWidth > window.innerWidth ? e.clientX - menuCon.value!.offsetWidth : e.clientX
+        y.value = e.clientY + menuCon.value!.offsetHeight > window.innerHeight ? e.clientY - menuCon.value!.offsetHeight : e.clientY
+        menuShow.value = true
+      })
     }
     function onCloseMenu() {
+      menuItems.value = []
       menuShow.value = false
+      x.value = 0
+      y.value = 0
     }
     function onClick(item: IMenuItem) {
-      menuShow.value = false
-      emit('select', item.label)
+      onCloseMenu()
+      emitter.emit(events.menuSelect, { uid: menuUID.value, value: item.label })
     }
-    return { menuCon, menuItems, menuShow, x, y, onOpenMenu, onCloseMenu, onClick }
+    return { menuCon, menuItems, menuShow, menuUID, x, y, onOpenMenu, onCloseMenu, onClick }
   }
 })
 </script>
@@ -68,7 +62,6 @@ $icon-size: 17px;
   position: fixed;
   left: v-bind('x + "px"');
   top: v-bind('y + "px"');
-  visibility: v-bind('menuShow ? "visible" : "hidden"');
   >.List {
     @include tool-tip;
     padding-top: 4px;

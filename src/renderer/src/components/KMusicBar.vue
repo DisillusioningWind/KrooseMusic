@@ -1,7 +1,6 @@
 <template>
-  <div class="KMusicBar" ref="musicBar">
-    <KContextMenu ref="ctxMenu" :menu="menu" :menu-div="musicBar!" @select="onMenuSelect"/>
-    <div class="sliderRow" v-no-menu>
+  <div class="KMusicBar" v-ctx-menu="menu">
+    <div class="sliderRow" v-no-ctx-menu>
       <el-text>{{ formatTime(showTime) }}</el-text>
       <KSlider ref="timeSlider" :min="0" :max="player.totalTime" :cur="curTime" :disable="player.playerState === 'unload'"
         :color="player.mainColor" :tooltip="player.playerState !== 'unload'" :tooltip-format="(v: number) => formatTime(v, 'mm:ss')"
@@ -15,7 +14,7 @@
           :showPic="!store.showDetail" v-show="player.playerState !== 'unload'" @click="btnToggleDetail">
         </KDetailBtn>
       </div>
-      <div class="controlBar" v-no-menu>
+      <div class="controlBar" v-no-ctx-menu>
         <button>
           <svg>
             <path d="m10,9 l0,17"/>
@@ -50,7 +49,7 @@
         </button>
       </div>
       <div class="toolBar">
-        <button v-no-menu v-tooltip="'开启静音'">
+        <button v-no-ctx-menu v-tooltip="'开启静音'">
           <svg>
             <path d="m7,14.5 l0,6 l3,0 l4,4 l0,-14 l-4,4 l-3,0 z"/>
             <path d="m18,14 a 5 5 0 0 1 0,7" :visibility="curVolume == 0 ? 'hidden' : 'visible'"/>
@@ -60,10 +59,10 @@
             <path d="m18,21 l7,-7" :visibility="curVolume == 0 ? 'visible' : 'hidden'"/>
           </svg>
         </button>
-        <KSlider v-no-menu :min="0" :max="100" :cur="curVolume" :color="player.mainColor" :tooltip="true" :tooltip-format="(v: number) => Math.floor(v)"
+        <KSlider v-no-ctx-menu :min="0" :max="100" :cur="curVolume" :color="player.mainColor" :tooltip="true" :tooltip-format="(v: number) => Math.floor(v)"
         @update-cur="(volume) => { player.audio.volume = curVolume = volume * 0.01 }">
         </KSlider>
-        <button v-no-menu v-tooltip="'播放列表'">
+        <button v-no-ctx-menu v-tooltip="'播放列表'">
           <svg>
             <path d="m8.5,10 l0,4 l3,-2 z" stroke-width="1px" fill="white"/>
             <path d="m14,12 l13,0" stroke-width="1px"/>
@@ -71,7 +70,7 @@
             <path d="m8,23 l19,0" stroke-width="1px"/>
           </svg>
         </button>
-        <button v-tooltip="'更多'" @click="onMenuOpen">
+        <button v-no-ctx-menu v-tooltip="'更多'" v-menu="menu">
           <svg>
             <circle cx="32%" cy="50%" r="0.5"/>
             <circle cx="50%" cy="50%" r="0.5"/>
@@ -88,13 +87,12 @@ import { useMusicPlayer } from '@renderer/classes/MusicPlayer'
 import { useStore } from '@renderer/store'
 import { emitter, events } from '@renderer/utils/emitter'
 import { formatTime } from '@renderer/utils/tools'
-import KSlider from './KSlider.vue'
-import KContextMenu from './KContextMenu.vue'
-import svgOpenFile from '@renderer/assets/icons/openFile.svg?url'
-import svgOpenDir from '@renderer/assets/icons/openDir.svg?url'
-import svgCloseFile from '@renderer/assets/icons/closeFile.svg?url'
 import { vTooltip } from '@renderer/directives/Tooltip'
-import { vNoMenu } from '@renderer/directives/NoMenu'
+import { vCtxMenu, vMenu, vNoCtxMenu } from '@renderer/directives/Menu'
+import KSlider from './KSlider.vue'
+import svgOpenDir from '@renderer/assets/icons/openDir.svg?url'
+import svgOpenFile from '@renderer/assets/icons/openFile.svg?url'
+import svgCloseFile from '@renderer/assets/icons/closeFile.svg?url'
 
 const ipc = window.ipc
 const store = useStore()
@@ -102,8 +100,6 @@ const player = useMusicPlayer()
 const curTime = ref(0)
 const showTime = ref(0)
 const curVolume = ref(100)
-const musicBar = ref<HTMLDivElement | null>(null)
-const ctxMenu = ref<InstanceType<typeof KContextMenu> | null>(null)
 const timeSlider = ref<InstanceType<typeof KSlider> | null>(null)
 const mainDirHandle = ref<FileSystemDirectoryHandle | null>(null)
 const menu = [
@@ -111,11 +107,14 @@ const menu = [
   { label: '打开文件', icon: svgOpenFile, action: btnOpenFile },
   { label: '卸载文件', icon: svgCloseFile, action: btnUnloadFile }
 ]
+let uid = -1
 // 事件绑定
 onMounted(() => {
   emitter.on(events.musicCanPlay, () => { store.musicPicURL = player.value.pictureURL as string})
   emitter.on(events.musicUpdateCur, (time) => { store.musicCurTime = curTime.value = time as number })
   emitter.on(events.musicReset, onMusicReset)
+  emitter.on(events.menuSelect, onMenuSelect)
+  uid = getCurrentInstance()?.uid || -1
 })
 // 事件处理
 function onMusicReset() {
@@ -125,11 +124,9 @@ function onMusicReset() {
   store.showDetail = false
   timeSlider.value?.reset()
 }
-function onMenuOpen(ev: MouseEvent) {
-  ctxMenu.value?.menuCon?.onOpenMenu(ev)
-}
-function onMenuSelect(label: string) {
-  menu.find(item => item.label === label)?.action()
+function onMenuSelect(data: any) {
+  if (data.uid !== uid) return
+  menu.find(item => item.label === data.value)?.action()
 }
 // 按钮功能
 function btnToggleDetail() {
@@ -160,7 +157,6 @@ async function btnOpenDir() {
     // @ts-ignore
     const db = ev.target.result as IDBDatabase
     const objStore = db.createObjectStore('Library', { keyPath: 'id', autoIncrement: true })
-    objStore.createIndex('dir', 'dir', { unique: true })
     objStore.transaction.oncomplete = () => {
       const res = db.transaction('Library', 'readwrite').objectStore('Library').add({ id: 1, dir: directoryHandle })
       res.onsuccess = () => console.log('音乐目录添加成功')
@@ -187,10 +183,10 @@ function btnOpenFile() {
 async function openFile() {
   //申请权限
   if (!mainDirHandle.value) return
-  // @ts-ignore 2339
+  // @ts-ignore
   const perRes = await mainDirHandle.value.queryPermission({ mode: 'read' })
   if (perRes !== 'granted') {
-    // @ts-ignore 2339
+    // @ts-ignore
     console.log('申请权限:', await mainDirHandle.value.requestPermission({ mode: 'read' }))
   }
   //打开文件

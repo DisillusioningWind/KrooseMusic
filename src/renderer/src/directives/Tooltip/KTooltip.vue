@@ -1,5 +1,5 @@
 <template>
-  <div class="Tooltip" :class="show ? 'visible' : ''">
+  <div class="KTooltip" :class="show ? 'visible' : ''">
     <span>{{ text }}</span>
   </div>
 </template>
@@ -18,7 +18,7 @@ export default defineComponent({
 
 <style scoped lang="scss">
 @import '@renderer/assets/global';
-.Tooltip {
+.KTooltip {
   position: fixed;
   top: v-bind('dtop + "px"');
   left: v-bind('dleft + "px"');
@@ -26,6 +26,7 @@ export default defineComponent({
   transform: translate(-50%, calc(-100% - 10px));
   @include tool-tip;
   opacity: 0;
+  pointer-events: none;
   transition: opacity .2s;
   padding: 7px 10px;
   display: flex;
