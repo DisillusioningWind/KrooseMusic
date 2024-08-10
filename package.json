@@ -1,9 +1,11 @@
 {
   "name": "kroose-music",
-  "version": "1.0.0",
+  "productName": "Kroose Music",
+  "version": "0.0.1",
   "description": "A Win10 style music player with Vue 3 and Electron.",
   "main": "./out/main/index.js",
   "author": "BreezingWind",
+  "type": "module",
   "scripts": {
     "format": "prettier --write .",
     "typecheck:node": "tsc --noEmit -p tsconfig.node.json --composite false",
@@ -35,6 +37,7 @@
     "electron": "^31.0.2",
     "electron-better-ipc": "^2.0.1",
     "electron-builder": "^24.13.3",
+    "electron-store": "^10.0.0",
     "electron-vite": "^2.3.0",
     "element-plus": "^2.7.6",
     "iconv-lite": "^0.6.3",

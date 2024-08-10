@@ -150,17 +150,19 @@ function btnUnloadFile() {
 }
 async function btnOpenDir() {
   // @ts-ignore
-  const directoryHandle = await window.showDirectoryPicker()
+  const directoryHandle = await window.showDirectoryPicker() as FileSystemDirectoryHandle
   if (!directoryHandle) return
   const req = window.indexedDB.open('KrooseDB')
   req.onupgradeneeded = (ev) => {
     // @ts-ignore
     const db = ev.target.result as IDBDatabase
-    const objStore = db.createObjectStore('Library', { keyPath: 'id', autoIncrement: true })
+    const objStore = db.createObjectStore('Library', { autoIncrement: true })
+    objStore.createIndex('name', 'name', { unique: false })
     objStore.transaction.oncomplete = () => {
-      const res = db.transaction('Library', 'readwrite').objectStore('Library').add({ id: 1, dir: directoryHandle })
-      res.onsuccess = () => console.log('音乐目录添加成功')
-      res.onerror = () => console.log('音乐目录添加失败')
+      const res = db.transaction('Library', 'readwrite').objectStore('Library').add({ name: directoryHandle.name, dir: directoryHandle })
+      const com = (success: boolean) => { console.log(success ? '音乐目录添加成功' : '音乐目录添加失败'); db.close() }
+      res.onsuccess = () => com(true)
+      res.onerror = () => com(false)
     }
   }
 }
@@ -176,6 +178,7 @@ function btnOpenFile() {
       res.onsuccess = () => {
         mainDirHandle.value = res.result.dir
         openFile()
+        db.close()
       }
     }
   }

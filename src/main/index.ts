@@ -1,10 +1,10 @@
 import { app, BrowserWindow, session } from 'electron/main'
 import { join } from 'path'
-import { bindIpcMain } from './api/index'
+import { bindIpcMain } from './api/index.js'
 
 class MainWindow extends BrowserWindow {
   constructor() {
-    const preloadFilePath = '../preload/index.js'
+    const preloadFilePath = '../preload/index.mjs'
     const rendererFilePath = '../renderer/index.html'
     //窗口配置
     super({
@@ -32,6 +32,11 @@ class MainWindow extends BrowserWindow {
     })
   }
 }
+
+app.setPath('userData', join(app.getAppPath(), 'Data', 'userData'))
+app.setPath('sessionData', join(app.getAppPath(), 'Data', 'sessionData'))
+console.log('userDataDir:', app.getPath('userData'))
+console.log('sessionDataDir:', app.getPath('sessionData'))
 
 app.whenReady().then(() => {
   const mainWindow = new MainWindow()

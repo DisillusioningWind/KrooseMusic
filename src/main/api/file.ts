@@ -2,8 +2,8 @@ import fs from 'fs'
 import * as jschardet from 'jschardet'
 import * as iconv from 'iconv-lite'
 import { ICommonTagsResult, parseBuffer, parseFile } from 'music-metadata'
-import { getMainColorFromBuffer } from './music'
-import { ILyric, formatLyrics } from './lyric'
+import { getMainColorFromBuffer } from './music.js'
+import { ILyric, formatLyrics } from './lyric.js'
 
 /**
  * 读取文件内容为Buffer

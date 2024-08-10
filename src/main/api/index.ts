@@ -1,13 +1,15 @@
 import { ipcMain } from 'electron-better-ipc'
 import { BrowserWindow } from 'electron'
-import * as fileAPI from './file'
-import * as musicAPI from './music'
-import * as windowAPI from './window'
+import * as fileAPI from './file.js'
+import * as musicAPI from './music.js'
+import * as storeAPI from './store.js'
+import * as windowAPI from './window.js'
 
 /** 所有API */
 const API = {
   ...fileAPI,
-  ...musicAPI
+  ...musicAPI,
+  ...storeAPI,
 }
 
 /**

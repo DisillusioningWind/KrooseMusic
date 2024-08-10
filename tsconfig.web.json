@@ -16,8 +16,6 @@
     },
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
-    "jsx": "preserve",
-    "jsxImportSource": "vue"
     // "noUnusedLocals": false,
   }
 }
