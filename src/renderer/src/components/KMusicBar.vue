@@ -2,9 +2,8 @@
   <div class="KMusicBar" v-ctx-menu="menu">
     <div class="sliderRow" v-no-ctx-menu>
       <el-text>{{ formatTime(showTime) }}</el-text>
-      <KSlider :min="0" :max="player.totalTime" :cur="curTime" :disable="player.playerState === 'unload'"
-        :tooltip="player.playerState !== 'unload'" :tooltip-format="(v: number) => formatTime(v, 'mm:ss')"
-        @update-cur="(time) => { showTime = time }" @drag-cur="(time) => { player.currentTime = time }">
+      <KSlider :min="0" :max="player.totalTime" :cur="curTime" :disable="player.playerState === 'unload'" :tooltip="player.playerState !== 'unload'"
+        :tooltip-format="(v: number) => formatTime(v, 'mm:ss')" @update-cur="(time) => { showTime = time }" @drag-cur="(time) => { player.currentTime = time }">
       </KSlider>
       <el-text>{{ formatTime(player.totalTime) }}</el-text>
     </div>
@@ -15,33 +14,33 @@
         </KDetailBtn>
       </div>
       <div class="controlBar" v-no-ctx-menu>
-        <button>
+        <button v-tooltip="player.playerState !== 'unload' ? '上一首' : ''">
           <svg>
             <path d="m10,9 l0,17"/>
             <path d="m25,10 l0,15 l-10,-7.5 z"/>
           </svg>
         </button>
-        <button @click="btnFastBackward">
+        <button v-tooltip="player.playerState !== 'unload' ? '向前10秒' : ''" @click="btnFastBackward">
           <svg>
             <path d="m7.5,17.5 a 10 10 0 1 0 10,-10"/>
             <path class="forwardPath" d="m17.5,4.5 l0,6 l-5,-3 z"/>
             <text x="50%" y="60%">10</text>
           </svg>
         </button>
-        <button class="playButton" @click="btnTogglePlay">
+        <button class="playButton" v-tooltip="player.playerState !== 'unload' ? (player.playerState === 'play' ? '暂停' : '播放') : ''" @click="btnTogglePlay">
           <svg>
             <path v-show="player.playerState === 'play'" d="m19,12 l0,22 m8,0 l0,-22"/>
             <path v-show="player.playerState !== 'play'" d="m17,13.5 l0,20 l15,-10 z"/>
           </svg>
         </button>
-        <button @click="btnFastForward">
+        <button v-tooltip="player.playerState !== 'unload' ? '向后10秒' : ''" @click="btnFastForward">
           <svg>
             <path d="m27.5,17.5 a 10 10 0 1 1 -10,-10"/>
             <path class="forwardPath" d="m17.5,4.5 l0,6 l5,-3 z"/>
             <text x="50%" y="60%">10</text>
           </svg>
         </button>
-        <button>
+        <button v-tooltip="player.playerState !== 'unload' ? '下一首' : ''">
           <svg>
             <path d="m10,10 l0,15 l10,-7.5 z"/>
             <path d="m25,9 l0,17"/>
@@ -60,7 +59,7 @@
           </svg>
         </button>
         <KSlider v-no-ctx-menu :min="0" :max="100" :cur="curVolume" :tooltip="true" :tooltip-format="(v: number) => Math.floor(v)"
-        @update-cur="(volume) => { player.audio.volume = curVolume = volume * 0.01 }">
+          @update-cur="(volume) => { player.audio.volume = curVolume = volume * 0.01 }">
         </KSlider>
         <button v-no-ctx-menu v-tooltip="'播放列表'">
           <svg>

@@ -9,35 +9,35 @@ export default defineComponent({
   setup() {
     const text = ref('')
     const show = ref(false)
-    const dtop = ref(0)
-    const dleft = ref(0)
-    return { text, show, dtop, dleft }
+    const top = ref(0)
+    const left = ref(0)
+    return { text, show, top, left }
   }
 })
 </script>
 
 <style scoped lang="scss">
 @import '@renderer/assets/global';
+$tooltip-height: 26px;
 .KTooltip {
   position: fixed;
-  top: v-bind('dtop + "px"');
-  left: v-bind('dleft + "px"');
-  width: max-content;
+  top: v-bind('top + "px"');
+  left: v-bind('left + "px"');
+  height: $tooltip-height;
   transform: translate(-50%, calc(-100% - 10px));
   @include tool-tip;
+  padding: 0 8px;
   opacity: 0;
   pointer-events: none;
   transition: opacity .2s;
-  padding: 7px 10px;
-  display: flex;
-  justify-content: center;
   &.visible {
     opacity: 1;
     transition: opacity .2s;
   }
   span {
+    line-height: $tooltip-height;
+    white-space: nowrap;
     font-size: 13px;
-    line-height: 13px;
   }
 }
 </style>

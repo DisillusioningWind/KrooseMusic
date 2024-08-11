@@ -64,25 +64,23 @@ $icon-size: 17px;
   top: v-bind('y + "px"');
   >.List {
     @include tool-tip;
-    padding-top: 4px;
-    padding-bottom: 4px;
-    visibility: hidden;
+    padding: 4px 0;
     clip-path: polygon(0 0, 100% 0, 100% 0, 0 0);
     &.visible {
-      visibility: visible;
       clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
       transition: clip-path .2s;
     }
     >.Item {
       height: $item-height;
-      line-height: $item-height;
-      padding-left: $item-padding;
-      padding-right: $item-padding;
+      padding: 0 $item-padding;
       display: flex;
       align-items: center;
       &:hover {
         cursor: default;
         background-color: #dadada;
+      }
+      &:active {
+        background-color: #c2c2c2;
       }
       >.Icon {
         height: $icon-size;
@@ -91,6 +89,7 @@ $icon-size: 17px;
         object-fit: fill;
       }
       >span {
+        line-height: $item-height;
         font-size: 15px;
       }
     }
