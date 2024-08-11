@@ -61,7 +61,7 @@ export default defineComponent({
       document.addEventListener('mouseup', endDrag)
     })
     onUnmounted(() => {
-      slider.value!.removeEventListener('mousedown', startDrag)
+      slider.value?.removeEventListener('mousedown', startDrag)
       document.removeEventListener('mousemove', onDrag)
       document.removeEventListener('mouseup', endDrag)
     })
