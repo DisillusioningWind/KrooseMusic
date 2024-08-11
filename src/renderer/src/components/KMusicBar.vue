@@ -2,8 +2,8 @@
   <div class="KMusicBar" v-ctx-menu="menu">
     <div class="sliderRow" v-no-ctx-menu>
       <el-text>{{ formatTime(showTime) }}</el-text>
-      <KSlider ref="timeSlider" :min="0" :max="player.totalTime" :cur="curTime" :disable="player.playerState === 'unload'"
-        :color="player.mainColor" :tooltip="player.playerState !== 'unload'" :tooltip-format="(v: number) => formatTime(v, 'mm:ss')"
+      <KSlider :min="0" :max="player.totalTime" :cur="curTime" :disable="player.playerState === 'unload'"
+        :tooltip="player.playerState !== 'unload'" :tooltip-format="(v: number) => formatTime(v, 'mm:ss')"
         @update-cur="(time) => { showTime = time }" @drag-cur="(time) => { player.currentTime = time }">
       </KSlider>
       <el-text>{{ formatTime(player.totalTime) }}</el-text>
@@ -59,7 +59,7 @@
             <path d="m18,21 l7,-7" :visibility="curVolume == 0 ? 'visible' : 'hidden'"/>
           </svg>
         </button>
-        <KSlider v-no-ctx-menu :min="0" :max="100" :cur="curVolume" :color="player.mainColor" :tooltip="true" :tooltip-format="(v: number) => Math.floor(v)"
+        <KSlider v-no-ctx-menu :min="0" :max="100" :cur="curVolume" :tooltip="true" :tooltip-format="(v: number) => Math.floor(v)"
         @update-cur="(volume) => { player.audio.volume = curVolume = volume * 0.01 }">
         </KSlider>
         <button v-no-ctx-menu v-tooltip="'播放列表'">
@@ -89,7 +89,6 @@ import { emitter, events } from '@renderer/utils/emitter'
 import { formatTime } from '@renderer/utils/tools'
 import { vTooltip } from '@renderer/directives/Tooltip'
 import { vCtxMenu, vMenu, vNoCtxMenu } from '@renderer/directives/Menu'
-import KSlider from './KSlider.vue'
 import svgOpenDir from '@renderer/assets/icons/openDir.svg?url'
 import svgOpenFile from '@renderer/assets/icons/openFile.svg?url'
 import svgCloseFile from '@renderer/assets/icons/closeFile.svg?url'
@@ -100,7 +99,6 @@ const player = useMusicPlayer()
 const curTime = ref(0)
 const showTime = ref(0)
 const curVolume = ref(100)
-const timeSlider = ref<InstanceType<typeof KSlider> | null>(null)
 const mainDirHandle = ref<FileSystemDirectoryHandle | null>(null)
 const menu = [
   { label: '打开目录', icon: svgOpenDir, action: btnOpenDir},
@@ -122,7 +120,6 @@ function onMusicReset() {
   store.musicPicURL = ''
   store.musicLyrics = []
   store.showDetail = false
-  timeSlider.value?.reset()
 }
 function onMenuSelect(data: any) {
   if (data.uid !== uid) return

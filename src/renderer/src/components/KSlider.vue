@@ -1,5 +1,5 @@
 <template>
-  <div class="KSlider" ref="slider" @mousedown.left.prevent="startDrag">
+  <div class="KSlider" ref="slider">
     <div class="Use"></div>
     <div class="Btn" :cur="tooltipFormat(cur)"></div>
     <div class="Unuse"></div>
@@ -7,21 +7,18 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
 export default defineComponent({
-  name: 'KSlider',
   props: {
     min: Number,
     max: Number,
     cur: Number,
     disable: Boolean,
-    color: String,
     tooltip: Boolean,
-    tooltipFormat: Function,
+    tooltipFormat: Function
   },
   emits: [
-    'updateCur',//更新当前值
-    'dragCur',//拖动当前值
+    'updateCur', //更新当前值
+    'dragCur' //拖动当前值
   ],
   setup(props, { emit }) {
     //属性
@@ -29,23 +26,17 @@ export default defineComponent({
     const slider = ref<HTMLElement | null>(null)
     const min = computed(() => props.min || 0)
     const max = computed(() => props.max || 100)
-    const disable = computed(() => props.disable || false)
-    const color = computed(() => props.color || '#ffffff')
-    const tooltip = computed(() => props.tooltip || false)
-    const tooltipFormat = computed(() => props.tooltipFormat || ((v: any) => v))
-    const len = computed(() => max.value - min.value)
+    const len = computed(() => max.value - min.value) //范围
     const cur = ref(props.cur || 0)
-    /** 理论占比 */
-    const perCur = computed(() => cur.value / len.value)
-    /** 实际表现占比 */
-    const perUse = computed(() => getPerUse(perCur.value))
-    //工具函数
-    function getPerUse(perCur: number) {
-      return ((slider.value!.offsetWidth - 21) * perCur) / slider.value!.offsetWidth * 100
-    }
-    function getPerCur(clientX: number) {
-      return (clientX - slider.value!.getBoundingClientRect().x - 10.5) / (slider.value!.offsetWidth - 21)
-    }
+    const perCur = computed(() => cur.value / len.value) //当前值占范围百分比
+    const perUse = computed(() => getPerUse(perCur.value)) //已使用进度条占总进度条长度百分比
+    const disable = computed(() => props.disable || false) //是否禁用
+    const tooltip = computed(() => props.tooltip || false) //是否显示提示
+    const tooltipFormat = computed(() => props.tooltipFormat || ((v: any) => v)) //提示格式化
+    /** perCur为1时，实际按钮需要停在距终点按钮自身宽度（21px）的位置，因此进行换算 */
+    const getPerUse = (perCur: number) => ((slider.value!.offsetWidth - 21) * perCur) / slider.value!.offsetWidth * 100
+    /** 同理，拖动Slider时perCur的值需要计算按钮的宽度 */
+    const getPerCur = (clientX: number) => (clientX - slider.value!.getBoundingClientRect().x - 10.5) / (slider.value!.offsetWidth - 21)
     //监听外部传入的cur，仅当sliderState为slide且新旧值不等时更新内部cur
     watch(() => props.cur, (newCur, oldCur) => {
       if (sliderState === 'slide' && newCur !== oldCur) {
@@ -65,16 +56,20 @@ export default defineComponent({
     })
     //事件绑定
     onMounted(() => {
-      document.addEventListener('mouseup', endDrag)
+      slider.value!.addEventListener('mousedown', startDrag)
       document.addEventListener('mousemove', onDrag)
+      document.addEventListener('mouseup', endDrag)
     })
     onUnmounted(() => {
-      document.removeEventListener('mouseup', endDrag)
+      slider.value!.removeEventListener('mousedown', startDrag)
       document.removeEventListener('mousemove', onDrag)
+      document.removeEventListener('mouseup', endDrag)
     })
     //内部事件处理
     function startDrag(e: MouseEvent) {
       if (disable.value) return
+      if (e.button !== 0) return
+      e.preventDefault()
       sliderState = 'drag'
       cur.value = getPerCur(e.clientX) * len.value
     }
@@ -88,13 +83,8 @@ export default defineComponent({
       sliderState = 'slide'
       emit('dragCur', cur.value)
     }
-    /** 重置滑块 */
-    function reset() {
-      cur.value = 0
-      sliderState = 'slide'
-    }
-    return { slider, perUse, color, cur, disable, tooltip, tooltipFormat, startDrag, reset}
-  },
+    return { slider, perUse, cur, disable, tooltip, tooltipFormat }
+  }
 })
 </script>
 
@@ -124,7 +114,8 @@ $track-left-color: #ffffff40;
     .Btn {
       background-color: $track-use-color;
       &::before {
-        visibility: v-bind('tooltip ? "visible" : "hidden"');
+        opacity: v-bind('tooltip ? 1 : 0');
+        transition: opacity .2s;
       }
     }
   }
@@ -148,20 +139,23 @@ $track-left-color: #ffffff40;
     border-radius: 50%;
     margin: $button-margin-width;
     background-color: transparent;
-    // 当前时间提示
+    // 提示
     &::before {
       @include tool-tip;
       position: absolute;
-      left: -17px;
+      left: 50%;
+      transform: translate(-50%);
       bottom: 28px;
-      width: 44px;
-      height: 27px;
+      height: 28px;
+      line-height: 28px;
+      padding: 0 8px;
       content: attr(cur);
       font-size: 13px;
       font-weight: 400;
-      line-height: 27px;
       text-align: center;
-      visibility: hidden;
+      opacity: 0;
+      transition: opacity .2s;
+      pointer-events: none;
     }
   }
 }

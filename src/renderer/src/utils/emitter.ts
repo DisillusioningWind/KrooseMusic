@@ -2,12 +2,6 @@ import mitt from 'mitt'
 
 export const emitter = mitt()
 export const events = {
-  /** 滑块拖动完毕 @param number 当前值 */
-  sliderDragCur: 'sliderDragCur',
-  /** 滑块显示当前值 @param number 当前值 */
-  sliderShowCur: 'sliderShowCur',
-  /** 音乐重置 @param void */
-  musicReset: 'musicReset',
   /** 音乐播放 @param void */
   musicPlay: 'musicPlay',
   /** 音乐暂停 @param void */
@@ -16,6 +10,8 @@ export const events = {
   musicStop: 'musicStop',
   /** 音乐结束 @param void */
   musicEnd: 'musicEnd',
+  /** 音乐重置 @param void */
+  musicReset: 'musicReset',
   /** 音乐加载完成 @param void */
   musicCanPlay: 'musicCanPlay',
   /** 音乐更新当前值 @param number 当前值 */
