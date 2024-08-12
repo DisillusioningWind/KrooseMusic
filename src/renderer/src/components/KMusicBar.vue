@@ -84,33 +84,33 @@
 <script setup lang="ts">
 import { useMusicPlayer } from '@renderer/classes/MusicPlayer'
 import { useStore } from '@renderer/store'
-import { emitter, events } from '@renderer/utils/emitter'
+import { bus } from '@renderer/utils/emitter'
 import { formatTime } from '@renderer/utils/tools'
 import { vTooltip } from '@renderer/directives/Tooltip'
 import { vCtxMenu, vMenu, vNoCtxMenu } from '@renderer/directives/Menu'
 import svgOpenDir from '@renderer/assets/icons/openDir.svg?url'
 import svgOpenFile from '@renderer/assets/icons/openFile.svg?url'
 import svgCloseFile from '@renderer/assets/icons/closeFile.svg?url'
-
+// 数据
 const ipc = window.ipc
 const store = useStore()
 const player = useMusicPlayer()
-const curTime = ref(0)
 const showTime = ref(0)
+const curTime = ref(0)
 const curVolume = ref(100)
-const mainDirHandle = ref<FileSystemDirectoryHandle | null>(null)
 const menu = [
   { label: '打开目录', icon: svgOpenDir, action: btnOpenDir},
   { label: '打开文件', icon: svgOpenFile, action: btnOpenFile },
   { label: '卸载文件', icon: svgCloseFile, action: btnUnloadFile }
 ]
+let mainDirHandle: FileSystemDirectoryHandle | null = null
 let uid = -1
 // 事件绑定
 onMounted(() => {
-  emitter.on(events.musicCanPlay, () => { store.musicPicURL = player.value.pictureURL as string})
-  emitter.on(events.musicUpdateCur, (time) => { store.musicCurTime = curTime.value = time as number })
-  emitter.on(events.musicReset, onMusicReset)
-  emitter.on(events.menuSelect, onMenuSelect)
+  bus.musicCanPlay(() => { store.musicPicURL = player.value.pictureURL as string })
+  bus.musicUpdateCur((time) => { store.musicCurTime = curTime.value = time })
+  bus.musicReset(onMusicReset)
+  bus.menuSelect(onMenuSelect)
   uid = getCurrentInstance()?.uid || -1
 })
 // 事件处理
@@ -120,7 +120,7 @@ function onMusicReset() {
   store.musicLyrics = []
   store.showDetail = false
 }
-function onMenuSelect(data: any) {
+function onMenuSelect(data: { uid: number, value: string }) {
   if (data.uid !== uid) return
   menu.find(item => item.label === data.value)?.action()
 }
@@ -163,7 +163,7 @@ async function btnOpenDir() {
   }
 }
 function btnOpenFile() {
-  if (mainDirHandle.value) {
+  if (mainDirHandle) {
     openFile()
   } else {
     const req = window.indexedDB.open('KrooseDB')
@@ -172,7 +172,7 @@ function btnOpenFile() {
       const db = req.result
       const res = db.transaction('Library').objectStore('Library').get(1)
       res.onsuccess = () => {
-        mainDirHandle.value = res.result.dir
+        mainDirHandle = res.result.dir
         openFile()
         db.close()
       }
@@ -181,18 +181,18 @@ function btnOpenFile() {
 }
 async function openFile() {
   //申请权限
-  if (!mainDirHandle.value) return
+  if (!mainDirHandle) return
   // @ts-ignore
-  const perRes = await mainDirHandle.value.queryPermission({ mode: 'read' })
+  const perRes = await mainDirHandle.queryPermission({ mode: 'read' })
   if (perRes !== 'granted') {
     // @ts-ignore
-    console.log('申请权限:', await mainDirHandle.value.requestPermission({ mode: 'read' }))
+    console.log('申请权限:', await mainDirHandle.requestPermission({ mode: 'read' }))
   }
   //打开文件
   const filePath = await ipc.callMain('openFileWindow') as string | null
   if (!filePath) return
-  const relPaths = filePath.slice(filePath.lastIndexOf(`\\${ mainDirHandle.value.name }\\`) + mainDirHandle.value.name.length + 2).split('\\')
-  let dirHandle = mainDirHandle.value
+  const relPaths = filePath.slice(filePath.lastIndexOf(`\\${ mainDirHandle.name }\\`) + mainDirHandle.name.length + 2).split('\\')
+  let dirHandle = mainDirHandle
   for (let i = 0; i < relPaths.length - 1; i++) {
     dirHandle = await dirHandle.getDirectoryHandle(relPaths[i])
   }

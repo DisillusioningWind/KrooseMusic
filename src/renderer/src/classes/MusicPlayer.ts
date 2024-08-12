@@ -1,7 +1,7 @@
 import { ICommonTagsResult, parseBlob } from 'music-metadata'
 import { ref, onMounted } from 'vue'
 import { logExeTimeAsync } from '@renderer/utils/tools'
-import { emitter, events } from '@renderer/utils/emitter'
+import { bus } from '@renderer/utils/emitter'
 
 class MusicPlayer {
   audio: HTMLAudioElement
@@ -43,7 +43,7 @@ class MusicPlayer {
     this.totalTime = 0
     this.lyrics = []
     this.audioState = 'unload'
-    emitter.emit(events.musicReset)
+    bus.musicResetEmit()
   }
 
   async load(filePath: string): Promise<void>
@@ -110,14 +110,14 @@ class MusicPlayer {
 
   /** 将audio原生事件转化为emitter事件发射 */
   initialEvents() {
-    this.audio.ontimeupdate = () => { emitter.emit(events.musicUpdateCur, this.currentTime) }
-    this.audio.oncanplay = () => { emitter.emit(events.musicCanPlay) }
-    this.audio.onended = () => { emitter.emit(events.musicEnd) }
+    this.audio.ontimeupdate = () => { bus.musicUpdateCurEmit(this.currentTime) }
+    this.audio.oncanplay = () => { bus.musicCanPlayEmit() }
+    this.audio.onended = () => { bus.musicEndEmit() }
   }
 
   /** 初始化事件监听 */
   initialHandlers() {
-    emitter.on(events.musicCanPlay, this.readyPlay.bind(this))
+    bus.musicCanPlay(this.readyPlay.bind(this))
   }
 }
 

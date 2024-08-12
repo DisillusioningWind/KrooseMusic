@@ -10,7 +10,7 @@
 </template>
 
 <script lang="ts">
-import { emitter, events } from '@renderer/utils/emitter'
+import { bus } from '@renderer/utils/emitter'
 export default defineComponent({
   setup() {
     const menuCon = ref<HTMLDivElement | null>(null)
@@ -46,7 +46,7 @@ export default defineComponent({
     }
     function onClick(item: IMenuItem) {
       onCloseMenu()
-      emitter.emit(events.menuSelect, { uid: menuUID.value, value: item.label })
+      bus.menuSelectEmit({ uid: menuUID.value, value: item.label })
     }
     return { menuCon, menuItems, menuShow, menuUID, x, y, onOpenMenu, onCloseMenu, onClick }
   }
