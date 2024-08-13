@@ -86,6 +86,7 @@ import { useMusicPlayer } from '@renderer/classes/MusicPlayer'
 import { useStore } from '@renderer/store'
 import { bus } from '@renderer/utils/emitter'
 import { formatTime } from '@renderer/utils/tools'
+import { DBAddDir, DBGetDir } from '@renderer/utils/indexedDB'
 import { vTooltip } from '@renderer/directives/Tooltip'
 import { vCtxMenu, vMenu, vNoCtxMenu } from '@renderer/directives/Menu'
 import svgOpenDir from '@renderer/assets/icons/openDir.svg?url'
@@ -148,35 +149,18 @@ async function btnOpenDir() {
   // @ts-ignore
   const directoryHandle = await window.showDirectoryPicker() as FileSystemDirectoryHandle
   if (!directoryHandle) return
-  const req = window.indexedDB.open('KrooseDB')
-  req.onupgradeneeded = (ev) => {
-    // @ts-ignore
-    const db = ev.target.result as IDBDatabase
-    const objStore = db.createObjectStore('Library', { autoIncrement: true })
-    objStore.createIndex('name', 'name', { unique: false })
-    objStore.transaction.oncomplete = () => {
-      const res = db.transaction('Library', 'readwrite').objectStore('Library').add({ name: directoryHandle.name, dir: directoryHandle })
-      const com = (success: boolean) => { console.log(success ? '音乐目录添加成功' : '音乐目录添加失败'); db.close() }
-      res.onsuccess = () => com(true)
-      res.onerror = () => com(false)
-    }
-  }
+  mainDirHandle = directoryHandle
+  DBAddDir(directoryHandle)
 }
-function btnOpenFile() {
-  if (mainDirHandle) {
-    openFile()
-  } else {
-    const req = window.indexedDB.open('KrooseDB')
-    req.onerror = () => console.log('KrooseDB打开失败')
-    req.onsuccess = () => {
-      const db = req.result
-      const res = db.transaction('Library').objectStore('Library').get(1)
-      res.onsuccess = () => {
-        mainDirHandle = res.result.dir
-        openFile()
-        db.close()
-      }
+async function btnOpenFile() {
+  try {
+    if (!mainDirHandle) {
+      const dir = await DBGetDir(1)
+      mainDirHandle = dir
     }
+    openFile()
+  } catch (e) {
+    console.error(e)
   }
 }
 async function openFile() {
