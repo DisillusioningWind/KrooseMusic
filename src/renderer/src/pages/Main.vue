@@ -1,27 +1,25 @@
 <template>
   <el-container class="BackCon" :style="{ backgroundImage : showDetailCom ? `url(${ backPicURL })` : '' }">
-  <el-container :class=" showDetailCom ? ( backPicURL == defaultPicURL ? '' : 'TopCon') : ''">
-    <el-header><KTitleBar /></el-header>
-    <el-container v-show="!showDetailCom">
-      <el-aside><MainNav ref="nav"/></el-aside>
-      <el-main><router-view /></el-main>
+    <el-container :class=" showDetailCom ? ( backPicURL == defaultPicURL ? '' : 'TopCon') : ''">
+      <el-header><KTitleBar /></el-header>
+      <el-container v-show="!showDetailCom">
+        <el-aside><KNavBar /></el-aside>
+        <el-main><router-view /></el-main>
+      </el-container>
+      <el-container v-show="showDetailCom">
+        <Detail />
+      </el-container>
+      <el-footer><KMusicBar /></el-footer>
     </el-container>
-    <el-container v-show="showDetailCom">
-      <Detail />
-    </el-container>
-    <el-footer><KMusicBar /></el-footer>
-  </el-container>
   </el-container>
 </template>
 
 <script setup lang="ts">
 import { useStore } from '@renderer/store'
 import defaultPicURL from '@renderer/assets/DefaultPic.jpg'
-const nav = ref()
 const store = useStore()
 const showDetailCom = computed(() => store.showDetail)
 const backPicURL = computed(() => store.musicPicURL ? store.musicPicURL : defaultPicURL)
-const menuWidthStyle = computed(() => nav.value.menuWidthStyle)
 </script>
 
 <style scoped lang="scss">
@@ -42,7 +40,7 @@ const menuWidthStyle = computed(() => nav.value.menuWidthStyle)
   }
   .el-aside {
     background-color: #f2f2f2;
-    width: v-bind('menuWidthStyle');
+    width: fit-content;
   }
   .el-footer {
     padding: 0px;
