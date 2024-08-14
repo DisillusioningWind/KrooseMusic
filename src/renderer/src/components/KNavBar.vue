@@ -17,7 +17,7 @@ const menus = [
   { path: '/List', title: '播放列表', icon: 'Collection' },
   { path: '/Setting', title: '设置', icon: 'Setting' }
 ]
-const collapsed = ref(false)
+const collapsed = ref(true)
 const menuWidth = computed(() => collapsed.value ? 48 : 120)
 function onSelect(index: string) {
   if (index === '/Max') {

@@ -85,8 +85,8 @@
 import { useMusicPlayer } from '@renderer/classes/MusicPlayer'
 import { useStore } from '@renderer/store'
 import { bus } from '@renderer/utils/emitter'
+import db from '@renderer/utils/indexedDB'
 import { formatTime } from '@renderer/utils/tools'
-import { DBAddDir, DBGetDir } from '@renderer/utils/indexedDB'
 import { vTooltip } from '@renderer/directives/Tooltip'
 import { vCtxMenu, vMenu, vNoCtxMenu } from '@renderer/directives/Menu'
 import svgOpenDir from '@renderer/assets/icons/openDir.svg?url'
@@ -150,12 +150,12 @@ async function btnOpenDir() {
   const directoryHandle = await window.showDirectoryPicker() as FileSystemDirectoryHandle
   if (!directoryHandle) return
   mainDirHandle = directoryHandle
-  DBAddDir(directoryHandle)
+  db.addDir(directoryHandle)
 }
 async function btnOpenFile() {
   try {
     if (!mainDirHandle) {
-      const dir = await DBGetDir(1)
+      const dir = await db.getDir(1)
       mainDirHandle = dir
     }
     openFile()
