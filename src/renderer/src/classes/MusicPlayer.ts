@@ -1,110 +1,83 @@
-import { ICommonTagsResult, parseBlob } from 'music-metadata'
-import { ref, onMounted } from 'vue'
+import { ref } from 'vue'
 import { logExeTimeAsync } from '@renderer/utils/tools'
 import { bus } from '@renderer/utils/emitter'
 
 class MusicPlayer {
   audio: HTMLAudioElement
-  audioURL: string | null = null
-  private audioState:'unload' | 'play' | 'pause' | 'stop' = 'unload'
-  filePath: string | null = null
-  commonTags: ICommonTagsResult | null = null
   title: string = ''
   artist: string = ''
-  pictureURL: string | null = null
+  picURL: string = ''
   mainColor: string = '#1a5d8e'
   totalTime: number = 0
   lyrics: ILyric[] = []
-  get playerState () {
-    return this.audioState
-  }
-  get currentTime() {
-    return this.audio.currentTime
-  }
-  set currentTime(time: number) {
-    this.audio.currentTime = time
-  }
+  private state: 'unload' | 'play' | 'pause' | 'stop' = 'unload'
+  get playerState() { return this.state }
+  get currentTime() { return this.audio.currentTime }
+  set currentTime(time: number) { this.audio.currentTime = time }
 
   constructor() {
     this.audio = new Audio()
   }
 
   unload() {
+    URL.revokeObjectURL(this.picURL)
+    this.picURL = ''
     this.audio.src = ''
-    this.filePath = null
-    this.commonTags = null
     this.title = ''
     this.artist = ''
-    URL.revokeObjectURL(this.audioURL as string)
-    URL.revokeObjectURL(this.pictureURL as string)
-    this.audioURL = null
-    this.pictureURL = null
     this.mainColor = '#1a5d8e'
     this.totalTime = 0
     this.lyrics = []
-    this.audioState = 'unload'
-    bus.musicResetEmit()
+    this.state = 'unload'
+    bus.musicUnloadEmit()
   }
 
-  async load(filePath: string): Promise<void>
-  async load(file: File): Promise<void>
-
   @logExeTimeAsync
-  async load(input: string | File) {
-    if (this.audioState !== 'unload') {
-      this.unload()
-    }
-    if (typeof input === 'string') {
-      // 读取音乐文件
-      const filePath = input
-      const res = await window.ipc.callMain('loadFile', filePath) as { buffer?: Buffer, commonTags?: ICommonTagsResult, mainColor?: string, success: boolean }
-      if (res.success) {
-        this.commonTags = res.commonTags!
-        this.artist = res.commonTags!.artist || '未知艺术家'
-        this.title = res.commonTags!.title || filePath.slice(filePath.lastIndexOf('\\') + 1)
-        this.mainColor = res.mainColor!
-        this.pictureURL = (res.commonTags!.picture) ? URL.createObjectURL(new Blob([res.commonTags!.picture[0].data])) : null
-        this.audioURL = URL.createObjectURL(new Blob([res.buffer!]))
-        this.audio.src = this.audioURL
-      }
-    } else {
-      this.audioURL = URL.createObjectURL(input)
-      this.audio.src = this.audioURL
-      const tags = (await parseBlob(input)).common
-      this.commonTags = tags
-      this.artist = tags.artist || '未知艺术家'
-      this.title = tags.title || input.name
-      this.pictureURL = (tags.picture) ? URL.createObjectURL(new Blob([tags.picture[0].data])) : null
+  async load(path: string) {
+    try {
+      this.pause()
+      const oldPicURL = this.picURL
+      console.log(path)
+      const lyricRes = window.ipc.callMain('getLyricFromFile', path)
+      const infoRes = window.ipc.callMain('getInfoFromFile', path)
+      this.lyrics = await lyricRes as ILyric[]
+      const { tag, mainColor } = await infoRes as IMusicInfo
+      this.artist = tag.artist || '未知艺术家'
+      this.title = tag.title || window.path.basename(path, window.path.extname(path))
+      this.picURL = (tag.picture) ? URL.createObjectURL(new Blob([tag.picture[0].data])) : ''
+      this.mainColor = mainColor
+      this.audio.src = window.url.pathToFileURL(path).href
+      URL.revokeObjectURL(oldPicURL)
+    } catch (e) {
+      console.error(e)
     }
   }
 
   readyPlay() {
-    if (this.audioState === 'unload') {
-      this.audioState = 'stop'
-      this.totalTime = this.audio.duration
-      this.play()
-    }
+    this.state = 'stop'
+    this.totalTime = this.audio.duration
+    this.play()
   }
 
   play() {
-    if (this.audioState === 'pause' || this.audioState === 'stop') {
+    if (this.state === 'pause' || this.state === 'stop') {
       this.audio.play()
-      this.audioState = 'play'
+      this.state = 'play'
     }
   }
 
   pause() {
-    if (this.audioState === 'play') {
+    if (this.state === 'play') {
       this.audio.pause()
-      this.audioState = 'pause'
+      this.state = 'pause'
     }
   }
 
   stop() {
-    if (this.audioState === 'play' || this.audioState === 'pause') {
+    if (this.state === 'play' || this.state === 'pause') {
       this.audio.currentTime = 0
       this.audio.pause()
-      this.audioState = 'stop'
+      this.state = 'stop'
     }
   }
 
@@ -121,12 +94,8 @@ class MusicPlayer {
   }
 }
 
-export function useMusicPlayer() {
-  const musicPlayer = ref(new MusicPlayer())
-  //由Vue来接管事件绑定，否则无法监听到数据变化
-  onMounted(() => {
-    musicPlayer.value.initialEvents()
-    musicPlayer.value.initialHandlers()
-  })
-  return musicPlayer
-}
+const musicPlayer = ref(new MusicPlayer())
+// 若在构造函数中调用initialEvents和initialHandlers，会导致Vue无法监听到audio的事件
+musicPlayer.value.initialEvents()
+musicPlayer.value.initialHandlers()
+export default musicPlayer

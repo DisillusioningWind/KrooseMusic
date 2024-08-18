@@ -5,7 +5,7 @@ type Events = {
   musicPause: void
   musicStop: void
   musicEnd: void
-  musicReset: void
+  musicUnload: void
   musicCanPlay: void
   musicUpdateCur: number
   menuSelect: { uid: number; value: string }
@@ -25,9 +25,9 @@ class EventBus {
   /** 音乐结束 */
   musicEnd(h: () => void) { this.emitter.on('musicEnd', h) }
   musicEndEmit() { this.emitter.emit('musicEnd') }
-  /** 音乐重置 */
-  musicReset(h: () => void) { this.emitter.on('musicReset', h) }
-  musicResetEmit() { this.emitter.emit('musicReset') }
+  /** 音乐卸载 */
+  musicUnload(h: () => void) { this.emitter.on('musicUnload', h) }
+  musicUnloadEmit() { this.emitter.emit('musicUnload') }
   /** 音乐加载完成 */
   musicCanPlay(h: () => void) { this.emitter.on('musicCanPlay', h) }
   musicCanPlayEmit() { this.emitter.emit('musicCanPlay') }

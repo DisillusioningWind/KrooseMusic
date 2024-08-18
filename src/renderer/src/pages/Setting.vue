@@ -51,6 +51,7 @@ async function onChangeMode(item: ILibrary) {
 $Ptitle-size: 34px;
 .PSetting {
   width: calc(100% - 300px);
+  padding-top: 16px;
   display: flex;
   flex-direction: column;
   row-gap: 25px;
@@ -125,18 +126,6 @@ $Ptitle-size: 34px;
           }
         }
       }
-    }
-  }
-}
-</style>
-
-<style lang="scss">
-.k-popper {
-  border-radius: 0;
-  .el-select-dropdown__item {
-    color: #000;
-    &.is-selected {
-      color: #0078d7;
     }
   }
 }

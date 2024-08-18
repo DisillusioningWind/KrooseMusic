@@ -5,7 +5,6 @@ import svgLoader from 'vite-svg-loader'
 import AutoImport from 'unplugin-auto-import/vite'
 import Components from 'unplugin-vue-components/vite'
 import { ElementPlusResolver } from 'unplugin-vue-components/resolvers'
-import optimizer from 'vite-plugin-optimizer'
 
 export default defineConfig({
   main: {
@@ -39,9 +38,6 @@ export default defineConfig({
         extensions: ['vue'],
         dts: 'src/types/components.d.ts'
       }),
-      optimizer({
-        electron: `const { ipcRenderer } = require('electron');export { ipcRenderer };`
-      })
     ],
   },
 })

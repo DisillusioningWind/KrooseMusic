@@ -9,7 +9,7 @@
     </div>
     <div class="buttonRow">
       <div class="detailBar">
-        <KDetailBtn :title="player.title" :artist="player.artist" :picURL="player.pictureURL || ''"
+        <KDetailBtn :title="player.title" :artist="player.artist" :picURL="player.picURL"
           :showPic="!store.showDetail" v-show="player.playerState !== 'unload'" @click="btnToggleDetail">
         </KDetailBtn>
       </div>
@@ -82,20 +82,17 @@
 </template>
 
 <script setup lang="ts">
-import { useMusicPlayer } from '@renderer/classes/MusicPlayer'
 import { useStore } from '@renderer/store'
 import { bus } from '@renderer/utils/emitter'
-import db from '@renderer/utils/indexedDB'
 import { formatTime } from '@renderer/utils/tools'
 import { vTooltip } from '@renderer/directives/Tooltip'
-import { vCtxMenu, vMenu, vNoCtxMenu } from '@renderer/directives/Menu'
+import { vMenu, vCtxMenu, vNoCtxMenu } from '@renderer/directives/Menu'
+import player from '@renderer/classes/MusicPlayer'
 import svgOpenDir from '@renderer/assets/icons/openDir.svg?url'
 import svgOpenFile from '@renderer/assets/icons/openFile.svg?url'
 import svgCloseFile from '@renderer/assets/icons/closeFile.svg?url'
 // 数据
-const ipc = window.ipc
 const store = useStore()
-const player = useMusicPlayer()
 const showTime = ref(0)
 const curTime = ref(0)
 const curVolume = ref(100)
@@ -104,18 +101,22 @@ const menu = [
   { label: '打开文件', icon: svgOpenFile, action: btnOpenFile },
   { label: '卸载文件', icon: svgCloseFile, action: btnUnloadFile }
 ]
-let mainDirHandle: FileSystemDirectoryHandle | null = null
 let uid = -1
 // 事件绑定
 onMounted(() => {
-  bus.musicCanPlay(() => { store.musicPicURL = player.value.pictureURL as string })
   bus.musicUpdateCur((time) => { store.musicCurTime = curTime.value = time })
-  bus.musicReset(onMusicReset)
+  bus.musicCanPlay(onMusicCanPlay)
+  bus.musicUnload(onMusicUnload)
   bus.menuSelect(onMenuSelect)
   uid = getCurrentInstance()?.uid || -1
 })
 // 事件处理
-function onMusicReset() {
+function onMusicCanPlay() {
+  curTime.value = 0
+  store.musicPicURL = player.value.picURL
+  store.musicLyrics = player.value.lyrics
+}
+function onMusicUnload() {
   curTime.value = 0
   store.musicPicURL = ''
   store.musicLyrics = []
@@ -146,45 +147,11 @@ function btnUnloadFile() {
   player.value.unload()
 }
 async function btnOpenDir() {
-  // @ts-ignore
-  const directoryHandle = await window.showDirectoryPicker() as FileSystemDirectoryHandle
-  if (!directoryHandle) return
-  mainDirHandle = directoryHandle
-  db.addDir(directoryHandle)
 }
 async function btnOpenFile() {
-  try {
-    if (!mainDirHandle) {
-      const dir = await db.getDir(1)
-      mainDirHandle = dir
-    }
-    openFile()
-  } catch (e) {
-    console.error(e)
-  }
-}
-async function openFile() {
-  //申请权限
-  if (!mainDirHandle) return
-  // @ts-ignore
-  const perRes = await mainDirHandle.queryPermission({ mode: 'read' })
-  if (perRes !== 'granted') {
-    // @ts-ignore
-    console.log('申请权限:', await mainDirHandle.requestPermission({ mode: 'read' }))
-  }
-  //打开文件
-  const filePath = await ipc.callMain('openFileWindow') as string | null
+  const filePath = await window.ipc.callMain('openFileWindow') as string | null
   if (!filePath) return
-  const relPaths = filePath.slice(filePath.lastIndexOf(`\\${ mainDirHandle.name }\\`) + mainDirHandle.name.length + 2).split('\\')
-  let dirHandle = mainDirHandle
-  for (let i = 0; i < relPaths.length - 1; i++) {
-    dirHandle = await dirHandle.getDirectoryHandle(relPaths[i])
-  }
-  player.value.load(await (await dirHandle.getFileHandle(relPaths.at(-1) as string)).getFile())
-  const colorRes = ipc.callMain('getMainColorFromFile', filePath)
-  const lyricRes = ipc.callMain('loadLyric', filePath)
-  player.value.mainColor = await colorRes as string
-  store.musicLyrics = await lyricRes as ILyric[]
+  player.value.load(filePath)
 }
 </script>
 

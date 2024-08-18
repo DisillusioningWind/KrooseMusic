@@ -1,14 +1,17 @@
 import { contextBridge } from 'electron'
-import { electronAPI } from '@electron-toolkit/preload'
 import { ipcRenderer } from 'electron-better-ipc'
+import url from 'url'
+import path from 'path'
 
 try {
   if (process.contextIsolated) {
-    contextBridge.exposeInMainWorld('electron', electronAPI)
     contextBridge.exposeInMainWorld('ipc', ipcRenderer)
+    contextBridge.exposeInMainWorld('url', url)
+    contextBridge.exposeInMainWorld('path', path)
   } else {
-    window.electron = electronAPI
     window.ipc = ipcRenderer
+    window.url = url
+    window.path = path
   }
 } catch (error) {
   console.error('preload:', error)

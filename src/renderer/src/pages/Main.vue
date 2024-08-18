@@ -42,6 +42,10 @@ const backPicURL = computed(() => store.musicPicURL ? store.musicPicURL : defaul
     background-color: #f2f2f2;
     width: fit-content;
   }
+  .el-main {
+    padding-top: 0px;
+    padding-bottom: 0px;
+  }
   .el-footer {
     padding: 0px;
     height: 122px;

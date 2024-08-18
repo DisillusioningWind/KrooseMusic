@@ -15,13 +15,16 @@ class MainWindow extends BrowserWindow {
       autoHideMenuBar: true,
       webPreferences: {
         preload: join(__dirname, preloadFilePath),
-        sandbox: false,
-        nodeIntegration: true,
         contextIsolation: false,
+        nodeIntegration: true,
+        sandbox: false,
+        webSecurity: false,
+        allowRunningInsecureContent: false
       }
     })
     //加载页面
     if (process.env.NODE_ENV === 'development') {
+      process.env.ELECTRON_DISABLE_SECURITY_WARNINGS = 'true'
       this.loadURL('http://localhost:5173')
     } else {
       this.loadFile(join(__dirname, rendererFilePath))
