@@ -6,7 +6,7 @@
         {{ curLib?.name }}
         <template #dropdown>
           <el-dropdown-menu>
-            <el-dropdown-item v-for="item in Libs.arr" :key="item.id" @click="curLib = item">
+            <el-dropdown-item v-for="item in libs.arr" :key="item.id" @click="curLib = item">
               {{ item.name }}
             </el-dropdown-item>
           </el-dropdown-menu>
@@ -20,14 +20,13 @@
 </template>
 
 <script setup lang="ts">
-import db from '@renderer/utils/indexedDB'
-
-const Libs = reactive<{ arr: ILibrary[] }>({ arr: [] })
+import db from '@renderer/utils/db'
+const libs = reactive<{ arr: ILibrary[] }>({ arr: [] })
 const curLib = ref<ILibrary | null>(null)
 
 onMounted(async () => {
-  Libs.arr = await db.getAllDir()
-  curLib.value = Libs.arr[0]
+  libs.arr = await db.getLibraries()
+  curLib.value = libs.arr[0]
 })
 </script>
 

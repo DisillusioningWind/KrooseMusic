@@ -3,7 +3,7 @@
     <p class="PTitle">设置</p>
     <KSettingItem title="音乐目录">
       <div class="Library">
-        <div v-for="item in dirs.arr" :key="item.id">
+        <div v-for="item in libs.arr" :key="item.id">
           <span>{{ item.name }}</span>
           <el-select v-model="item.mode" popper-class="k-popper" @change="onChangeMode(item)">
             <el-option label="普通" value="normal" />
@@ -18,32 +18,26 @@
 </template>
 
 <script setup lang="ts">
-import db from '@renderer/utils/indexedDB'
-const dirs = reactive<{arr: ILibrary[]}>({ arr: [] })
+import db from '@renderer/utils/db'
+const libs = reactive<{arr: ILibrary[]}>({ arr: [] })
 onMounted(async () => {
-  dirs.arr = await db.getAllDir()
+  libs.arr = await db.getLibraries()
 })
 async function onAddDir() {
-  // @ts-ignore
-  const tempDir = await window.showDirectoryPicker() as FileSystemDirectoryHandle
-  if (!tempDir) return
-  const id = await db.addDir(tempDir, 'asmr')
-  dirs.arr.push({ id, name: tempDir.name, mode: 'asmr', dir: tempDir })
+  const path = await window.ipc.callMain('openDirectoryWindow') as string | null
+  if (!path) return
+  const name = window.path.basename(path)
+  const id = await db.addLibrary(name, path)
+  libs.arr.push({ id, name, path, mode: 'normal' })
+  console.log('音乐目录添加成功')
 }
 async function onDeleteDir(id: number) {
-  try {
-    await db.deleteDir(id)
-    dirs.arr = dirs.arr.filter(item => item.id !== id)
-  } catch (e) {
-    console.error(e)
-  }
+  db.deleteLibrary(id)
+  libs.arr = libs.arr.filter(item => item.id !== id)
+  console.log('音乐目录删除成功')
 }
 async function onChangeMode(item: ILibrary) {
-  try {
-    await db.updateDir(item.id, item.mode)
-  } catch (e) {
-    console.error(e)
-  }
+  db.updateLibrary(item.id, item.mode)
 }
 </script>
 

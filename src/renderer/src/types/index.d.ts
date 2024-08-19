@@ -13,10 +13,11 @@ export global {
     icon?: string
     label: string
   }
+  type LibMode = 'normal' | 'asmr'
   interface ILibrary {
     id: number
     name: string
-    mode: 'normal' | 'asmr'
-    dir: FileSystemDirectoryHandle
+    path: string
+    mode: LibMode
   }
 }
