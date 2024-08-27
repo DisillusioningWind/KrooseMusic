@@ -20,4 +20,11 @@ export global {
     path: string
     mode: LibMode
   }
+  interface ILibMusic {
+    name: string
+    path: string
+    artist: string
+    duration: number
+    coms: ICommonTagsResult
+  }
 }

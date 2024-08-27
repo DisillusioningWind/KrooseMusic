@@ -1,9 +1,10 @@
-import { ipcMain } from 'electron-better-ipc'
+import { ipcMain } from 'electron'
 import { BrowserWindow } from 'electron'
 import * as fileAPI from './file.js'
 import * as musicAPI from './music.js'
 import * as storeAPI from './store.js'
 import * as windowAPI from './window.js'
+import * as libraryAPI from './library.js'
 
 /** 所有API */
 const API = {
@@ -18,13 +19,18 @@ const API = {
  */
 export function bindIpcMain(window: BrowserWindow) {
   for (const key of Object.keys(API)) {
-    ipcMain.answerRenderer(key, async (...args) => {
+    ipcMain.handle(key, async (_e, ...args) => {
       return await API[key](...args)
     })
   }
   for (const key of Object.keys(windowAPI)) {
-    ipcMain.answerRenderer(key, async (...args) => {
+    ipcMain.handle(key, async (_e, ...args) => {
       return await windowAPI[key](window, ...args)
+    })
+  }
+  for (const key of Object.keys(libraryAPI)) {
+    ipcMain.handle(key, async (e, ...args) => {
+      return await libraryAPI[key](e, ...args)
     })
   }
 }

@@ -62,6 +62,7 @@ $icon-size: 17px;
   position: fixed;
   left: v-bind('x + "px"');
   top: v-bind('y + "px"');
+  z-index: 1;
   >.List {
     @include tool-tip;
     padding: 4px 0;

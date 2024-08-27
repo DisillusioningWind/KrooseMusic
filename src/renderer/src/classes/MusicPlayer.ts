@@ -36,10 +36,10 @@ class MusicPlayer {
   async load(path: string) {
     try {
       this.pause()
-      const oldPicURL = this.picURL
+      this.state = 'unload'
       console.log(path)
-      const lyricRes = window.ipc.callMain('getLyricFromFile', path)
-      const infoRes = window.ipc.callMain('getInfoFromFile', path)
+      const lyricRes = window.ipc.invoke('getLyricFromFile', path)
+      const infoRes = window.ipc.invoke('getInfoFromFile', path)
       this.lyrics = await lyricRes as ILyric[]
       const { tag, mainColor } = await infoRes as IMusicInfo
       this.artist = tag.artist || '未知艺术家'
@@ -47,7 +47,6 @@ class MusicPlayer {
       this.picURL = (tag.picture) ? URL.createObjectURL(new Blob([tag.picture[0].data])) : ''
       this.mainColor = mainColor
       this.audio.src = window.url.pathToFileURL(path).href
-      URL.revokeObjectURL(oldPicURL)
     } catch (e) {
       console.error(e)
     }
@@ -84,13 +83,14 @@ class MusicPlayer {
   /** 将audio原生事件转化为emitter事件发射 */
   initialEvents() {
     this.audio.ontimeupdate = () => { bus.musicUpdateCurEmit(this.currentTime) }
-    this.audio.oncanplay = () => { bus.musicCanPlayEmit() }
+    this.audio.oncanplay = () => { if (this.state === 'unload') bus.musicCanPlayEmit() }
     this.audio.onended = () => { bus.musicEndEmit() }
   }
 
   /** 初始化事件监听 */
   initialHandlers() {
     bus.musicCanPlay(this.readyPlay.bind(this))
+    bus.musicEnd(this.pause.bind(this))
   }
 }
 

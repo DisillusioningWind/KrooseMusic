@@ -1,5 +1,5 @@
 import { contextBridge } from 'electron'
-import { ipcRenderer } from 'electron-better-ipc'
+import { ipcRenderer } from 'electron'
 import url from 'url'
 import path from 'path'
 

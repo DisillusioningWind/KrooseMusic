@@ -7,17 +7,17 @@
         <line x1="31%" y1="50%" x2="46%" y2="66%"/>
       </svg>
     </button>
-    <button class="Button-Min" :class=" showDetail ? 'Button-Min-Detail' : ''" @click="ipc.callMain('minWindow')">
+    <button class="Button-Min" :class=" showDetail ? 'Button-Min-Detail' : ''" @click="ipc.invoke('minWindow')">
       <svg height="100%" width="100%">
         <line x1="35%" y1="50%" x2="65%" y2="50%"/>
       </svg>
     </button>
-    <button class="Button-Max" :class=" showDetail ? 'Button-Max-Detail' : ''" @click="ipc.callMain('maxWindow')">
+    <button class="Button-Max" :class=" showDetail ? 'Button-Max-Detail' : ''" @click="ipc.invoke('maxWindow')">
       <svg height="100%" width="100%">
         <rect x="34%" y="32%" width="28%" height="36%" fill="transparent"/>
       </svg>
     </button>
-    <button class="Button-Close" :class=" showDetail ? 'Button-Close-Detail' : ''" @click="ipc.callMain('closeWindow')">
+    <button class="Button-Close" :class=" showDetail ? 'Button-Close-Detail' : ''" @click="ipc.invoke('closeWindow')">
       <svg height="100%" width="100%">
         <line x1="36%" y1="34%" x2="64%" y2="66%"/>
         <line x1="64%" y1="34%" x2="36%" y2="66%"/>

@@ -149,7 +149,7 @@ function btnUnloadFile() {
 async function btnOpenDir() {
 }
 async function btnOpenFile() {
-  const filePath = await window.ipc.callMain('openFileWindow') as string | null
+  const filePath = await window.ipc.invoke('openFileWindow') as string | null
   if (!filePath) return
   player.value.load(filePath)
 }

@@ -2,7 +2,7 @@
   <el-container class="BackCon" :style="{ backgroundImage : showDetailCom ? `url(${ backPicURL })` : '' }">
     <el-container :class=" showDetailCom ? ( backPicURL == defaultPicURL ? '' : 'TopCon') : ''">
       <el-header><KTitleBar /></el-header>
-      <el-container v-show="!showDetailCom">
+      <el-container class="MainCon" v-show="!showDetailCom">
         <el-aside><KNavBar /></el-aside>
         <el-main><router-view /></el-main>
       </el-container>
@@ -30,6 +30,9 @@ const backPicURL = computed(() => store.musicPicURL ? store.musicPicURL : defaul
   .TopCon {
     background-color: #0000005f;
     backdrop-filter: blur(40px);
+  }
+  .MainCon {
+    height: calc(100% - 152px);
   }
 }
 .el-container {
