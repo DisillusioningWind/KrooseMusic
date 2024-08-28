@@ -4,26 +4,28 @@ const menuDiv = document.createElement('div')
 menuDiv.id = 'kMenu'
 document.body.appendChild(menuDiv)
 const menuApp = createApp(KMenu)
-const menuCom: any = menuApp.mount(menuDiv)
+const menuCom = menuApp.mount(menuDiv) as any
 const menuCtl = new AbortController()
 // 事件处理
-const showMenu = (ev: MouseEvent, uid: number, menuItems: IMenuItem[]) => {
+const showMenu = (ev: MouseEvent, menuItems: IMenuItem[]) => {
   menuCom.menuItems = menuItems
-  menuCom.menuUID = uid
   menuCom.onOpenMenu(ev)
 }
-const prevMenu = (ev: MouseEvent) => { ev.preventDefault(); ev.stopPropagation() }
+const prevMenu = (ev: MouseEvent) => {
+  ev.preventDefault()
+  ev.stopPropagation()
+}
 /** 右键菜单 */
 export const vCtxMenu = {
-  mounted: (el: HTMLElement, binding: { value: IMenuItem[], instance: ComponentPublicInstance }) => {
-    el.addEventListener('contextmenu', (ev) => showMenu(ev, binding.instance.$.uid, binding.value), { signal: menuCtl.signal })
+  mounted: (el: HTMLElement, binding: { value: IMenuItem[] }) => {
+    el.addEventListener('contextmenu', (ev) => showMenu(ev, binding.value), { signal: menuCtl.signal })
   },
   beforeUnmount: () => menuCtl.abort()
 }
 /** 点击菜单 */
 export const vMenu = {
-  mounted: (el: HTMLElement, binding: { value: IMenuItem[], instance: ComponentPublicInstance }) => {
-    el.addEventListener('click', (ev) => showMenu(ev, binding.instance.$.uid, binding.value), { signal: menuCtl.signal })
+  mounted: (el: HTMLElement, binding: { value: IMenuItem[] }) => {
+    el.addEventListener('click', (ev) => showMenu(ev, binding.value), { signal: menuCtl.signal })
   },
   beforeUnmount: () => menuCtl.abort()
 }

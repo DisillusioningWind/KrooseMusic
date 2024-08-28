@@ -101,14 +101,11 @@ const menu = [
   { label: '打开文件', icon: svgOpenFile, action: btnOpenFile },
   { label: '卸载文件', icon: svgCloseFile, action: btnUnloadFile }
 ]
-let uid = -1
 // 事件绑定
 onMounted(() => {
   bus.musicUpdateCur((time) => { store.musicCurTime = curTime.value = time })
   bus.musicCanPlay(onMusicCanPlay)
   bus.musicUnload(onMusicUnload)
-  bus.menuSelect(onMenuSelect)
-  uid = getCurrentInstance()?.uid || -1
 })
 // 事件处理
 function onMusicCanPlay() {
@@ -121,10 +118,6 @@ function onMusicUnload() {
   store.musicPicURL = ''
   store.musicLyrics = []
   store.showDetail = false
-}
-function onMenuSelect(data: { uid: number, value: string }) {
-  if (data.uid !== uid) return
-  menu.find(item => item.label === data.value)?.action()
 }
 // 按钮功能
 function btnToggleDetail() {

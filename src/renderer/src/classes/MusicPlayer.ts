@@ -10,7 +10,9 @@ class MusicPlayer {
   mainColor: string = '#1a5d8e'
   totalTime: number = 0
   lyrics: ILyric[] = []
+  private path: string = ''
   private state: 'unload' | 'play' | 'pause' | 'stop' = 'unload'
+  get Path() { return this.path }
   get playerState() { return this.state }
   get currentTime() { return this.audio.currentTime }
   set currentTime(time: number) { this.audio.currentTime = time }
@@ -23,6 +25,7 @@ class MusicPlayer {
     URL.revokeObjectURL(this.picURL)
     this.picURL = ''
     this.audio.src = ''
+    this.path = ''
     this.title = ''
     this.artist = ''
     this.mainColor = '#1a5d8e'
@@ -42,8 +45,9 @@ class MusicPlayer {
       const infoRes = window.ipc.invoke('getInfoFromFile', path)
       this.lyrics = await lyricRes as ILyric[]
       const { tag, mainColor } = await infoRes as IMusicInfo
-      this.artist = tag.artist || '未知艺术家'
+      this.path = path
       this.title = tag.title || window.path.basename(path, window.path.extname(path))
+      this.artist = tag.artist || '未知艺术家'
       this.picURL = (tag.picture) ? URL.createObjectURL(new Blob([tag.picture[0].data])) : ''
       this.mainColor = mainColor
       this.audio.src = window.url.pathToFileURL(path).href

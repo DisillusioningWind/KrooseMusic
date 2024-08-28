@@ -8,7 +8,6 @@ type Events = {
   musicUnload: void
   musicCanPlay: void
   musicUpdateCur: number
-  menuSelect: { uid: number; value: string }
 }
 
 class EventBus {
@@ -34,12 +33,5 @@ class EventBus {
   /** 音乐更新当前值 @param cur 当前值 */
   musicUpdateCur(h: (cur: number) => void) { this.emitter.on('musicUpdateCur', h) }
   musicUpdateCurEmit(cur: number) { this.emitter.emit('musicUpdateCur', cur) }
-  /**
-   * 菜单选择
-   * @param uid 监听组件标识
-   * @param value 选项名称
-   */
-  menuSelect(h: (data: { uid: number; value: string }) => void) { this.emitter.on('menuSelect', h) }
-  menuSelectEmit(data: { uid: number; value: string }) { this.emitter.emit('menuSelect', data) }
 }
 export const bus = new EventBus()

@@ -6,7 +6,7 @@
         {{ libCur?.name }}
         <template #dropdown>
           <el-dropdown-menu>
-            <el-dropdown-item v-for="item in libs.arr" :key="item.id" @click="libCur = item">
+            <el-dropdown-item v-for="item in libs" :key="item.id" @click="libCur = item">
               {{ item.name }}
             </el-dropdown-item>
           </el-dropdown-menu>
@@ -15,13 +15,11 @@
     </div>
     <div class="ContentBar">
       <div class="ListBar">
-        <div class="BtnBar"></div>
-        <div class="List">
-          <div class="Item" v-for="item in musics" :key="item.path" @click="(e) => onItemClick(e.currentTarget, item)">
-            <span v-tooltip="item.name">{{ item.name }}</span>
-            <span v-tooltip="item.artist">{{ item.artist }}</span>
-            <span>{{ formatTime(item.duration, 'mm:ss') }}</span>
-          </div>
+        <div class="Item" v-for="item in musics" :key="item.path" v-ctx-menu="menu"
+          @contextmenu="onItemContext($event.currentTarget as HTMLElement, item)" @click="onItemClick($event.currentTarget as HTMLElement, item)">
+          <span v-tooltip.immediate.overflow="item.name">{{ item.name }}</span>
+          <span v-tooltip.immediate.overflow="item.artist">{{ item.artist }}</span>
+          <span>{{ formatTime(item.duration, 'mm:ss') }}</span>
         </div>
       </div>
       <div class="DetailBar"></div>
@@ -34,13 +32,24 @@ import db from '@renderer/utils/db'
 import player from '@renderer/classes/MusicPlayer'
 import { formatTime } from '@renderer/utils/tools'
 import { vTooltip } from '@renderer/directives/Tooltip'
-const libs = reactive<{ arr: ILibrary[] }>({ arr: [] })
-const libCur = ref<ILibrary | null>(null)
+import { vCtxMenu } from '@renderer/directives/Menu'
+const libs = shallowRef<ILibrary[]>([])
 const musics = shallowRef<ILibMusic[]>([])
-let musicSelected: any = null
+const libCur = ref<ILibrary | null>(null)
+let musicContext: ILibMusic | null = null
+let itemSelect: HTMLElement | null = null
+let itemContext: HTMLElement | null = null
+let itemPlaying: HTMLElement | null = null
+const menu = [
+  { label: '播放', action: onItemCtxPlay },
+  { label: '信息', action: () => {} },
+  { label: '删除', action: () => {} },
+  { label: '添加到播放列表', action: () => {} },
+  { label: '在文件资源管理器中显示', action: onItemOpenInFolder },
+]
 onMounted(async () => {
-  libs.arr = await db.getLibraries()
-  libCur.value = libs.arr[0]
+  libs.value = await db.getLibraries()
+  libCur.value = libs.value[0]
 })
 watch(libCur, async (val) => {
   if (!val) return
@@ -48,11 +57,26 @@ watch(libCur, async (val) => {
   musics.value = await db.getMusics(val.name)
   console.log('获取音乐列表耗时', performance.now() - stime)
 })
-function onItemClick(curTarget: any, item: ILibMusic) {
-  if (musicSelected) musicSelected.classList.remove('Select')
-  curTarget.classList.add('Select')
-  musicSelected = curTarget
-  player.value.load(item.path)
+function onItemClick(curTarget: HTMLElement, item: ILibMusic) {
+  if (itemSelect) { itemSelect.classList.remove('Select') }
+  if (itemPlaying) { itemPlaying.classList.remove('Play') }
+  itemSelect = curTarget
+  itemPlaying = curTarget
+  curTarget.classList.add('Select', 'Play')
+  if (item.path !== player.value.Path) { player.value.load(item.path) }
+}
+function onItemContext(curTarget: HTMLElement, item: ILibMusic) {
+  musicContext = item
+  itemContext = curTarget
+}
+function onItemCtxPlay() {
+  if (itemPlaying) { itemPlaying.classList.remove('Play') }
+  itemPlaying = itemContext!
+  itemPlaying.classList.add('Play')
+  player.value.load(musicContext!.path)
+}
+function onItemOpenInFolder() {
+  window.shell.showItemInFolder(musicContext!.path)
 }
 </script>
 
@@ -60,9 +84,10 @@ function onItemClick(curTarget: any, item: ILibMusic) {
 .PLibrary {
   height: 100%;
   box-sizing: border-box;
-  padding-top: 12px;
+  padding-top: 10px;
+  $toolBarHeight: 45px;
   .ToolBar {
-    height: 45px;
+    height: $toolBarHeight;
     display: flex;
     align-items: center;
     >span {
@@ -84,68 +109,70 @@ function onItemClick(curTarget: any, item: ILibMusic) {
     }
   }
   .ContentBar {
-    height: calc(100% - 45px);
+    height: calc(100% - $toolBarHeight - 10px);
+    box-sizing: border-box;
+    border-top: 1px solid #e5e5e5;
+    margin-top: 10px;
     display: flex;
     .ListBar {
-      width: 100%;
       height: 100%;
-      .BtnBar {
-        height: 30px;
-        border-bottom: 1px solid #e5e5e5;
+      overflow-y: scroll;
+      &::-webkit-scrollbar {
+        width: 8px;
       }
-      .List {
-        height: calc(100% - 31px);
-        overflow-y: scroll;
-        &::-webkit-scrollbar {
-          width: 8px;
+      &::-webkit-scrollbar-thumb {
+        background-color: #bababa;
+        &:hover {
+          background-color: #8c8c8c;
         }
-        &::-webkit-scrollbar-thumb {
-          background-color: #bababa;
+        &:active {
+          background-color: #5d5d5d;
+        }
+      }
+      .Item {
+        height: 40px;
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        user-select: none;
+        &.Select {
+          background-color: #0078d7 !important;
+          color: white;
           &:hover {
-            background-color: #8c8c8c;
+            background-color: #005a9e !important;
           }
           &:active {
-            background-color: #5d5d5d;
+            background-color: #00487e !important;
           }
         }
-        .Item {
-          height: 40px;
-          display: flex;
-          justify-content: flex-end;
-          align-items: center;
-          &.Select {
-            background-color: #0078d7 !important;
-            color: white;
+        &.Play:not(.Select) {
+          color: #005a9e;
+        }
+        &:nth-child(odd) {
+          background-color: #f2f2f2;
+        }
+        &:hover {
+          background-color: #d9d9d9;
+        }
+        &:active {
+          background-color: #aeaeae;
+        }
+        span {
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          font-size: 14px;
+          margin-left: 10px;
+          &:first-child {
+            flex: 1;
           }
-          &:nth-child(odd) {
-            background-color: #f2f2f2;
+          &:nth-child(2) {
+            width: 100px;
           }
-          &:hover {
-            background-color: #d9d9d9;
-          }
-          &:active {
-            background-color: #aeaeae;
-          }
-          &:focus {
-            background-color: #0078d7;
-          }
-          span {
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            font-size: 14px;
-            margin-left: 10px;
-            &:first-child {
-              flex: 1;
-            }
-            &:nth-child(2) {
-              width: 100px;
-            }
-            &:last-child {
-              width: 50px;
-              text-align: center;
-              margin-right: 10px;
-            }
+          &:last-child {
+            width: 50px;
+            text-align: center;
+            margin-right: 10px;
           }
         }
       }

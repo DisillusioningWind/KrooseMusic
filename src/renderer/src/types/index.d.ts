@@ -12,6 +12,7 @@ export global {
   interface IMenuItem {
     icon?: string
     label: string
+    action: () => void | Promise<void>
   }
   type LibMode = 'normal' | 'asmr'
   interface ILibrary {

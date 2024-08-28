@@ -1,8 +1,8 @@
 <template>
-  <div class="KMenu" ref="menuCon">
-    <div class="List" :class="menuShow ? 'visible' : ''">
+  <div class="KMenu" ref="menuDiv">
+    <div class="List" :class="menuShow ? 'Visible' : ''">
       <div class="Item" v-for="item in menuItems" :key="item.label" @click="onClick(item)">
-        <img class="Icon" v-if="item.icon" :src="item.icon" />
+        <img v-if="item.icon" :src="item.icon" />
         <span>{{ item.label }}</span>
       </div>
     </div>
@@ -10,13 +10,11 @@
 </template>
 
 <script lang="ts">
-import { bus } from '@renderer/utils/emitter'
 export default defineComponent({
   setup() {
-    const menuCon = ref<HTMLDivElement | null>(null)
     const menuItems = ref<IMenuItem[]>([])
     const menuShow = ref(false)
-    const menuUID = ref(0)
+    const menuDiv = ref<HTMLDivElement | null>(null)
     const x = ref(0)
     const y = ref(0)
     // 事件绑定
@@ -33,22 +31,24 @@ export default defineComponent({
       e.preventDefault()
       e.stopPropagation()
       nextTick(() => {
-        x.value = e.clientX + menuCon.value!.offsetWidth > window.innerWidth ? e.clientX - menuCon.value!.offsetWidth : e.clientX
-        y.value = e.clientY + menuCon.value!.offsetHeight > window.innerHeight ? e.clientY - menuCon.value!.offsetHeight : e.clientY
+        const divWidth = menuDiv.value!.offsetWidth
+        const divHeight = menuDiv.value!.offsetHeight
+        x.value = e.clientX + divWidth > window.innerWidth ? e.clientX - divWidth : e.clientX
+        y.value = e.clientY + divHeight > window.innerHeight ? e.clientY - divHeight : e.clientY
         menuShow.value = true
       })
     }
     function onCloseMenu() {
-      menuItems.value = []
       menuShow.value = false
+      menuItems.value = []
       x.value = 0
       y.value = 0
     }
     function onClick(item: IMenuItem) {
       onCloseMenu()
-      bus.menuSelectEmit({ uid: menuUID.value, value: item.label })
+      item.action()
     }
-    return { menuCon, menuItems, menuShow, menuUID, x, y, onOpenMenu, onCloseMenu, onClick }
+    return { menuDiv, menuItems, menuShow, x, y, onOpenMenu, onClick }
   }
 })
 </script>
@@ -67,7 +67,7 @@ $icon-size: 17px;
     @include tool-tip;
     padding: 4px 0;
     clip-path: polygon(0 0, 100% 0, 100% 0, 0 0);
-    &.visible {
+    &.Visible {
       clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
       transition: clip-path .2s;
     }
@@ -83,7 +83,7 @@ $icon-size: 17px;
       &:active {
         background-color: #c2c2c2;
       }
-      >.Icon {
+      >img {
         height: $icon-size;
         width: $icon-size;
         margin-right: 8px;
