@@ -19,7 +19,7 @@
             <template #header>
               <el-icon><Refresh /></el-icon>
               <span>正在添加音乐</span>
-              <el-progress :percentage="libPercent" />
+              <el-progress :percentage="libAddPercent" />
             </template>
           </el-dialog>
           <el-icon><Plus /></el-icon>
@@ -33,14 +33,18 @@
 import db from '@renderer/utils/db'
 const libs = reactive<{arr: ILibrary[]}>({ arr: [] })
 const libAddDialog = ref(false)
-const libAddDir = ref('')
 const libAddNum = ref(0)
 const libAddTotal = ref(10)
-const libPercent = computed(() => Math.round(libAddNum.value / libAddTotal.value * 100))
+const libAddPercent = computed(() => Math.round(libAddNum.value / libAddTotal.value * 100))
+let libAddDirName = ''
 onMounted(async () => {
   libs.arr = await db.getLibraries()
   window.ipc.on('musicLength', (_e, length) => libAddTotal.value = length)
   window.ipc.on('musicData', onGetMusic)
+})
+onUnmounted(() => {
+  window.ipc.removeAllListeners('musicLength')
+  window.ipc.removeAllListeners('musicData')
 })
 async function onAddDir() {
   const path = await window.ipc.invoke('openDirectoryWindow') as string | null
@@ -50,7 +54,7 @@ async function onAddDir() {
   libs.arr.push({ id, name, path, mode: 'normal' })
   console.log('音乐目录添加成功')
   libAddDialog.value = true
-  libAddDir.value = name
+  libAddDirName = name
   libAddNum.value = 0
   window.ipc.invoke('getDirMusics', path)
 }
@@ -62,8 +66,8 @@ async function onDeleteDir(id: number) {
 async function onChangeMode(item: ILibrary) {
   db.updateLibrary(item.id, item.mode)
 }
-function onGetMusic(_e, music: ILibMusic) {
-  db.addMusic(libAddDir.value, music)
+async function onGetMusic(_e, music: ILibMusic) {
+  await db.addMusic(libAddDirName, music)
   libAddNum.value++
   if (libAddNum.value === libAddTotal.value) {
     libAddDialog.value = false

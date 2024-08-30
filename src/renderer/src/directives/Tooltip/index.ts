@@ -5,7 +5,6 @@ tooltipDiv.id = 'kTooltip'
 document.body.appendChild(tooltipDiv)
 const tooltipApp = createApp(KTooltip)
 const tooltipCom = tooltipApp.mount(tooltipDiv) as any
-const tooltipCtl = new AbortController()
 let tooltipTimer = null as any
 // 事件处理
 const showText = (el: HTMLElement, delay: number, overShow: boolean) => {
@@ -37,16 +36,11 @@ export const vTooltip = {
     const delay = binding.modifiers.immediate ? 0 : 800
     const overShow = binding.modifiers.overflow || false
     el.setAttribute('tooltip-text', binding.value)
-    el.addEventListener('mouseenter', () => showText(el, delay, overShow), { signal: tooltipCtl.signal })
+    el.addEventListener('mouseenter', () => showText(el, delay, overShow))
     el.addEventListener('mouseleave', hideText)
     el.addEventListener('click', hideText)
   },
   updated: (el: HTMLElement, binding: { value: string }) => {
     el.setAttribute('tooltip-text', binding.value)
-  },
-  beforeUnmount: (el: HTMLElement) => {
-    tooltipCtl.abort()
-    el.removeEventListener('mouseleave', hideText)
-    el.removeEventListener('click', hideText)
   }
 }

@@ -34,7 +34,7 @@ import { formatTime } from '@renderer/utils/tools'
 import { vTooltip } from '@renderer/directives/Tooltip'
 import { vCtxMenu } from '@renderer/directives/Menu'
 const libs = shallowRef<ILibrary[]>([])
-const musics = shallowRef<ILibMusic[]>([])
+const musics = ref<ILibMusic[]>([])
 const libCur = ref<ILibrary | null>(null)
 let musicContext: ILibMusic | null = null
 let itemSelect: HTMLElement | null = null
@@ -53,9 +53,11 @@ onMounted(async () => {
 })
 watch(libCur, async (val) => {
   if (!val) return
-  const stime = performance.now()
-  musics.value = await db.getMusics(val.name)
-  console.log('获取音乐列表耗时', performance.now() - stime)
+  const cnt = await db.getMusicNums(val.name)
+  const size = 500
+  for (let i = 0; i < cnt; i += size) {
+    musics.value.push(...await db.getMusics(val.name, i, size))
+  }
 })
 function onItemClick(curTarget: HTMLElement, item: ILibMusic) {
   if (itemSelect) { itemSelect.classList.remove('Select') }
