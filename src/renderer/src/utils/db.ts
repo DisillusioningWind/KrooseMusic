@@ -44,7 +44,8 @@ class DBManager {
 
   async addLibrary(name: string, path: string, mode: LibMode = 'normal') {
     const id = await this.db.table('library').add({ name, path, mode })
-    await this.changeSchema({ [name]: '++id,name,&path,artist' })
+    if (mode === 'normal') await this.changeSchema({ [name]: '++id,name,&path,artist' })
+    else if (mode === 'asmr') await this.changeSchema({ [name]: '++id,name,&path' })
     return id as number
   }
   async deleteLibrary(id: number) {
@@ -66,13 +67,13 @@ class DBManager {
     return this.db.table('library').toArray()
   }
 
-  addMusic(libName: string, music: ILibMusic) {
-    return this.db.table(libName).add(music) as Promise<number>
+  addItem(libName: string, item: ILibItem) {
+    return this.db.table(libName).add(item) as Promise<number>
   }
-  getMusicNums(libName: string) {
+  getItemNums(libName: string) {
     return this.db.table(libName).count()
   }
-  getMusics(libName: string, offest?: number, limit?: number) {
+  getItems(libName: string, offest?: number, limit?: number) {
     if (offest && limit) {
       return this.db.table(libName).orderBy('name').offset(offest).limit(limit).toArray()
     } else {

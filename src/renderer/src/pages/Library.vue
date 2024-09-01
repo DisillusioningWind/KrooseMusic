@@ -18,11 +18,23 @@
         <div class="Item" v-for="item in musics" :key="item.path" v-ctx-menu="menu"
           @contextmenu="onItemContext($event.currentTarget as HTMLElement, item)" @click="onItemClick($event.currentTarget as HTMLElement, item)">
           <span v-tooltip.immediate.overflow="item.name">{{ item.name }}</span>
-          <span v-tooltip.immediate.overflow="item.artist">{{ item.artist }}</span>
-          <span>{{ formatTime(item.duration, 'mm:ss') }}</span>
+          <span v-if="libCur.mode === 'normal'" v-tooltip.immediate.overflow="(item as ILibMusic).artist">{{ (item as ILibMusic).artist }}</span>
+          <span v-if="libCur.mode === 'normal'">{{ formatTime((item as ILibMusic).duration, 'mm:ss') }}</span>
         </div>
       </div>
-      <div class="DetailBar"></div>
+      <div class="DetailBar" v-if="libCur.mode === 'asmr'">
+        <div class="InfoBar">
+          <img :src="(musicSelect as ILibAlbum)?.pic" />
+          <div class="TitleBar">
+            <div>{{ musicSelect?.name }}</div>
+            <div>未知声优</div>
+            <div>未知标签</div>
+          </div>
+        </div>
+        <div class="DirListBar" v-if="dirSelect">
+          <KRecursiveList :dir="dirSelect" />
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -34,9 +46,11 @@ import { formatTime } from '@renderer/utils/tools'
 import { vTooltip } from '@renderer/directives/Tooltip'
 import { vCtxMenu } from '@renderer/directives/Menu'
 const libs = shallowRef<ILibrary[]>([])
-const musics = ref<ILibMusic[]>([])
-const libCur = ref<ILibrary | null>(null)
-let musicContext: ILibMusic | null = null
+const libCur = ref<ILibrary>({ id: 0, name: '', path: '', mode: 'normal' })
+const musics = ref<ILibItem[]>([])
+const musicSelect = ref<ILibItem | null>(null)
+const dirSelect = ref<IDirStruc | null>(null)
+let musicContext: ILibItem | null = null
 let itemSelect: HTMLElement | null = null
 let itemContext: HTMLElement | null = null
 let itemPlaying: HTMLElement | null = null
@@ -53,21 +67,29 @@ onMounted(async () => {
 })
 watch(libCur, async (val) => {
   if (!val) return
-  const cnt = await db.getMusicNums(val.name)
+  const cnt = await db.getItemNums(val.name)
   const size = 500
+  musics.value = []
   for (let i = 0; i < cnt; i += size) {
-    musics.value.push(...await db.getMusics(val.name, i, size))
+    musics.value.push(...await db.getItems(val.name, i, size))
   }
 })
-function onItemClick(curTarget: HTMLElement, item: ILibMusic) {
+function onItemClick(curTarget: HTMLElement, item: ILibItem) {
+  // 样式处理
   if (itemSelect) { itemSelect.classList.remove('Select') }
   if (itemPlaying) { itemPlaying.classList.remove('Play') }
   itemSelect = curTarget
   itemPlaying = curTarget
   curTarget.classList.add('Select', 'Play')
-  if (item.path !== player.value.Path) { player.value.load(item.path) }
+  // 数据处理
+  musicSelect.value = item
+  if (libCur.value.mode === 'normal' && item.path !== player.value.Path) {
+    player.value.load(item.path)
+  } else if (libCur.value.mode === 'asmr') {
+    window.ipc.invoke('getDirStruc', item.path).then((res: IDirStruc) => dirSelect.value = res)
+  }
 }
-function onItemContext(curTarget: HTMLElement, item: ILibMusic) {
+function onItemContext(curTarget: HTMLElement, item: ILibItem) {
   musicContext = item
   itemContext = curTarget
 }
@@ -83,6 +105,23 @@ function onItemOpenInFolder() {
 </script>
 
 <style scoped lang="scss">
+@mixin kScrollBar($track-color: transparent){
+  &::-webkit-scrollbar {
+    width: 8px;
+  }
+  &::-webkit-scrollbar-thumb {
+    background-color: #bababa;
+    &:hover {
+      background-color: #8c8c8c;
+    }
+    &:active {
+      background-color: #5d5d5d;
+    }
+  }
+  &::-webkit-scrollbar-track {
+    background-color: $track-color;
+  }
+}
 .PLibrary {
   height: 100%;
   box-sizing: border-box;
@@ -118,19 +157,9 @@ function onItemOpenInFolder() {
     display: flex;
     .ListBar {
       height: 100%;
+      width: v-bind('libCur.mode === "asmr" ? "40%" : "100%"');
       overflow-y: scroll;
-      &::-webkit-scrollbar {
-        width: 8px;
-      }
-      &::-webkit-scrollbar-thumb {
-        background-color: #bababa;
-        &:hover {
-          background-color: #8c8c8c;
-        }
-        &:active {
-          background-color: #5d5d5d;
-        }
-      }
+      @include kScrollBar;
       .Item {
         height: 40px;
         display: flex;
@@ -165,22 +194,62 @@ function onItemOpenInFolder() {
           text-overflow: ellipsis;
           font-size: 14px;
           margin-left: 10px;
-          &:first-child {
-            flex: 1;
-          }
-          &:nth-child(2) {
-            width: 100px;
-          }
           &:last-child {
             width: 50px;
             text-align: center;
             margin-right: 10px;
+          }
+          &:nth-child(2) {
+            width: 100px;
+          }
+          &:first-child {
+            flex: 1;
+            text-align: left;
           }
         }
       }
     }
     .DetailBar {
       flex: 1;
+      $img-size: 230px;
+      $pad-width: 10px;
+      .InfoBar {
+        background-color: #f6f6f6;
+        display: flex;
+        >img {
+          width: $img-size;
+          height: $img-size;
+          box-sizing: border-box;
+          padding: $pad-width;
+          object-fit: cover;
+        }
+        .TitleBar {
+          flex: 1;
+          margin: $pad-width $pad-width $pad-width 0;
+          height: $img-size - $pad-width * 2;
+          display: flex;
+          flex-direction: column;
+          >div {
+            max-width: 100%;
+            font-size: 15px;
+            &:first-child {
+              font-size: 18px;
+              margin-bottom: 4px;
+              overflow: hidden;
+            }
+          }
+        }
+      }
+      .DirListBar {
+        width: 100%;
+        height: calc(100% - $img-size);
+        background-color: #f6f6f6;
+        overflow-y: scroll;
+        @include kScrollBar;
+        >div {
+          margin-bottom: 10px;
+        }
+      }
     }
   }
 }

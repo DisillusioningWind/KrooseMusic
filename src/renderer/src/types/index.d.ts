@@ -14,18 +14,26 @@ export global {
     label: string
     action: () => void | Promise<void>
   }
+  interface IDirStruc {
+    name: string
+    musics?: { name: string, path: string }[]
+    dirs?: IDirStruc[]
+  }
   type LibMode = 'normal' | 'asmr'
-  interface ILibrary {
-    id: number
+  interface ILibItem {
     name: string
     path: string
+  }
+  interface ILibrary extends ILibItem {
+    id: number
     mode: LibMode
   }
-  interface ILibMusic {
-    name: string
-    path: string
+  interface ILibMusic extends ILibItem {
     artist: string
     duration: number
     coms: ICommonTagsResult
+  }
+  interface ILibAlbum extends ILibItem {
+    pic?: string
   }
 }

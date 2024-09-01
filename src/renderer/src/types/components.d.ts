@@ -34,6 +34,7 @@ declare module 'vue' {
     KMenu: typeof import('./../directives/Menu/KMenu.vue')['default']
     KMusicBar: typeof import('./../components/KMusicBar.vue')['default']
     KNavBar: typeof import('./../components/KNavBar.vue')['default']
+    KRecursiveList: typeof import('./../components/KRecursiveList.vue')['default']
     KSettingItem: typeof import('./../components/KSettingItem.vue')['default']
     KSlider: typeof import('./../components/KSlider.vue')['default']
     KTitleBar: typeof import('./../components/KTitleBar.vue')['default']
