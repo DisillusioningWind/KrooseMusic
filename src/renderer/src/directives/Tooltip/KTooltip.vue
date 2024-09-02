@@ -25,6 +25,7 @@ $tooltip-height: 26px;
   left: v-bind('left + "px"');
   height: $tooltip-height;
   transform: translate(-50%, calc(-100% - 10px));
+  z-index: 1;
   @include tool-tip;
   padding: 0 8px;
   opacity: 0;
