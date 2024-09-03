@@ -1,17 +1,15 @@
 <template>
-  <div class="KRecursiveList">
+  <div class="KDirList">
     <div class="DirBar" v-for="direc in dir.dirs" :key="direc.name">
       <div class="Dir" :ref="direc.name" @click="onDirClick(($refs[direc.name] as any)[0] as HTMLElement)">
-        <svg>
-          <path d="m8,6 l4,4 l-4,4" />
-        </svg>
+        <svg><path d="m8,6 l4,4 l-4,4" /></svg>
         <span v-tooltip.immediate.overflow="direc.name">{{ direc.name }}</span>
       </div>
       <div class="DirList">
-        <KRecursiveList :dir="direc" :left="left?left+1:1"/>
+        <KDirList :dir="direc" :left="left?left+1:1"/>
       </div>
     </div>
-    <div class="MusicBar" v-for="music in dir.musics" :key="music.name" @click="onMusicClick(music)">
+    <div class="MusicBar" v-for="music in dir.musics" :key="music.name" :class="music.path === curPath?'Play':''" @click="onMusicClick(music)">
       <span v-tooltip.immediate.overflow="music.name">{{ music.name }}</span>
     </div>
   </div>
@@ -19,8 +17,18 @@
 
 <script setup lang="ts">
 import { vTooltip } from '@renderer/directives/Tooltip'
-import player from '@renderer/classes/MusicPlayer'
-defineProps<{ dir: IDirStruc, left?: number }>()
+defineProps<{
+  /** 当前目录 */
+  dir: IDirStruc,
+  /** 当前播放歌曲 */
+  curPath?: string,
+  /** 子目录缩进，顶层不需要传入 */
+  left?: number
+}>()
+const emit = defineEmits<{
+  /** 歌曲点击 */
+  music: [value: string]
+}>()
 function onDirClick(item: HTMLElement) {
   const dirList = item.nextElementSibling as HTMLElement
   if (item.classList.contains('Hidden')) {
@@ -32,9 +40,7 @@ function onDirClick(item: HTMLElement) {
   }
 }
 function onMusicClick(music: { name: string, path: string }) {
-  if (music.path !== player.value.path) {
-    player.value.load(music.path)
-  }
+  emit('music', music.path)
 }
 </script>
 
@@ -57,7 +63,7 @@ function onMusicClick(music: { name: string, path: string }) {
     text-overflow: ellipsis;
   }
 }
-.KRecursiveList {
+.KDirList {
   display: flex;
   flex-direction: column;
   user-select: none;
@@ -123,6 +129,10 @@ function onMusicClick(music: { name: string, path: string }) {
     @include topItem;
     padding-left: v-bind('(left?left * 20:10) + "px"');
     box-sizing: border-box;
+    &.Play {
+      background-color: #e4e4e4;
+      color: #005a9e;
+    }
   }
 }
 </style>
