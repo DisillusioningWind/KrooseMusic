@@ -29,9 +29,9 @@ export global {
     mode: LibMode
   }
   interface ILibMusic extends ILibItem {
+    ext: string
     artist: string
     duration: number
-    coms: ICommonTagsResult
   }
   interface ILibAlbum extends ILibItem {
     pic?: string

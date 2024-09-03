@@ -1,7 +1,7 @@
+import { IpcMainInvokeEvent } from 'electron'
+import { parseFile } from 'music-metadata'
 import fs from 'fs'
 import path from 'path'
-import { parseFile } from 'music-metadata'
-import { IpcMainInvokeEvent } from 'electron'
 
 const musicExts = ['.mp3', '.flac', '.wav']
 const picExts = ['.jpg', '.jpeg', '.png']
@@ -22,11 +22,11 @@ export function getDirMusics(e: IpcMainInvokeEvent, dirPath: string) {
     const filePath = path.join(file.parentPath, file.name)
     parseFile(filePath).then(data => {
       e.sender.send('musicData', {
-        name: file.name,
+        name: data.common.title || path.basename(file.name, path.extname(file.name)),
         path: filePath,
+        ext: path.extname(file.name),
         artist: data.common.artist || '未知艺术家',
-        duration: data.format.duration || 0,
-        coms: data.common
+        duration: data.format.duration || 0
       })
     })
   })

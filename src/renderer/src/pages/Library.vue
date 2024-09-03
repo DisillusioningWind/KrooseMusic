@@ -17,7 +17,7 @@
       <div class="ListBar">
         <div class="Item" v-for="item in musics" :key="item.path" v-ctx-menu="menu"
           @contextmenu="onItemContext($event.currentTarget as HTMLElement, item)" @click="onItemClick($event.currentTarget as HTMLElement, item)">
-          <span v-tooltip.immediate.overflow="item.name">{{ item.name }}</span>
+          <span v-tooltip.immediate.overflow="item.name">{{ item.name + (libCur.mode === 'normal'?(item as ILibMusic).ext:'') }}</span>
           <span v-if="libCur.mode === 'normal'" v-tooltip.immediate.overflow="(item as ILibMusic).artist">{{ (item as ILibMusic).artist }}</span>
           <span v-if="libCur.mode === 'normal'">{{ formatTime((item as ILibMusic).duration, 'mm:ss') }}</span>
         </div>
