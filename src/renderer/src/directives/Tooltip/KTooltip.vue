@@ -1,5 +1,5 @@
 <template>
-  <div class="KTooltip" :class="show ? 'visible' : ''">
+  <div ref="kTooltip" class="KTooltip" :class="show ? 'visible' : ''">
     <span>{{ text }}</span>
   </div>
 </template>
@@ -7,11 +7,24 @@
 <script lang="ts">
 export default defineComponent({
   setup() {
+    const kTooltip = ref<HTMLElement | null>(null)
     const text = ref('')
     const show = ref(false)
     const top = ref(0)
     const left = ref(0)
-    return { text, show, top, left }
+    watch(show,async (v) => {
+      if (!v) return
+      await nextTick()
+      const tooltip = kTooltip.value
+      if (!tooltip) return
+      const width = tooltip.offsetWidth
+      const height = tooltip.offsetHeight
+      left.value -= width / 2
+      top.value -= height + 10
+      if (left.value < 0) left.value = 0
+      else if (left.value + width > window.innerWidth) left.value = window.innerWidth - width
+    })
+    return { kTooltip, text, show, top, left }
   }
 })
 </script>
@@ -24,7 +37,6 @@ $tooltip-height: 26px;
   top: v-bind('top + "px"');
   left: v-bind('left + "px"');
   height: $tooltip-height;
-  transform: translate(-50%, calc(-100% - 10px));
   z-index: 1;
   @include tool-tip;
   padding: 0 8px;

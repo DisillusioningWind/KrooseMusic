@@ -11,9 +11,9 @@ const showText = (el: HTMLElement, delay: number, overShow: boolean) => {
   tooltipTimer = setTimeout(() => {
     const rect = el.getBoundingClientRect()
     const text = el.getAttribute('tooltip-text') || ''
-    tooltipCom.text = text
     // 当scrollWidth大于offsetWidth时，文本溢出
     tooltipCom.show = text.length > 0 && (overShow ? el.scrollWidth > el.offsetWidth : true)
+    tooltipCom.text = text
     tooltipCom.top = rect.top
     tooltipCom.left = rect.left + rect.width / 2
   }, delay)
@@ -33,7 +33,7 @@ type TooltipModifiers = {
  */
 export const vTooltip = {
   mounted: (el: HTMLElement, binding: { value: string, modifiers: TooltipModifiers }) => {
-    const delay = binding.modifiers.immediate ? 0 : 800
+    const delay = binding.modifiers.immediate ? 100 : 800
     const overShow = binding.modifiers.overflow || false
     el.setAttribute('tooltip-text', binding.value)
     el.addEventListener('mouseenter', () => showText(el, delay, overShow))
