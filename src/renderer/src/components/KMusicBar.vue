@@ -2,45 +2,45 @@
   <div class="KMusicBar" v-ctx-menu="menu">
     <div class="sliderRow" v-no-ctx-menu>
       <el-text>{{ formatTime(showTime) }}</el-text>
-      <KSlider :min="0" :max="player.totalTime" :cur="curTime" :disable="player.playerState === 'unload'" :tooltip="player.playerState !== 'unload'"
-        :tooltip-format="(v: number) => formatTime(v, 'mm:ss')" @update-cur="(time) => { showTime = time }" @drag-cur="(time) => { player.currentTime = time }">
+      <KSlider :min="0" :max="player.duration" :cur="curTime" :disable="player.state === 'unload'" :tooltip="player.state !== 'unload'"
+        :tooltip-format="(v: number) => formatTime(v, 'mm:ss')" @update-cur="(time) => { showTime = time }" @drag-cur="(time) => { player.time = time }">
       </KSlider>
-      <el-text>{{ formatTime(player.totalTime) }}</el-text>
+      <el-text>{{ formatTime(player.duration) }}</el-text>
     </div>
     <div class="buttonRow">
       <div class="detailBar">
         <KDetailBtn :title="player.title" :artist="player.artist" :picURL="player.picURL"
-          :showPic="!store.showDetail" v-show="player.playerState !== 'unload'" @click="btnToggleDetail">
+          :showPic="!store.showDetail" v-show="player.state !== 'unload'" @click="btnToggleDetail">
         </KDetailBtn>
       </div>
       <div class="controlBar" v-no-ctx-menu>
-        <button v-tooltip="player.playerState !== 'unload' ? '上一首' : ''">
+        <button v-tooltip="player.state !== 'unload' ? '上一首' : ''">
           <svg>
             <path d="m10,9 l0,17"/>
             <path d="m25,10 l0,15 l-10,-7.5 z"/>
           </svg>
         </button>
-        <button v-tooltip="player.playerState !== 'unload' ? '向前10秒' : ''" @click="btnFastBackward">
+        <button v-tooltip="player.state !== 'unload' ? '向前10秒' : ''" @click="btnFastBackward">
           <svg>
             <path d="m7.5,17.5 a 10 10 0 1 0 10,-10"/>
             <path class="forwardPath" d="m17.5,4.5 l0,6 l-5,-3 z"/>
             <text x="50%" y="60%">10</text>
           </svg>
         </button>
-        <button class="playButton" v-tooltip="player.playerState !== 'unload' ? (player.playerState === 'play' ? '暂停' : '播放') : ''" @click="btnTogglePlay">
+        <button class="playButton" v-tooltip="player.state !== 'unload' ? (player.state === 'play' ? '暂停' : '播放') : ''" @click="btnTogglePlay">
           <svg>
-            <path v-show="player.playerState === 'play'" d="m19,12 l0,22 m8,0 l0,-22"/>
-            <path v-show="player.playerState !== 'play'" d="m17,13.5 l0,20 l15,-10 z"/>
+            <path v-show="player.state === 'play'" d="m19,12 l0,22 m8,0 l0,-22"/>
+            <path v-show="player.state !== 'play'" d="m17,13.5 l0,20 l15,-10 z"/>
           </svg>
         </button>
-        <button v-tooltip="player.playerState !== 'unload' ? '向后10秒' : ''" @click="btnFastForward">
+        <button v-tooltip="player.state !== 'unload' ? '向后10秒' : ''" @click="btnFastForward">
           <svg>
             <path d="m27.5,17.5 a 10 10 0 1 1 -10,-10"/>
             <path class="forwardPath" d="m17.5,4.5 l0,6 l5,-3 z"/>
             <text x="50%" y="60%">10</text>
           </svg>
         </button>
-        <button v-tooltip="player.playerState !== 'unload' ? '下一首' : ''">
+        <button v-tooltip="player.state !== 'unload' ? '下一首' : ''">
           <svg>
             <path d="m10,10 l0,15 l10,-7.5 z"/>
             <path d="m25,9 l0,17"/>
@@ -59,7 +59,7 @@
           </svg>
         </button>
         <KSlider v-no-ctx-menu :min="0" :max="100" :cur="curVolume" :tooltip="true" :tooltip-format="(v: number) => Math.floor(v)"
-          @update-cur="(volume) => { player.audio.volume = curVolume = volume * 0.01 }">
+          @update-cur="(volume) => { player.volume = curVolume = volume * 0.01 }">
         </KSlider>
         <button v-no-ctx-menu v-tooltip="'播放列表'">
           <svg>
@@ -83,10 +83,10 @@
 
 <script setup lang="ts">
 import { useStore } from '@renderer/store'
-import { bus } from '@renderer/utils/emitter'
 import { formatTime } from '@renderer/utils/tools'
 import { vTooltip } from '@renderer/directives/Tooltip'
 import { vMenu, vCtxMenu, vNoCtxMenu } from '@renderer/directives/Menu'
+import bus from '@renderer/utils/emitter'
 import player from '@renderer/classes/MusicPlayer'
 import svgOpenDir from '@renderer/assets/icons/openDir.svg?url'
 import svgOpenFile from '@renderer/assets/icons/openFile.svg?url'
@@ -104,12 +104,11 @@ const menu = [
 // 事件绑定
 onMounted(() => {
   bus.musicUpdateCur((time) => { store.musicCurTime = curTime.value = time })
-  bus.musicCanPlay(onMusicCanPlay)
+  bus.musicLoad(() => curTime.value = 0)
+  bus.musicInfoLoad(onMusicInfoLoad)
   bus.musicUnload(onMusicUnload)
 })
-// 事件处理
-function onMusicCanPlay() {
-  curTime.value = 0
+function onMusicInfoLoad() {
   store.musicPicURL = player.value.picURL
   store.musicLyrics = player.value.lyrics
 }
@@ -124,17 +123,17 @@ function btnToggleDetail() {
   store.toggleDetail()
 }
 function btnTogglePlay() {
-  if (player.value.playerState === 'play') {
+  if (player.value.state === 'play') {
     player.value.pause()
-  } else if (player.value.playerState === 'pause' || player.value.playerState === 'stop') {
+  } else if (player.value.state === 'pause' || player.value.state === 'stop') {
     player.value.play()
   }
 }
 function btnFastForward() {
-  player.value.currentTime += 10
+  player.value.time += 10
 }
 function btnFastBackward() {
-  player.value.currentTime -= 10
+  player.value.time -= 10
 }
 function btnUnloadFile() {
   player.value.unload()
@@ -191,7 +190,7 @@ async function btnOpenFile() {
     .el-text {
       color: white;
       font-size: 12px;
-      visibility: v-bind('player.playerState === "unload" ? "hidden" : "visible" ');
+      visibility: v-bind('player.state === "unload" ? "hidden" : "visible" ');
       &:first-child {
         margin-right: 22px;
       }
@@ -222,34 +221,34 @@ async function btnOpenFile() {
       button {
         @include svgButton(35px);
         &:hover {
-          background-color: v-bind('player.playerState === "unload" ? "transparent" : "#00000030"');
+          background-color: v-bind('player.state === "unload" ? "transparent" : "#00000030"');
         }
         &:active {
-          background-color: v-bind('player.playerState === "unload" ? "transparent" : "#00000050"');
+          background-color: v-bind('player.state === "unload" ? "transparent" : "#00000050"');
         }
         svg {
-          stroke: v-bind('player.playerState === "unload" ? "#ffffff40" : "white"');
+          stroke: v-bind('player.state === "unload" ? "#ffffff40" : "white"');
           .forwardPath {
-            fill: v-bind('player.playerState === "unload" ? "#ffffff40" : "white"');
+            fill: v-bind('player.state === "unload" ? "#ffffff40" : "white"');
           }
         }
       }
       .playButton {
         @include svgButton(50px);
         &:hover {
-          background-color: v-bind('player.playerState === "unload" ? "transparent" : "#00000030"');
+          background-color: v-bind('player.state === "unload" ? "transparent" : "#00000030"');
         }
         &:active {
-          background-color: v-bind('player.playerState === "unload" ? "transparent" : "#00000050"');
+          background-color: v-bind('player.state === "unload" ? "transparent" : "#00000050"');
         }
         svg {
-          stroke: v-bind('player.playerState === "unload" ? "#ffffff40" : "white"');
+          stroke: v-bind('player.state === "unload" ? "#ffffff40" : "white"');
         }
         border: 2px solid #ffffff40;
         &:active {
           background-color: transparent;
           border-width: 2px;
-          border-color: v-bind('player.playerState === "unload" ? "#ffffff40" : "white"');
+          border-color: v-bind('player.state === "unload" ? "#ffffff40" : "white"');
         }
       }
     }

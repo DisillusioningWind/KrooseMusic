@@ -1,99 +1,99 @@
-import { ref } from 'vue'
 import { logExeTimeAsync } from '@renderer/utils/tools'
-import { bus } from '@renderer/utils/emitter'
+import bus from '@renderer/utils/emitter'
 
 class MusicPlayer {
-  audio: HTMLAudioElement
-  title: string = ''
-  artist: string = ''
-  picURL: string = ''
-  mainColor: string = '#1a5d8e'
-  totalTime: number = 0
-  lyrics: ILyric[] = []
-  private path: string = ''
-  private state: 'unload' | 'play' | 'pause' | 'stop' = 'unload'
-  get Path() { return this.path }
-  get playerState() { return this.state }
-  get currentTime() { return this.audio.currentTime }
-  set currentTime(time: number) { this.audio.currentTime = time }
+  private _audio: HTMLAudioElement
+  private _state: 'unload' | 'play' | 'pause' | 'stop' = 'unload'
+  private _path: string = ''
+  private _duration: number = 0
+  private _title: string = ''
+  private _artist: string = ''
+  private _picURL: string = ''
+  private _mainColor: string = '#1a5d8e'
+  private _lyrics: ILyric[] = []
+  get state() { return this._state }
+  get path() { return this._path }
+  get duration() { return this._duration }
+  get title() { return this._title }
+  get artist() { return this._artist }
+  get picURL() { return this._picURL }
+  get mainColor() { return this._mainColor }
+  get lyrics() { return this._lyrics }
+  get time() { return this._audio.currentTime }
+  set time(time: number) { this._audio.currentTime = time }
+  get volume() { return this._audio.volume }
+  set volume(volume: number) { this._audio.volume = volume }
 
   constructor() {
-    this.audio = new Audio()
+    this._audio = new Audio()
   }
-
-  unload() {
-    URL.revokeObjectURL(this.picURL)
-    this.picURL = ''
-    this.audio.src = ''
-    this.path = ''
-    this.title = ''
-    this.artist = ''
-    this.mainColor = '#1a5d8e'
-    this.totalTime = 0
-    this.lyrics = []
-    this.state = 'unload'
-    bus.musicUnloadEmit()
-  }
-
   @logExeTimeAsync
   async load(path: string) {
     try {
       this.pause()
-      this.state = 'unload'
-      console.log(path)
+      this._state = 'unload'
+      this._audio.src = window.url.pathToFileURL(path).href
+      // 加载歌词和音乐信息
       const lyricRes = window.ipc.invoke('getLyricFromFile', path)
       const infoRes = window.ipc.invoke('getInfoFromFile', path)
-      this.lyrics = await lyricRes as ILyric[]
+      this._lyrics = await lyricRes as ILyric[]
       const { tag, mainColor } = await infoRes as IMusicInfo
-      this.path = path
-      this.title = tag.title || window.path.basename(path, window.path.extname(path))
-      this.artist = tag.artist || '未知艺术家'
-      this.picURL = (tag.picture) ? URL.createObjectURL(new Blob([tag.picture[0].data])) : ''
-      this.mainColor = mainColor
-      this.audio.src = window.url.pathToFileURL(path).href
+      this._path = path
+      this._title = tag.title || window.path.basename(path, window.path.extname(path))
+      this._artist = tag.artist || '未知艺术家'
+      this._picURL = (tag.picture) ? URL.createObjectURL(new Blob([tag.picture[0].data])) : ''
+      this._mainColor = mainColor
+      bus.musicInfoLoadEmit()
     } catch (e) {
       console.error(e)
     }
   }
-
-  readyPlay() {
-    this.state = 'stop'
-    this.totalTime = this.audio.duration
+  unload() {
+    URL.revokeObjectURL(this._picURL)
+    this._audio.src = ''
+    this._path = ''
+    this._duration = 0
+    this._title = ''
+    this._artist = ''
+    this._picURL = ''
+    this._mainColor = '#1a5d8e'
+    this._lyrics = []
+    this._state = 'unload'
+    bus.musicUnloadEmit()
+  }
+  loaded() {
+    this._state = 'stop'
+    this._duration = this._audio.duration
     this.play()
   }
-
   play() {
-    if (this.state === 'pause' || this.state === 'stop') {
-      this.audio.play()
-      this.state = 'play'
+    if (this._state === 'pause' || this._state === 'stop') {
+      this._audio.play()
+      this._state = 'play'
     }
   }
-
   pause() {
-    if (this.state === 'play') {
-      this.audio.pause()
-      this.state = 'pause'
+    if (this._state === 'play') {
+      this._audio.pause()
+      this._state = 'pause'
     }
   }
-
   stop() {
-    if (this.state === 'play' || this.state === 'pause') {
-      this.audio.currentTime = 0
-      this.audio.pause()
-      this.state = 'stop'
+    if (this._state === 'play' || this._state === 'pause') {
+      this._audio.currentTime = 0
+      this._audio.pause()
+      this._state = 'stop'
     }
   }
-
   /** 将audio原生事件转化为emitter事件发射 */
   initialEvents() {
-    this.audio.ontimeupdate = () => { bus.musicUpdateCurEmit(this.currentTime) }
-    this.audio.oncanplay = () => { if (this.state === 'unload') bus.musicCanPlayEmit() }
-    this.audio.onended = () => { bus.musicEndEmit() }
+    this._audio.ontimeupdate = () => { bus.musicUpdateCurEmit(this.time) }
+    this._audio.oncanplay = () => { if (this._state === 'unload') bus.musicLoadEmit() }
+    this._audio.onended = () => { bus.musicEndEmit() }
   }
-
   /** 初始化事件监听 */
   initialHandlers() {
-    bus.musicCanPlay(this.readyPlay.bind(this))
+    bus.musicLoad(this.loaded.bind(this))
     bus.musicEnd(this.pause.bind(this))
   }
 }

@@ -32,7 +32,7 @@ function onDirClick(item: HTMLElement) {
   }
 }
 function onMusicClick(music: { name: string, path: string }) {
-  if (music.path !== player.value.Path) {
+  if (music.path !== player.value.path) {
     player.value.load(music.path)
   }
 }

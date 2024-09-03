@@ -40,11 +40,11 @@
 </template>
 
 <script setup lang="ts">
-import db from '@renderer/utils/db'
-import player from '@renderer/classes/MusicPlayer'
 import { formatTime } from '@renderer/utils/tools'
 import { vTooltip } from '@renderer/directives/Tooltip'
 import { vCtxMenu } from '@renderer/directives/Menu'
+import db from '@renderer/utils/db'
+import player from '@renderer/classes/MusicPlayer'
 const libs = shallowRef<ILibrary[]>([])
 const libCur = ref<ILibrary>({ id: 0, name: '', path: '', mode: 'normal' })
 const musics = ref<ILibItem[]>([])
@@ -83,7 +83,7 @@ function onItemClick(curTarget: HTMLElement, item: ILibItem) {
   curTarget.classList.add('Select', 'Play')
   // 数据处理
   musicSelect.value = item
-  if (libCur.value.mode === 'normal' && item.path !== player.value.Path) {
+  if (libCur.value.mode === 'normal' && item.path !== player.value.path) {
     player.value.load(item.path)
   } else if (libCur.value.mode === 'asmr') {
     window.ipc.invoke('getDirStruc', item.path).then((res: IDirStruc) => dirSelect.value = res)

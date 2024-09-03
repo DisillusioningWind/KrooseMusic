@@ -5,8 +5,9 @@ type Events = {
   musicPause: void
   musicStop: void
   musicEnd: void
+  musicLoad: void
+  musicInfoLoad: void
   musicUnload: void
-  musicCanPlay: void
   musicUpdateCur: number
 }
 
@@ -24,14 +25,18 @@ class EventBus {
   /** 音乐结束 */
   musicEnd(h: () => void) { this.emitter.on('musicEnd', h) }
   musicEndEmit() { this.emitter.emit('musicEnd') }
+  /** 音乐加载完成 */
+  musicLoad(h: () => void) { this.emitter.on('musicLoad', h) }
+  musicLoadEmit() { this.emitter.emit('musicLoad') }
+  /** 音乐信息加载完成 */
+  musicInfoLoad(h: () => void) { this.emitter.on('musicInfoLoad', h) }
+  musicInfoLoadEmit() { this.emitter.emit('musicInfoLoad') }
   /** 音乐卸载 */
   musicUnload(h: () => void) { this.emitter.on('musicUnload', h) }
   musicUnloadEmit() { this.emitter.emit('musicUnload') }
-  /** 音乐加载完成 */
-  musicCanPlay(h: () => void) { this.emitter.on('musicCanPlay', h) }
-  musicCanPlayEmit() { this.emitter.emit('musicCanPlay') }
   /** 音乐更新当前值 @param cur 当前值 */
   musicUpdateCur(h: (cur: number) => void) { this.emitter.on('musicUpdateCur', h) }
   musicUpdateCurEmit(cur: number) { this.emitter.emit('musicUpdateCur', cur) }
 }
-export const bus = new EventBus()
+const bus = new EventBus()
+export default bus
