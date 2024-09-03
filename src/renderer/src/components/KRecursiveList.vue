@@ -5,7 +5,7 @@
         <svg>
           <path d="m8,6 l4,4 l-4,4" />
         </svg>
-        <span>{{ direc.name }}</span>
+        <span v-tooltip.immediate.overflow="direc.name">{{ direc.name }}</span>
       </div>
       <div class="DirList">
         <KRecursiveList :dir="direc" :left="left?left+1:1"/>
@@ -45,8 +45,16 @@ function onMusicClick(music: { name: string, path: string }) {
   line-height: $itemHeight;
   margin-left: 10px;
   padding-left: v-bind('(left?left:0) * 20 + "px"');
+  display: flex;
   &:hover {
     background-color: #e4e4e4;
+  }
+  >span {
+    width: 100px;
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 }
 .KRecursiveList {
@@ -64,7 +72,7 @@ function onMusicClick(music: { name: string, path: string }) {
         $svgSize: 20px;
         width: $svgSize;
         height: $svgSize;
-        vertical-align: middle;
+        align-self: center;
         stroke: #747474;
         stroke-width: 1.5px;
         stroke-linejoin: round;
@@ -115,14 +123,6 @@ function onMusicClick(music: { name: string, path: string }) {
     @include topItem;
     padding-left: v-bind('(left?left * 20:10) + "px"');
     box-sizing: border-box;
-    display: flex;
-    >span {
-      width: 100px;
-      flex: 1;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
   }
 }
 </style>

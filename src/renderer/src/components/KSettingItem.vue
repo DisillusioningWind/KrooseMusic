@@ -7,15 +7,8 @@
   </div>
 </template>
 
-<script lang="ts">
-export default defineComponent({
-  props: {
-    title: String
-  },
-  setup(props) {
-    return { title: props.title }
-  }
-})
+<script setup lang="ts">
+defineProps<{ title: string }>()
 </script>
 
 <style scoped lang="scss">
@@ -24,6 +17,7 @@ $title-size: 25px;
   .Title {
     font-size: $title-size;
     line-height: $title-size;
+    user-select: none;
   }
   .Content {
     margin-top: 16px;

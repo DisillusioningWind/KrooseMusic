@@ -4,8 +4,8 @@
     <KSettingItem title="音乐目录">
       <div class="Library">
         <div v-for="item in libs.arr" :key="item.id">
-          <span>{{ item.name }}</span>
-          <span>{{ item.path }}</span>
+          <span v-tooltip.immediate.overflow="item.name">{{ item.name }}</span>
+          <span v-tooltip.immediate.overflow="item.path">{{ item.path }}</span>
           <span>模式</span>
           <el-select v-model="item.mode" popper-class="k-popper" @change="onChangeMode(item)">
             <el-option label="普通" value="normal" />
@@ -19,21 +19,29 @@
         <el-dialog v-model="libAddDialog" :close-on-click-modal="false"
           :close-on-press-escape="false" class="k-lib-dialog">
           <template #header>
-            <div v-if="libAddSelect">
+            <div v-if="libAddSelect" class="select">
               <el-icon><Refresh /></el-icon>
               <span>正在添加音乐</span>
               <el-progress :percentage="libAddPercent" />
             </div>
-            <div v-else>
-              <el-icon><Check /></el-icon>
-              <span>当前目录</span>
-              <span>{{ libAddDirPath }}</span><br>
-              <span>选择模式</span>
-              <el-select v-model="libAddMode" popper-class="k-popper">
-                <el-option label="普通" value="normal" />
-                <el-option label="ASMR" value="asmr" />
-              </el-select>
-              <button @click="onAddDir">确定</button>
+            <div v-else class="no-select">
+              <div>
+                <div>
+                  <el-icon><Folder /></el-icon>
+                  <span>当前目录</span>
+                  <span>{{ libAddDirPath }}</span><br>
+                </div>
+                <div>
+                  <span>选择模式</span>
+                  <el-select v-model="libAddMode" size="small" popper-class="k-popper">
+                    <el-option label="普通" value="normal" />
+                    <el-option label="ASMR" value="asmr" />
+                  </el-select>
+                </div>
+              </div>
+              <button @click="onAddDir">
+                <el-icon><Check /></el-icon>
+              </button>
             </div>
           </template>
         </el-dialog>
@@ -43,6 +51,7 @@
 </template>
 
 <script setup lang="ts">
+import { vTooltip } from '@renderer/directives/Tooltip'
 import db from '@renderer/utils/db'
 const libs = reactive<{arr: ILibrary[]}>({ arr: [] })
 const libAddDialog = ref(false)
@@ -75,7 +84,6 @@ async function onAddDir() {
   const id = await db.addLibrary(libAddDirName, libAddDirPath, libAddMode.value)
   libs.arr.push({ id, name: libAddDirName, path: libAddDirPath, mode: libAddMode.value })
   console.log('音乐目录添加成功')
-  libAddSelect.value = true
   if (libAddMode.value === 'normal') window.ipc.invoke('getDirMusics', libAddDirPath)
   else if(libAddMode.value === 'asmr') window.ipc.invoke('getDirAlbums', libAddDirPath)
 }
@@ -109,6 +117,7 @@ $Ptitle-size: 34px;
     font-size: $Ptitle-size;
     font-weight: 300;
     line-height: $Ptitle-size;
+    user-select: none;
   }
   .Library {
     $item-height: 40px;
@@ -145,15 +154,20 @@ $Ptitle-size: 34px;
       &>span {
         margin-right: 10px;
         white-space: nowrap;
+        &:not(:last-of-type) {
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
         &:first-child {
           margin-right: auto;
           padding-right: 10px;
         }
         &:nth-child(2) {
-          overflow: hidden;
-          text-overflow: ellipsis;
           font-size: 14px;
           color: #797a7a;
+        }
+        &:last-of-type {
+          user-select: none;
         }
       }
       &:deep(.el-select) {

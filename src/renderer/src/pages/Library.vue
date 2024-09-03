@@ -132,17 +132,23 @@ function onItemOpenInFolder() {
     display: flex;
     align-items: center;
     >span {
+      line-height: $toolBarHeight;
       font-size: 34px;
       font-weight: 300;
       margin-right: 15px;
+      white-space: nowrap;
     }
     :deep(>.el-dropdown) {
       .el-button-group {
         .el-button {
           &:first-child {
+            max-width: 135px;
             span {
+              overflow: hidden;
               font-size: 18px;
               line-height: 40px;
+              white-space: nowrap;
+              text-overflow: ellipsis;
             }
           }
         }
