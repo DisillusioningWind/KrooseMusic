@@ -17,7 +17,7 @@
       <div class="ListBar">
         <KLibList :mode="libCur.mode" :items="items" :cur="itemSelect" @select="onItemSelect" />
       </div>
-      <div class="DetailBar" v-if="dirSelect">
+      <div class="DetailBar" v-if="libCur.mode==='asmr'&&dirSelect">
         <div class="InfoBar">
           <img :src="(itemSelect as ILibAlbum)?.pic" />
           <div class="TitleBar">
@@ -47,11 +47,16 @@ onMounted(async () => {
   libCur.value = libs.value[0]
 })
 watch(libCur, async (val) => {
+  // 获取当前表格数据
   const cnt = await db.getItemNums(val.name)
   const size = 500
   items.value = []
   for (let i = 0; i < cnt; i += size) {
     items.value.push(...await db.getItems(val.name, i, size))
+  }
+  // 清空不需要数据
+  if (val.mode === 'normal') {
+    dirSelect.value = undefined
   }
 })
 function onItemSelect(item: ILibItem) {

@@ -6,7 +6,7 @@
         <span v-tooltip.immediate.overflow="direc.name">{{ direc.name }}</span>
       </div>
       <div class="DirList">
-        <KDirList :dir="direc" :left="left?left+1:1"/>
+        <KDirList :dir="direc" :cur-path="curPath" :left="left?left+1:1" @music="v => $emit('music', v)"/>
       </div>
     </div>
     <div class="MusicBar" v-for="music in dir.musics" :key="music.name" :class="music.path === curPath?'Play':''" @click="onMusicClick(music)">
