@@ -88,9 +88,9 @@ import { vTooltip } from '@renderer/directives/Tooltip'
 import { vMenu, vCtxMenu, vNoCtxMenu } from '@renderer/directives/Menu'
 import bus from '@renderer/utils/emitter'
 import player from '@renderer/classes/MusicPlayer'
-import svgOpenDir from '@renderer/assets/icons/openDir.svg?url'
-import svgOpenFile from '@renderer/assets/icons/openFile.svg?url'
-import svgCloseFile from '@renderer/assets/icons/closeFile.svg?url'
+import svgOpenDir from '@renderer/assets/icons/dir.svg?url'
+import svgOpenFile from '@renderer/assets/icons/plus.svg?url'
+import svgCloseFile from '@renderer/assets/icons/close.svg?url'
 // 数据
 const store = useStore()
 const showTime = ref(0)
