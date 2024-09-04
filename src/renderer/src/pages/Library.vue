@@ -74,7 +74,7 @@ function onDirMusic(path: string) {
 </script>
 
 <style scoped lang="scss">
-@mixin kScrollBar($track-color: transparent){
+@mixin KScrollBar($track-color: transparent){
   &::-webkit-scrollbar {
     width: 8px;
   }
@@ -91,11 +91,11 @@ function onDirMusic(path: string) {
     background-color: $track-color;
   }
 }
+$toolBarHeight: 45px;
+$conBarMarginTop: 14px;
 .PLibrary {
   height: 100%;
   box-sizing: border-box;
-  padding-top: 10px;
-  $toolBarHeight: 45px;
   .ToolBar {
     height: $toolBarHeight;
     display: flex;
@@ -125,16 +125,16 @@ function onDirMusic(path: string) {
     }
   }
   .ContentBar {
-    height: calc(100% - $toolBarHeight - 10px);
+    height: calc(100% - $toolBarHeight - $conBarMarginTop);
+    margin-top: $conBarMarginTop;
     box-sizing: border-box;
     border-top: 1px solid #e5e5e5;
-    margin-top: 10px;
     display: flex;
     .ListBar {
       height: 100%;
       width: v-bind('libCur.mode === "asmr" ? "40%" : "100%"');
       overflow-y: scroll;
-      @include kScrollBar;
+      @include KScrollBar;
     }
     .DetailBar {
       flex: 1;
@@ -172,7 +172,7 @@ function onDirMusic(path: string) {
         height: calc(100% - $img-size);
         background-color: #f6f6f6;
         overflow-y: scroll;
-        @include kScrollBar;
+        @include KScrollBar;
         >div {
           margin-bottom: 10px;
         }
