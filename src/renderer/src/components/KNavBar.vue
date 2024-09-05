@@ -31,6 +31,9 @@ const menus = [
   { path: '/List', title: '播放列表', icon: SVGPlayList },
   { path: '/Setting', title: '设置', icon: SVGSetting }
 ]
+onMounted(() => {
+  onMenuClick('/Library')
+})
 watch(expand, v => store.navExpand = v)
 function onMenuClass(routePath: string, menuPath: string) {
   if (routePath === menuPath && routePath !== '/Search') {
