@@ -1,57 +1,60 @@
 <template>
-  <el-container class="BackCon" :style="{ backgroundImage : showDetailCom ? `url(${ backPicURL })` : '' }">
-    <el-container :class=" showDetailCom ? ( backPicURL == defaultPicURL ? '' : 'TopCon') : ''">
-      <el-header><KTitleBar /></el-header>
-      <el-container class="MainCon" v-show="!showDetailCom">
-        <el-aside><KNavBar /></el-aside>
-        <el-main><router-view /></el-main>
-      </el-container>
-      <el-container v-show="showDetailCom">
-        <Detail />
-      </el-container>
-      <el-footer><KMusicBar /></el-footer>
-    </el-container>
-  </el-container>
+  <div class="Background" :class="showDetail?(musicPicURL?'Picture':'Default'):''">
+    <div :class="showDetail?'Blur':''">
+      <KTitleBar />
+      <div v-show="!showDetail" class="Main">
+        <KNavBar />
+        <RouterView />
+      </div>
+      <Detail v-show="showDetail" class="Detail"/>
+      <KMusicBar />
+    </div>
+  </div>
 </template>
 
 <script setup lang="ts">
 import { useStore } from '@renderer/store'
-import defaultPicURL from '@renderer/assets/DefaultPic.jpg'
 const store = useStore()
-const showDetailCom = computed(() => store.showDetail)
-const backPicURL = computed(() => store.musicPicURL ? store.musicPicURL : defaultPicURL)
+const showDetail = computed(() => store.showDetail)
+const musicPicURL = computed(() => store.musicPicURL)
 </script>
 
 <style scoped lang="scss">
-.BackCon {
+.Background {
+  height: 100%;
+  width: 100%;
   background-repeat: no-repeat;
   background-position: 50% 0;
   background-size: 100% auto;
-  .TopCon {
-    background-color: #0000005f;
-    backdrop-filter: blur(40px);
+  overflow: hidden;
+  &.Picture {
+    background-image: v-bind('"url(" + musicPicURL + ")"');
   }
-  .MainCon {
-    height: calc(100% - 152px);
+  &.Default {
+    background-image: linear-gradient(150deg, #3b3b3b, #6b6b6b 20%, #ffffff);
   }
-}
-.el-container {
-  height: 100%;
-  .el-header {
-    padding: 0px;
-    height: 30px;
-  }
-  .el-aside {
-    background-color: #f2f2f2;
-    width: fit-content;
-  }
-  .el-main {
-    padding-top: 0px;
-    padding-bottom: 0px;
-  }
-  .el-footer {
-    padding: 0px;
-    height: 122px;
+  >div {
+    height: 100%;
+    width: 100%;
+    &.Blur {
+      background-color: #0000005f;
+      backdrop-filter: blur(40px);
+    }
+    >.Main {
+      height: calc(100% - 152px);
+      width: 100%;
+      display: flex;
+      >div {
+        &:last-child {
+          width: 0;
+          flex: 1;
+        }
+      }
+    }
+    >.Detail {
+      height: calc(100% - 152px);
+      width: 100%;
+    }
   }
 }
 </style>

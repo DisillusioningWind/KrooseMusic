@@ -1,9 +1,7 @@
 <template>
   <div class="KSettingItem">
     <p class="Title">{{ title }}</p>
-    <div class="Content">
-      <slot></slot>
-    </div>
+    <div class="Content"><slot></slot></div>
   </div>
 </template>
 
@@ -14,13 +12,14 @@ defineProps<{ title: string }>()
 <style scoped lang="scss">
 $title-size: 25px;
 .KSettingItem {
+  width: 500px;
   .Title {
     font-size: $title-size;
     line-height: $title-size;
     user-select: none;
   }
   .Content {
-    margin-top: 16px;
+    margin-top: 13px;
   }
 }
 </style>

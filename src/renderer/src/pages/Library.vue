@@ -96,6 +96,8 @@ $conBarMarginTop: 14px;
 .PLibrary {
   height: 100%;
   box-sizing: border-box;
+  padding: 0 10px;
+  user-select: none;
   .ToolBar {
     height: $toolBarHeight;
     display: flex;
@@ -151,11 +153,12 @@ $conBarMarginTop: 14px;
           object-fit: cover;
         }
         .TitleBar {
+          height: $img-size - $pad-width * 2;
           flex: 1;
           margin: $pad-width $pad-width $pad-width 0;
-          height: $img-size - $pad-width * 2;
           display: flex;
           flex-direction: column;
+          user-select: text;
           >div {
             max-width: 100%;
             font-size: 15px;

@@ -180,7 +180,6 @@ async function btnOpenFile() {
 }
 
 .KMusicBar {
-  height: 100%;
   background-color: v-bind('player.mainColor');
   .sliderRow {
     margin: 0 12px;
@@ -200,8 +199,8 @@ async function btnOpenFile() {
     }
   }
   .buttonRow {
-    margin: 0;
     height: 90px;
+    margin: 0;
     display: flex;
     justify-items: center;
     align-items: center;
@@ -211,15 +210,12 @@ async function btnOpenFile() {
     }
     .controlBar {
       flex: 1.2;
-      margin: 0;
       display: flex;
       justify-content: center;
       align-items: center;
-      &>* {
-        margin: 0 8px 0 8px;
-      }
-      button {
+      >button {
         @include svgButton(35px);
+        margin: 0 8px 0 8px;
         &:hover {
           background-color: v-bind('player.state === "unload" ? "transparent" : "#00000030"');
         }
@@ -235,6 +231,7 @@ async function btnOpenFile() {
       }
       .playButton {
         @include svgButton(50px);
+        border: 2px solid #ffffff40;
         &:hover {
           background-color: v-bind('player.state === "unload" ? "transparent" : "#00000030"');
         }
@@ -244,7 +241,6 @@ async function btnOpenFile() {
         svg {
           stroke: v-bind('player.state === "unload" ? "#ffffff40" : "white"');
         }
-        border: 2px solid #ffffff40;
         &:active {
           background-color: transparent;
           border-width: 2px;
@@ -254,16 +250,15 @@ async function btnOpenFile() {
     }
     .toolBar {
       flex: 1;
-      margin: 0;
       display: flex;
       align-items: center;
-      &>* {
+      >* {
         margin-right: 8px;
         &:first-child {
           margin-left: 50px;
         }
       }
-      button {
+      >button {
         @include svgButton(35px);
       }
     }

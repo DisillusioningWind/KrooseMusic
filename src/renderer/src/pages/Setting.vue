@@ -108,15 +108,14 @@ async function onGetData(_e, music: ILibItem) {
 <style scoped lang="scss">
 $Ptitle-size: 34px;
 .PSetting {
-  width: calc(100% - 300px);
-  padding-top: 16px;
+  padding: 0 10px;
   display: flex;
   flex-direction: column;
-  row-gap: 25px;
+  row-gap: 13px;
   .PTitle {
+    line-height: 45px;
     font-size: $Ptitle-size;
     font-weight: 300;
-    line-height: $Ptitle-size;
     user-select: none;
   }
   .Library {

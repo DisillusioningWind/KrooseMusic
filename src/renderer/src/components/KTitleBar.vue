@@ -56,7 +56,7 @@ const navExpand = computed(() => store.navExpand)
 }
 
 .KTitleBar {
-  height: 100%;
+  height: 30px;
   width: 100%;
   -webkit-app-region: drag;
   display: flex;
