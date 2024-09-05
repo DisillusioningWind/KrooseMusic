@@ -135,8 +135,6 @@ $conBarMarginTop: 14px;
     .ListBar {
       height: 100%;
       width: v-bind('libCur.mode === "asmr" ? "40%" : "100%"');
-      overflow-y: scroll;
-      @include KScrollBar;
     }
     .DetailBar {
       flex: 1;
