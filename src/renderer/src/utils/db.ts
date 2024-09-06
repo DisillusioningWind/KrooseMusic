@@ -1,5 +1,5 @@
 import Dexie from 'dexie'
-
+import { getVer, addVer } from '@renderer/utils/storage'
 class DBManager {
   name: string = 'KrooseDB'
   db!: Dexie
@@ -8,7 +8,7 @@ class DBManager {
     this.db = new Dexie(this.name)
     this.db.on('blocked', () => false)
     if (!(await Dexie.exists(this.name))) {
-      this.db.version(this.getVer()).stores({
+      this.db.version(getVer(this.name)).stores({
         library: '++id,&name,&path,mode',
         curlist: '&id,name,path',
         playlist: '++id,&name'
@@ -18,20 +18,6 @@ class DBManager {
     await this.db.open()
   }
 
-  getVer() {
-    let ver = localStorage.getItem(this.name)
-    if (!ver) {
-      ver = '1'
-      localStorage.setItem(this.name, ver)
-    }
-    return parseInt(ver)
-  }
-  addVer() {
-    const ver = this.getVer() + 1
-    localStorage.setItem(this.name, ver.toString())
-    return ver
-  }
-
   // 修改数据库schema后打开为普通模式，此时需要明确的schema
   changeSchema(newSchema: { [key: string]: string | null }) {
     const curSchema = this.db.tables.reduce((res, { name, schema }) => {
@@ -39,8 +25,8 @@ class DBManager {
       return res
     }, {} as { [key: string]: string })
     this.db.close()
-    this.db.version(this.getVer()).stores(curSchema)
-    this.db.version(this.addVer()).stores(newSchema)
+    this.db.version(getVer(this.name)).stores(curSchema)
+    this.db.version(addVer(this.name)).stores(newSchema)
     return this.db.open()
   }
 

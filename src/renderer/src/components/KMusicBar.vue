@@ -86,6 +86,7 @@ import { useStore } from '@renderer/store'
 import { formatTime } from '@renderer/utils/tools'
 import { vTooltip } from '@renderer/directives/Tooltip'
 import { vMenu, vCtxMenu, vNoCtxMenu } from '@renderer/directives/Menu'
+import * as local from '@renderer/utils/storage'
 import bus from '@renderer/utils/emitter'
 import db from '@renderer/utils/db'
 import player from '@renderer/classes/MusicPlayer'
@@ -102,17 +103,30 @@ const menu = [
   { label: '打开文件', icon: svgOpenFile, action: btnOpenFile },
   { label: '卸载文件', icon: svgCloseFile, action: btnUnloadFile }
 ]
+let lastPlay = false
 // 事件绑定
 onMounted(() => {
   bus.musicUpdateCur((time) => { store.musicCurTime = curTime.value = time })
-  bus.musicLoad(() => curTime.value = 0)
+  bus.musicLoad(onMusicLoad)
   bus.musicInfoLoad(onMusicInfoLoad)
   bus.musicUnload(onMusicUnload)
   bus.musicEnd(onMusicEnd)
+  const defPath = local.getMusicPath()
+  if (defPath.length > 0) {
+    lastPlay = true
+    player.value.load(defPath)
+  }
 })
 function onMusicInfoLoad() {
   store.musicPicURL = player.value.picURL
   store.musicLyrics = player.value.lyrics
+}
+function onMusicLoad() {
+  local.setMusicPath(player.value.path)
+  if (lastPlay) {
+    player.value.pause()
+    lastPlay = false
+  }
 }
 function onMusicUnload() {
   curTime.value = 0

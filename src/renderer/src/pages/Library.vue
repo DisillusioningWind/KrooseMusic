@@ -56,13 +56,15 @@ watch(libCur, async (val) => {
     res.push(...await db.getItems(val.name, i, size))
   }
   items.value = res
-  // 清空不需要数据
+  // 其他数据设置
   if (val.mode === 'normal') {
     dirSelect.value = undefined
+    itemSelect.value = items.value.find(v => v.path === player.value.path)
   }
 })
 watch(() => player.value.path, (val) => {
   if (libCur.value.mode === 'normal') {
+    console.log(val)
     itemSelect.value = items.value.find(v => v.path === val)
   }
 })
