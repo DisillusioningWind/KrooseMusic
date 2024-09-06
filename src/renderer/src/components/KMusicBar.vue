@@ -87,6 +87,7 @@ import { formatTime } from '@renderer/utils/tools'
 import { vTooltip } from '@renderer/directives/Tooltip'
 import { vMenu, vCtxMenu, vNoCtxMenu } from '@renderer/directives/Menu'
 import bus from '@renderer/utils/emitter'
+import db from '@renderer/utils/db'
 import player from '@renderer/classes/MusicPlayer'
 import svgOpenDir from '@renderer/assets/icons/dir.svg?url'
 import svgOpenFile from '@renderer/assets/icons/plus.svg?url'
@@ -107,6 +108,7 @@ onMounted(() => {
   bus.musicLoad(() => curTime.value = 0)
   bus.musicInfoLoad(onMusicInfoLoad)
   bus.musicUnload(onMusicUnload)
+  bus.musicEnd(onMusicEnd)
 })
 function onMusicInfoLoad() {
   store.musicPicURL = player.value.picURL
@@ -117,6 +119,16 @@ function onMusicUnload() {
   store.musicPicURL = ''
   store.musicLyrics = []
   store.showDetail = false
+}
+async function onMusicEnd() {
+  const list = await db.getItems('curlist') as ILibItem[]
+  if (list.length === 0) return
+  const index = list.findIndex(item => item.path === player.value.path)
+  if (index === list.length - 1) {
+    // TODO: 循环模式
+  } else {
+    player.value.load(list[index + 1].path)
+  }
 }
 // 按钮功能
 function btnToggleDetail() {

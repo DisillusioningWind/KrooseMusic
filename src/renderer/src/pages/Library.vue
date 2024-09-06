@@ -61,8 +61,12 @@ watch(libCur, async (val) => {
     dirSelect.value = undefined
   }
 })
+watch(() => player.value.path, (val) => {
+  if (libCur.value.mode === 'normal') {
+    itemSelect.value = items.value.find(v => v.path === val)
+  }
+})
 async function onItemSelect(item: ILibItem) {
-  itemSelect.value = item
   if (libCur.value.mode === 'normal' && item.path !== player.value.path) {
     player.value.load(item.path)
     const index = items.value.findIndex(v => v.path === item.path)
@@ -70,6 +74,7 @@ async function onItemSelect(item: ILibItem) {
     await db.clearItems('curlist')
     await db.addItems('curlist', list)
   } else if (libCur.value.mode === 'asmr') {
+    itemSelect.value = item
     const res = await window.ipc.invoke('getDirStruc', item.path) as IDirStruc
     dirSelect.value = res
   }
