@@ -9,7 +9,9 @@ class DBManager {
     this.db.on('blocked', () => false)
     if (!(await Dexie.exists(this.name))) {
       this.db.version(this.getVer()).stores({
-        library: '++id,&name,&path,mode'
+        library: '++id,&name,&path,mode',
+        curlist: '&id,name,path',
+        playlist: '++id,&name'
       })
     }
     // 非首次打开时为动态模式，此时不需要明确的schema
@@ -70,15 +72,21 @@ class DBManager {
   addItem(libName: string, item: ILibItem) {
     return this.db.table(libName).add(item) as Promise<number>
   }
+  addItems(libName: string, items: ILibItem[]) {
+    return this.db.table(libName).bulkAdd(items) as Promise<readonly number[]>
+  }
   getItemNums(libName: string) {
     return this.db.table(libName).count()
   }
   getItems(libName: string, offest?: number, limit?: number) {
-    if (offest && limit) {
+    if (offest !== undefined && limit !== undefined) {
       return this.db.table(libName).orderBy('name').offset(offest).limit(limit).toArray()
     } else {
       return this.db.table(libName).orderBy('name').toArray()
     }
+  }
+  clearItems(libName: string) {
+    return this.db.table(libName).clear()
   }
 }
 const db = new DBManager()

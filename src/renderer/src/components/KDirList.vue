@@ -1,12 +1,15 @@
 <template>
   <div class="KDirList">
     <div class="DirBar" v-for="direc in dir.dirs" :key="direc.name">
-      <div class="Dir" :ref="direc.name" @click="onDirClick(($refs[direc.name] as any)[0] as HTMLElement)">
+      <div class="Dir" @click="onDirClick">
         <svg><path d="m8,6 l4,4 l-4,4" /></svg>
         <span v-tooltip.immediate.overflow="direc.name">{{ direc.name }}</span>
+        <svg @click="onPlayClick($event,direc)"><path d="m7,5.5 l0,10 l8,-5z" /></svg>
+        <svg @click="onAddClick($event,direc)"><path d="m4.5,10 l12,0 m-6,-6 l0,12.5" /></svg>
       </div>
       <div class="DirList">
-        <KDirList :dir="direc" :cur-path="curPath" :left="left?left+1:1" @music="v => $emit('music', v)"/>
+        <KDirList :dir="direc" :cur-path="curPath" :left="left?left+1:1"
+          @music="v => $emit('music', v)" @musics="v => $emit('musics', v)"/>
       </div>
     </div>
     <div class="MusicBar" v-for="music in dir.musics" :key="music.name" :class="music.path === curPath?'Play':''" @click="onMusicClick(music)">
@@ -27,17 +30,41 @@ defineProps<{
 }>()
 const emit = defineEmits<{
   /** 歌曲点击 */
-  music: [value: string]
+  music: [value: string],
+  /** 目录点击 */
+  musics: [value: ILibItem[]]
 }>()
-function onDirClick(item: HTMLElement) {
-  const dirList = item.nextElementSibling as HTMLElement
-  if (item.classList.contains('Hidden')) {
-    item.classList.remove('Hidden')
+function onDirClick(e: MouseEvent) {
+  const dir = e.currentTarget as HTMLElement
+  const dirList = dir.nextElementSibling as HTMLElement
+  if (dir.classList.contains('Hidden')) {
+    dir.classList.remove('Hidden')
     dirList.classList.remove('Hidden')
   } else {
-    item.classList.add('Hidden')
+    dir.classList.add('Hidden')
     dirList.classList.add('Hidden')
   }
+}
+function getDirMusics(dir: IDirStruc) {
+  const res = [] as ILibItem[]
+  if (dir.dirs) {
+    for (const d of dir.dirs) {
+      res.push(...getDirMusics(d))
+    }
+  }
+  if (dir.musics) {
+    res.push(...dir.musics)
+  }
+  return res
+}
+function onPlayClick(e: MouseEvent, direc: IDirStruc) {
+  e.stopPropagation()
+  const musics = getDirMusics(direc)
+  emit('musics', musics)
+}
+// TODO: 添加目录为播放列表
+function onAddClick(e: MouseEvent, _direc: IDirStruc) {
+  e.stopPropagation()
 }
 function onMusicClick(music: { name: string, path: string }) {
   emit('music', music.path)
@@ -54,9 +81,12 @@ function onMusicClick(music: { name: string, path: string }) {
   display: flex;
   &:hover {
     background-color: #e4e4e4;
+    >svg:not(:first-child) {
+      display: block;
+    }
   }
   >span {
-    width: 100px;
+    width: 0;
     flex: 1;
     white-space: nowrap;
     overflow: hidden;
@@ -74,6 +104,7 @@ function onMusicClick(music: { name: string, path: string }) {
   .DirBar {
     .Dir {
       @include topItem;
+      padding-right: 5px;
       >svg {
         $svgSize: 20px;
         width: $svgSize;
@@ -83,11 +114,23 @@ function onMusicClick(music: { name: string, path: string }) {
         stroke-width: 1.5px;
         stroke-linejoin: round;
         fill: none;
-        transition: .2s;
-        transform: rotate(90deg);
+        &:first-child {
+          transition: .2s;
+          transform: rotate(90deg);
+        }
+        &:not(:first-child) {
+          padding: 3px;
+          display: none;
+          &:hover {
+            background-color: #bdbdbd;
+          }
+          &:active {
+            background-color: #a0a0a0;
+          }
+        }
       }
       &.Hidden {
-        >svg {
+        >svg:first-child {
           transform: rotate(0deg);
           transition: transform .2s;
         }

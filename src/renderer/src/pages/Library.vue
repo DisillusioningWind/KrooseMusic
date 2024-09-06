@@ -2,7 +2,7 @@
   <div class="PLibrary">
     <div class="ToolBar">
       <span>当前目录</span>
-      <el-dropdown type="primary" split-button placement="bottom-end" popper-class="k-popper" size="large">
+      <el-dropdown type="primary" split-button placement="bottom-end" popper-class="k-popper" size="large" v-if="libs.length>0">
         {{ libCur?.name }}
         <template #dropdown>
           <el-dropdown-menu>
@@ -27,7 +27,7 @@
           </div>
         </div>
         <div class="DirListBar">
-          <KDirList :dir="dirSelect" :cur-path="player.path" @music="onDirMusic"/>
+          <KDirList :dir="dirSelect" :cur-path="player.path" @music="onDirMusic" @musics="onDirMusics"/>
         </div>
       </div>
     </div>
@@ -38,38 +38,51 @@
 import db from '@renderer/utils/db'
 import player from '@renderer/classes/MusicPlayer'
 const libs = shallowRef<ILibrary[]>([])
-const libCur = ref<ILibrary>({ id: 0, name: '', path: '', mode: 'normal' })
-const items = ref<ILibItem[]>([])
+const libCur = shallowRef<ILibrary>({ id: 0, name: '', path: '', mode: 'normal' })
+const items = shallowRef<ILibItem[]>([])
 const itemSelect = ref<ILibItem>()
 const dirSelect = ref<IDirStruc>()
 onMounted(async () => {
   libs.value = await db.getLibraries()
+  if (libs.value.length === 0) return
   libCur.value = libs.value[0]
 })
 watch(libCur, async (val) => {
   // 获取当前表格数据
   const cnt = await db.getItemNums(val.name)
   const size = 500
-  items.value = []
+  const res = [] as ILibItem[]
   for (let i = 0; i < cnt; i += size) {
-    items.value.push(...await db.getItems(val.name, i, size))
+    res.push(...await db.getItems(val.name, i, size))
   }
+  items.value = res
   // 清空不需要数据
   if (val.mode === 'normal') {
     dirSelect.value = undefined
   }
 })
-function onItemSelect(item: ILibItem) {
+async function onItemSelect(item: ILibItem) {
   itemSelect.value = item
   if (libCur.value.mode === 'normal' && item.path !== player.value.path) {
     player.value.load(item.path)
+    const index = items.value.findIndex(v => v.path === item.path)
+    const list = items.value.slice(index).map((v, i) => { v['id'] = i; return v })
+    await db.clearItems('curlist')
+    await db.addItems('curlist', list)
   } else if (libCur.value.mode === 'asmr') {
-    window.ipc.invoke('getDirStruc', item.path).then((res: IDirStruc) => dirSelect.value = res)
+    const res = await window.ipc.invoke('getDirStruc', item.path) as IDirStruc
+    dirSelect.value = res
   }
 }
 function onDirMusic(path: string) {
   if (player.value.path === path) return
   player.value.load(path)
+}
+async function onDirMusics(musics: ILibItem[]) {
+  player.value.load(musics[0].path)
+  const list = musics.map((v, i) => ({ ...v, id: i }))
+  await db.clearItems('curlist')
+  await db.addItems('curlist', list)
 }
 </script>
 

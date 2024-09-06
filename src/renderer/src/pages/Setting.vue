@@ -84,6 +84,7 @@ async function onAddDir() {
   const id = await db.addLibrary(libAddDirName, libAddDirPath, libAddMode.value)
   libs.arr.push({ id, name: libAddDirName, path: libAddDirPath, mode: libAddMode.value })
   console.log('音乐目录添加成功')
+  libAddSelect.value = true
   if (libAddMode.value === 'normal') window.ipc.invoke('getDirMusics', libAddDirPath)
   else if(libAddMode.value === 'asmr') window.ipc.invoke('getDirAlbums', libAddDirPath)
 }

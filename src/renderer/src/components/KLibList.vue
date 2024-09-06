@@ -1,7 +1,7 @@
 <template>
   <div class="KLibList" @scroll="onScroll" >
     <div>
-      <div class="Item" v-for="item in itemsShow" :key="item.path" :class="cur===item?'select':''"
+      <div class="Item" v-for="item in itemsShow" :key="item.path" :class="cur?.path===item.path?'select':''"
         v-ctx-menu="menu" @contextmenu="onItemCtx(item)" @click="onItemClick(item)">
         <span v-tooltip.immediate.overflow="item.name">{{ item.name + (mode === 'normal'?(item as ILibMusic).ext:'') }}</span>
         <span v-if="mode === 'normal'" v-tooltip.immediate.overflow="(item as ILibMusic).artist">{{ (item as ILibMusic).artist }}</span>
