@@ -19,3 +19,5 @@ export function setMusicPath(path: string) { setVal('musicPath', path) }
 
 export function getPlayMode() { return getVal('playMode', 'order') }
 export function setPlayMode(mode: string) { setVal('playMode', mode) }
+
+export default { getVer, addVer, getMusicPath, setMusicPath, getPlayMode, setPlayMode }

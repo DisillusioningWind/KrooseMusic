@@ -1,7 +1,7 @@
 <template>
   <div class="KLibList" @scroll="onScroll" >
     <div>
-      <div class="Item" v-for="item in itemsShow" :key="item.path" :class="cur?.path===item.path?'select':''"
+      <div class="Item" v-for="item in itemsShow" :key="item.path" :class="cur?.path===item.path?'select':(item['id']%2===0?'odd':'')"
         v-ctx-menu="menu" @contextmenu="onItemCtx(item)" @click="onItemClick(item)">
         <span v-tooltip.immediate.overflow="item.name">{{ item.name + (mode === 'normal'?(item as ILibMusic).ext:'') }}</span>
         <span v-if="mode === 'normal'" v-tooltip.immediate.overflow="(item as ILibMusic).artist">{{ (item as ILibMusic).artist }}</span>
@@ -25,20 +25,20 @@ const prop = defineProps<{
   cur?: ILibItem
 }>()
 const emit = defineEmits<{ select: [value: ILibItem] }>()
-const start = ref(0)
+const _itemStart = ref(0)
 const itemStart = computed({
-  get: () => start.value,
+  get: () => _itemStart.value,
   set: (v: number) => {
     if (v < 0) {
-      start.value = 0
+      _itemStart.value = 0
     } else if (v > prop.items.length - 20) {
-      start.value = prop.items.length - 20
+      _itemStart.value = prop.items.length - 20
     } else {
-      start.value = v
+      _itemStart.value = v
     }
   }
 })
-const itemsShow = computed(() => prop.items.slice(itemStart.value, itemStart.value + 20))
+const itemsShow = computed(() => prop.items.slice(itemStart.value, itemStart.value + 20).map((v, i) => { v['id'] = itemStart.value + i; return v }))
 const menu = [
   { label: '播放', action: onItemCtxPlay },
   { label: '信息', action: () => {} },
@@ -95,7 +95,7 @@ function onItemCtxOpen() {
     justify-content: flex-end;
     align-items: center;
     user-select: none;
-    &:nth-child(odd) {
+    &.odd {
       background-color: #f2f2f2;
     }
     &:hover {

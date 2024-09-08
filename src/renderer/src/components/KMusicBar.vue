@@ -86,9 +86,9 @@ import { useStore } from '@renderer/store'
 import { formatTime } from '@renderer/utils/tools'
 import { vTooltip } from '@renderer/directives/Tooltip'
 import { vMenu, vCtxMenu, vNoCtxMenu } from '@renderer/directives/Menu'
-import * as local from '@renderer/utils/storage'
-import bus from '@renderer/utils/emitter'
 import db from '@renderer/utils/db'
+import bus from '@renderer/utils/emitter'
+import local from '@renderer/utils/storage'
 import player from '@renderer/classes/MusicPlayer'
 import svgOpenDir from '@renderer/assets/icons/dir.svg?url'
 import svgOpenFile from '@renderer/assets/icons/plus.svg?url'
@@ -120,9 +120,9 @@ onMounted(() => {
 function onMusicInfoLoad() {
   store.musicPicURL = player.value.picURL
   store.musicLyrics = player.value.lyrics
+  local.setMusicPath(player.value.path)
 }
 function onMusicLoad() {
-  local.setMusicPath(player.value.path)
   if (lastPlay) {
     player.value.pause()
     lastPlay = false
