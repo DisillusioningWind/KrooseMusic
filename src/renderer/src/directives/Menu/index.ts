@@ -1,3 +1,4 @@
+import { Directive } from 'vue'
 import KMenu from './KMenu.vue'
 
 const menuDiv = document.createElement('div')
@@ -14,19 +15,15 @@ const prevMenu = (ev: MouseEvent) => {
   ev.preventDefault()
   ev.stopPropagation()
 }
-/** 右键菜单 */
-export const vCtxMenu = {
-  mounted: (el: HTMLElement, binding: { value: IMenuItem[] }) => {
-    el.addEventListener('contextmenu', (ev) => showMenu(ev, binding.value))
-  }
-}
 /** 点击菜单 */
-export const vMenu = {
-  mounted: (el: HTMLElement, binding: { value: IMenuItem[] }) => {
-    el.addEventListener('click', (ev) => showMenu(ev, binding.value))
-  }
+export const vMenu: Directive<HTMLElement, IMenuItem[]> = {
+  mounted: (el, binding) => el.addEventListener('click', (ev) => showMenu(ev, binding.value))
+}
+/** 右键菜单 */
+export const vCtxMenu: Directive<HTMLElement, IMenuItem[]> = {
+  mounted: (el, binding) => el.addEventListener('contextmenu', (ev) => showMenu(ev, binding.value))
 }
 /** 禁止右键菜单 */
-export const vNoCtxMenu = {
-  mounted: (el: HTMLElement) => el.addEventListener('contextmenu', prevMenu)
+export const vNoCtxMenu: Directive<HTMLElement> = {
+  mounted: (el) => el.addEventListener('contextmenu', prevMenu)
 }

@@ -1,5 +1,5 @@
-import { ICommonTagsResult } from 'music-metadata'
-export global {
+export {}
+declare global {
   interface ILyric {
     time: number
     lyric: string

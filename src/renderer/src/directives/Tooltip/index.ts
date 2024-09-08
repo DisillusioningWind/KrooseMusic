@@ -1,3 +1,4 @@
+import { Directive } from "vue"
 import KTooltip from "./KTooltip.vue"
 
 const tooltipDiv = document.createElement('div')
@@ -22,17 +23,13 @@ const hideText = () => {
   clearTimeout(tooltipTimer)
   tooltipCom.show = false
 }
-type TooltipModifiers = {
-  immediate?: boolean
-  overflow?: boolean
-}
 /**
  * 悬停提示
  * @modifiers immediate 立即显示
  * @modifiers overflow 溢出才显示
  */
-export const vTooltip = {
-  mounted: (el: HTMLElement, binding: { value: string, modifiers: TooltipModifiers }) => {
+export const vTooltip: Directive<HTMLElement, string> = {
+  mounted: (el, binding) => {
     const delay = binding.modifiers.immediate ? 100 : 800
     const overShow = binding.modifiers.overflow || false
     el.setAttribute('tooltip-text', binding.value)
@@ -40,7 +37,7 @@ export const vTooltip = {
     el.addEventListener('mouseleave', hideText)
     el.addEventListener('click', hideText)
   },
-  updated: (el: HTMLElement, binding: { value: string }) => {
+  updated: (el, binding) => {
     el.setAttribute('tooltip-text', binding.value)
   }
 }
