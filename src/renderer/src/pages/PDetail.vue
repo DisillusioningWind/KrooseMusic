@@ -1,5 +1,5 @@
 <template>
-  <div class="Detail">
+  <div class="PDetail">
     <div class="PicDiv">
       <el-image :src="store.musicPicURL || ''">
         <template #error>
@@ -25,7 +25,7 @@ const store = useStore()
 
 <style scoped lang="scss">
 $paddingWidth: 12px;
-.Detail {
+.PDetail {
   height: 100%;
   width: 100%;
   display: flex;

@@ -11,13 +11,10 @@
             <el-option label="普通" value="normal" />
             <el-option label="ASMR" value="asmr" />
           </el-select>
-          <button @click="onDeleteDir(item.id)"><el-icon><Close /></el-icon></button>
+          <button @click="onDeleteDir(item.id)"><Close /></button>
         </div>
-        <div class="AddDiv" @click="onOpenAddDialog">
-          <el-icon><Plus /></el-icon>
-        </div>
-        <el-dialog v-model="libAddDialog" :close-on-click-modal="false"
-          :close-on-press-escape="false" class="k-lib-dialog">
+        <div class="AddDiv" @click="onOpenAddDialog"><Plus /></div>
+        <el-dialog v-model="libAddDialog" :close-on-click-modal="false" :close-on-press-escape="false" class="k-lib-dialog">
           <template #header>
             <div v-if="libAddSelect" class="select">
               <el-icon><Refresh /></el-icon>
@@ -27,7 +24,7 @@
             <div v-else class="no-select">
               <div>
                 <div>
-                  <el-icon><Folder /></el-icon>
+                  <el-icon><Dir /></el-icon>
                   <span>当前目录</span>
                   <span>{{ libAddDirPath }}</span><br>
                 </div>
@@ -53,6 +50,11 @@
 <script setup lang="ts">
 import { vTooltip } from '@renderer/directives/Tooltip'
 import db from '@renderer/utils/db'
+import Close from '@renderer/assets/icons/close.svg?component'
+import Plus from '@renderer/assets/icons/plus.svg?component'
+import Refresh from '@renderer/assets/icons/refresh.svg?component'
+import Dir from '@renderer/assets/icons/dir.svg?component'
+import Check from '@renderer/assets/icons/check.svg?component'
 const libs = reactive<{arr: ILibrary[]}>({ arr: [] })
 const libAddDialog = ref(false)
 const libAddSelect = ref(false)
@@ -107,7 +109,8 @@ async function onGetData(_e, music: ILibItem) {
 </script>
 
 <style scoped lang="scss">
-$Ptitle-size: 34px;
+$title-font: 34px;
+$icon-size: 20px;
 .PSetting {
   padding: 0 10px;
   display: flex;
@@ -115,7 +118,7 @@ $Ptitle-size: 34px;
   row-gap: 13px;
   .PTitle {
     line-height: 45px;
-    font-size: $Ptitle-size;
+    font-size: $title-font;
     font-weight: 300;
     user-select: none;
   }
@@ -143,6 +146,10 @@ $Ptitle-size: 34px;
         }
         &:active {
           background-color: #aeaeae;
+        }
+        >svg {
+          height: $icon-size;
+          width: $icon-size;
         }
       }
       &:hover {
@@ -193,14 +200,9 @@ $Ptitle-size: 34px;
         &:active {
           background-color: #aeaeae;
         }
-        .el-icon {
-          $icon-size: 20px;
+        >svg {
           height: $icon-size;
           width: $icon-size;
-          svg {
-            height: $icon-size;
-            width: $icon-size;
-          }
         }
       }
     }

@@ -1,12 +1,12 @@
 <template>
-  <div class="Background" :class="showDetail?(musicPicURL?'Picture':'Default'):''">
+  <div class="PMain" :class="showDetail?(musicPicURL?'Picture':'Default'):''">
     <div :class="showDetail?'Blur':''">
       <KTitleBar />
       <div v-show="!showDetail" class="Main">
         <KNavBar />
         <RouterView />
       </div>
-      <Detail v-show="showDetail" class="Detail"/>
+      <PDetail v-show="showDetail" class="PDetail"/>
       <KMusicBar />
     </div>
   </div>
@@ -20,7 +20,7 @@ const musicPicURL = computed(() => store.musicPicURL)
 </script>
 
 <style scoped lang="scss">
-.Background {
+.PMain {
   height: 100%;
   width: 100%;
   background-repeat: no-repeat;
@@ -51,7 +51,7 @@ const musicPicURL = computed(() => store.musicPicURL)
         }
       }
     }
-    >.Detail {
+    >.PDetail {
       height: calc(100% - 152px);
       width: 100%;
     }
