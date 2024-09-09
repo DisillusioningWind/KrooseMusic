@@ -10,7 +10,7 @@
     <div class="buttonRow">
       <div class="detailBar">
         <KDetailBtn :title="player.title" :artist="player.artist" :picURL="player.picURL"
-          :showPic="!store.showDetail" v-show="player.state !== 'unload'" @click="btnToggleDetail">
+          :showPic="!store.showDetail" v-show="player.state !== 'unload'" @click="store.toggleDetail()">
         </KDetailBtn>
       </div>
       <div class="controlBar" v-no-ctx-menu>
@@ -61,7 +61,7 @@
         <KSlider v-no-ctx-menu :min="0" :max="100" :cur="curVolume" :tooltip="true" :tooltip-format="(v: number) => Math.floor(v)"
           @update-cur="(volume) => { player.volume = curVolume = volume * 0.01 }">
         </KSlider>
-        <button v-no-ctx-menu v-tooltip="'播放列表'">
+        <button v-no-ctx-menu v-tooltip="'正在播放'" @click.stop="store.toggleDrawer()">
           <svg>
             <path d="m8.5,10 l0,4 l3,-2 z" stroke-width="1px" fill="white"/>
             <path d="m14,12 l13,0" stroke-width="1px"/>
@@ -118,6 +118,7 @@ onMounted(() => {
   }
 })
 function onMusicInfoLoad() {
+  store.musicPath = player.value.path
   store.musicPicURL = player.value.picURL
   store.musicLyrics = player.value.lyrics
   local.setMusicPath(player.value.path)
@@ -130,9 +131,11 @@ function onMusicLoad() {
 }
 function onMusicUnload() {
   curTime.value = 0
+  store.musicPath = ''
   store.musicPicURL = ''
   store.musicLyrics = []
   store.showDetail = false
+  local.setMusicPath('')
 }
 async function onMusicEnd() {
   const list = await db.getItems('curlist') as ILibItem[]
@@ -145,9 +148,6 @@ async function onMusicEnd() {
   }
 }
 // 按钮功能
-function btnToggleDetail() {
-  store.toggleDetail()
-}
 function btnTogglePlay() {
   if (player.value.state === 'play') {
     player.value.pause()

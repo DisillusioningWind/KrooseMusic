@@ -1,7 +1,7 @@
 <template>
   <div class="KLibList" @scroll="onScroll" >
     <div>
-      <div class="Item" v-for="item in itemsShow" :key="item.path" :class="cur?.path===item.path?'select':(item['id']%2===0?'odd':'')"
+      <div class="Item" v-for="item in itemShow" :key="item.path" :class="curPath===item.path?'select':(item['id']%2===0?'odd':'')"
         v-ctx-menu="menu" @contextmenu="onItemCtx(item)" @click="onItemClick(item)">
         <span v-tooltip.immediate.overflow="item.name">{{ item.name + (mode === 'normal'?(item as ILibMusic).ext:'') }}</span>
         <span v-if="mode === 'normal'" v-tooltip.immediate.overflow="(item as ILibMusic).artist">{{ (item as ILibMusic).artist }}</span>
@@ -16,29 +16,19 @@
 import { formatTime } from '@renderer/utils/tools'
 import { vTooltip } from '@renderer/directives/Tooltip'
 import { vCtxMenu } from '@renderer/directives/Menu'
-const prop = defineProps<{
-  /** 模式，决定列的显示 */
-  mode: LibMode,
-  /** 数据 */
-  items: ILibItem[],
-  /** 当前选中 */
-  cur?: ILibItem
-}>()
+type ListMode = LibMode | 'playlist'
+const prop = defineProps<{ mode?: ListMode, items: ILibItem[], curPath?: string }>()
 const emit = defineEmits<{ select: [value: ILibItem] }>()
 const _itemStart = ref(0)
 const itemStart = computed({
   get: () => _itemStart.value,
   set: (v: number) => {
-    if (v < 0) {
-      _itemStart.value = 0
-    } else if (v > prop.items.length - 20) {
-      _itemStart.value = prop.items.length - 20
-    } else {
-      _itemStart.value = v
-    }
+    if (v < 0) { _itemStart.value = 0 }
+    else if (v > prop.items.length - 20) { _itemStart.value = prop.items.length - 20 }
+    else { _itemStart.value = v }
   }
 })
-const itemsShow = computed(() => prop.items.slice(itemStart.value, itemStart.value + 20).map((v, i) => { v['id'] = itemStart.value + i; return v }))
+const itemShow = computed(() => prop.items.slice(itemStart.value, itemStart.value + 20).map((v, i) => { v['id'] = itemStart.value + i; return v }))
 const menu = [
   { label: '播放', action: onItemCtxPlay },
   { label: '信息', action: () => {} },

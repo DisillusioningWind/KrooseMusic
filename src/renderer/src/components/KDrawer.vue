@@ -1,30 +1,34 @@
 <template>
   <div class="KDrawer" ref="drawer" :class="show?'show':''">
-
+    <slot></slot>
   </div>
 </template>
 
 <script setup lang="ts">
-const show = defineModel<boolean>({ default: false })
+const show = defineModel<boolean>()
 const drawer = ref<HTMLElement>()
 onMounted(() => {
-  document.addEventListener('click', () => {
-    if (show.value) {
-      show.value = false
-    }
-  })
+  document.addEventListener('click', onDocClick)
 })
+onUnmounted(() => {
+  document.removeEventListener('click', onDocClick)
+})
+function onDocClick(e: MouseEvent) {
+  if (!drawer.value || !show.value) return
+  show.value = drawer.value.contains(e.target as Node)
+}
 </script>
 
 <style scoped lang="scss">
 .KDrawer {
   position: fixed;
   z-index: 1;
-  top: 0;
+  top: 30px;
   right: 0;
-  height: 100%;
+  height: calc(100vh - 152px);
   width: 0;
   background-color: white;
+  box-shadow: 0 10px 10px rgba(0, 0, 0, .1);
   transition: width .2s;
   &.show {
     width: 30%;

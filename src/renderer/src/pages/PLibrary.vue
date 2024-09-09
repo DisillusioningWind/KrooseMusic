@@ -2,26 +2,20 @@
   <div class="PLibrary">
     <div class="ToolBar">
       <span>当前目录</span>
-      <el-dropdown type="primary" split-button placement="bottom-end" popper-class="k-popper" size="large" v-if="libs.length>0">
-        {{ libCur?.name }}
-        <template #dropdown>
-          <el-dropdown-menu>
-            <el-dropdown-item v-for="item in libs" :key="item.id" @click="libCur = item">
-              {{ item.name }}
-            </el-dropdown-item>
-          </el-dropdown-menu>
-        </template>
+      <el-dropdown v-if="store.curLibs.length > 0" type="primary" split-button placement="bottom-end" popper-class="k-popper" size="large">
+        {{ store.curLib?.name }}
+        <template #dropdown><el-dropdown-menu><el-dropdown-item v-for="lib in store.curLibs" :key="lib.id" @click="store.curLib = lib">{{ lib.name }}</el-dropdown-item></el-dropdown-menu></template>
       </el-dropdown>
     </div>
     <div class="ContentBar">
       <div class="ListBar">
-        <KLibList :mode="libCur.mode" :items="items" :cur="itemSelect" @select="onItemSelect" />
+        <KLibList :mode="store.curLib?.mode" :items="store.curItems" :cur-path="store.curItem?.path" @select="onItemSelect" />
       </div>
-      <div class="DetailBar" v-if="libCur.mode==='asmr'&&dirSelect">
+      <div class="DetailBar" v-if="store.curLib?.mode==='asmr' && store.curItem">
         <div class="InfoBar">
-          <img :src="(itemSelect as ILibAlbum)?.pic" />
+          <img :src="(store.curItem as ILibAlbum).pic" />
           <div class="TitleBar">
-            <div>{{ itemSelect?.name }}</div>
+            <div>{{ store.curItem!.name }}</div>
             <div>未知声优</div>
             <div>未知标签</div>
           </div>
@@ -35,61 +29,37 @@
 </template>
 
 <script setup lang="ts">
+import { useStore } from '@renderer/store'
 import db from '@renderer/utils/db'
 import player from '@renderer/classes/MusicPlayer'
-const libs = shallowRef<ILibrary[]>([])
-const libCur = shallowRef<ILibrary>({ id: 0, name: '', path: '', mode: 'normal' })
-const items = shallowRef<ILibItem[]>([])
-const itemSelect = ref<ILibItem>()
+const store = useStore()
 const dirSelect = ref<IDirStruc>()
 onMounted(async () => {
-  libs.value = await db.getLibraries()
-  if (libs.value.length === 0) return
-  libCur.value = libs.value[0]
-})
-watch(libCur, async (val) => {
-  // 获取当前表格数据
-  const cnt = await db.getItemNums(val.name)
-  const size = 500
-  const res = [] as ILibItem[]
-  for (let i = 0; i < cnt; i += size) {
-    res.push(...await db.getItems(val.name, i, size))
-  }
-  items.value = res
-  // 其他数据设置
-  if (val.mode === 'normal') {
-    dirSelect.value = undefined
-    itemSelect.value = items.value.find(v => v.path === player.value.path)
+  const libLen = store.curLibs.length
+  store.curLibs = await db.getLibraries()
+  if (libLen === 0 && store.curLibs.length > 0) {
+    store.curLib = store.curLibs[0]
   }
 })
-watch(() => player.value.path, (val) => {
-  if (libCur.value.mode === 'normal') {
-    console.log(val)
-    itemSelect.value = items.value.find(v => v.path === val)
-  }
-})
+
 async function onItemSelect(item: ILibItem) {
-  if (libCur.value.mode === 'normal' && item.path !== player.value.path) {
+  if (store.curLib?.mode === 'normal' && item.path !== player.value.path) {
     player.value.load(item.path)
-    const index = items.value.findIndex(v => v.path === item.path)
-    const list = items.value.slice(index).map((v, i) => { v['id'] = i; return v })
-    await db.clearItems('curlist')
-    await db.addItems('curlist', list)
-  } else if (libCur.value.mode === 'asmr') {
-    itemSelect.value = item
+    const index = store.curItems.findIndex(v => v.path === item.path)
+    store.curList = store.curItems.slice(index).map((v, i) => { v['id'] = i; return v })
+  } else if (store.curLib?.mode === 'asmr') {
     const res = await window.ipc.invoke('getDirStruc', item.path) as IDirStruc
     dirSelect.value = res
+    store.albumPath = item.path
   }
 }
 function onDirMusic(path: string) {
   if (player.value.path === path) return
   player.value.load(path)
 }
-async function onDirMusics(musics: ILibItem[]) {
+function onDirMusics(musics: ILibItem[]) {
   player.value.load(musics[0].path)
-  const list = musics.map((v, i) => ({ ...v, id: i }))
-  await db.clearItems('curlist')
-  await db.addItems('curlist', list)
+  store.curList = musics.map((v, i) => ({ ...v, id: i }))
 }
 </script>
 
@@ -154,7 +124,7 @@ $conBarMarginTop: 14px;
     display: flex;
     .ListBar {
       height: 100%;
-      width: v-bind('libCur.mode === "asmr" ? "40%" : "100%"');
+      width: v-bind('store.curLib?.mode === "asmr" ? "40%" : "100%"');
     }
     .DetailBar {
       flex: 1;

@@ -1,5 +1,5 @@
 <template>
-  <div class="KDirList">
+  <div class="KDirList" v-if="dir">
     <div class="DirBar" v-for="direc in dir.dirs" :key="direc.name">
       <div class="Dir" @click="onDirClick">
         <svg><path d="m8,6 l4,4 l-4,4" /></svg>
@@ -22,7 +22,7 @@
 import { vTooltip } from '@renderer/directives/Tooltip'
 defineProps<{
   /** 当前目录 */
-  dir: IDirStruc,
+  dir?: IDirStruc,
   /** 当前播放歌曲 */
   curPath?: string,
   /** 子目录缩进，顶层不需要传入 */
