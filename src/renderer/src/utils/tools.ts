@@ -1,3 +1,6 @@
+const styleNameMethod = 'background-color: #606060; color: #fff; border-radius: 3px 0 0 3px; padding: 0 2px 0 2px; font-family: "Arial";'
+const styleNameTime = 'background-color: #e07800; color: #fff; border-radius: 3px 0 0 3px; padding: 0 2px 0 2px; font-family: "Arial";'
+const styleValue = 'background-color: #007acc; color: #fff; border-radius: 0 3px 3px 0; padding: 0 2px 0 2px; margin-right: 5px; font-family: "Arial";'
 /**
  * 计算函数执行时间
  * @param _target 类的原型
@@ -6,9 +9,6 @@
  */
 export function logExeTimeAsync(_target: any, propertyKey: string, descriptor: PropertyDescriptor) {
   const method = descriptor.value
-  const styleNameMethod = 'background-color: #606060; color: #fff; border-radius: 3px 0 0 3px; padding: 0 2px 0 2px; font-family: "Arial";'
-  const styleNameTime = 'background-color: #e07800; color: #fff; border-radius: 3px 0 0 3px; padding: 0 2px 0 2px; font-family: "Arial";'
-  const styleValue = 'background-color: #007acc; color: #fff; border-radius: 0 3px 3px 0; padding: 0 2px 0 2px; margin-right: 5px; font-family: "Arial";'
   descriptor.value = async function (...args: any[]) {
     const starTime = performance.now()
     const result = await method.call(this, ...args)

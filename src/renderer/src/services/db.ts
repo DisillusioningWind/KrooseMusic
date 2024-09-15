@@ -1,6 +1,6 @@
 import Dexie from 'dexie'
 import { getVer, addVer } from '@renderer/utils/storage'
-class DBManager {
+class KDBManager {
   name: string = 'KrooseDB'
   db!: Dexie
 
@@ -29,7 +29,7 @@ class DBManager {
     this.db.version(addVer(this.name)).stores(newSchema)
     return this.db.open()
   }
-
+  // Library
   async addLibrary(name: string, path: string, mode: LibMode = 'normal') {
     const id = await this.db.table('library').add({ name, path, mode })
     if (mode === 'normal') await this.changeSchema({ [name]: '++id,name,&path,artist' })
@@ -54,7 +54,7 @@ class DBManager {
   getLibraries() {
     return this.db.table('library').toArray()
   }
-
+  // Item
   addItem(libName: string, item: ILibItem) {
     return this.db.table(libName).add(item) as Promise<number>
   }
@@ -75,6 +75,6 @@ class DBManager {
     return this.db.table(libName).clear()
   }
 }
-const db = new DBManager()
+const db = new KDBManager()
 await db.init()
 export default db

@@ -1,5 +1,5 @@
 import { defineStore } from "pinia"
-import db from '@renderer/utils/db'
+import db from '@renderer/services/db'
 
 export const useStore = defineStore('main', () => {
   const navExpand = ref(false)

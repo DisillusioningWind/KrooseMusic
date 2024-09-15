@@ -30,8 +30,8 @@
 
 <script setup lang="ts">
 import { useStore } from '@renderer/store'
-import db from '@renderer/utils/db'
-import player from '@renderer/classes/MusicPlayer'
+import db from '@renderer/services/db'
+import player from '@renderer/services/player'
 const store = useStore()
 const dirSelect = ref<IDirStruc>()
 onMounted(async () => {

@@ -83,13 +83,13 @@
 
 <script setup lang="ts">
 import { useStore } from '@renderer/store'
-import { formatTime } from '@renderer/utils/tools'
 import { vTooltip } from '@renderer/directives/Tooltip'
 import { vMenu, vCtxMenu, vNoCtxMenu } from '@renderer/directives/Menu'
-import db from '@renderer/utils/db'
+import { formatTime } from '@renderer/utils/tools'
+import { getMusicPath, setMusicPath } from '@renderer/utils/storage'
 import bus from '@renderer/utils/emitter'
-import local from '@renderer/utils/storage'
-import player from '@renderer/classes/MusicPlayer'
+import db from '@renderer/services/db'
+import player from '@renderer/services/player'
 import svgOpenDir from '@renderer/assets/icons/dir.svg?url'
 import svgOpenFile from '@renderer/assets/icons/plus.svg?url'
 import svgCloseFile from '@renderer/assets/icons/close.svg?url'
@@ -111,7 +111,7 @@ onMounted(() => {
   bus.musicInfoLoad(onMusicInfoLoad)
   bus.musicUnload(onMusicUnload)
   bus.musicEnd(onMusicEnd)
-  const defPath = local.getMusicPath()
+  const defPath = getMusicPath()
   if (defPath.length > 0) {
     lastPlay = true
     player.value.load(defPath)
@@ -121,7 +121,7 @@ function onMusicInfoLoad() {
   store.musicPath = player.value.path
   store.musicPicURL = player.value.picURL
   store.musicLyrics = player.value.lyrics
-  local.setMusicPath(player.value.path)
+  setMusicPath(player.value.path)
 }
 function onMusicLoad() {
   if (lastPlay) {
@@ -135,7 +135,7 @@ function onMusicUnload() {
   store.musicPicURL = ''
   store.musicLyrics = []
   store.showDetail = false
-  local.setMusicPath('')
+  setMusicPath('')
 }
 async function onMusicEnd() {
   const list = await db.getItems('curlist') as ILibItem[]

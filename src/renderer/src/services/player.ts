@@ -1,7 +1,7 @@
 import { logExeTimeAsync } from '@renderer/utils/tools'
 import bus from '@renderer/utils/emitter'
 
-class MusicPlayer {
+class KPlayer {
   private _audio: HTMLAudioElement
   private _state: 'unload' | 'play' | 'pause' | 'stop' = 'unload'
   private _path: string = ''
@@ -98,8 +98,8 @@ class MusicPlayer {
   }
 }
 
-const musicPlayer = ref(new MusicPlayer())
+const player = ref(new KPlayer())
 // 若在构造函数中调用initialEvents和initialHandlers，会导致Vue无法监听到audio的事件
-musicPlayer.value.initialEvents()
-musicPlayer.value.initialHandlers()
-export default musicPlayer
+player.value.initialEvents()
+player.value.initialHandlers()
+export default player
