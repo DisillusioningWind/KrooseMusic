@@ -1,7 +1,7 @@
 import { logExeTimeAsync } from '@renderer/utils/tools'
 import bus from '@renderer/utils/emitter'
 
-class KPlayer {
+export default class KPlayer {
   private _audio: HTMLAudioElement
   private _state: 'unload' | 'play' | 'pause' | 'stop' = 'unload'
   private _path: string = ''
@@ -23,7 +23,7 @@ class KPlayer {
   set time(time: number) { this._audio.currentTime = time }
   get volume() { return this._audio.volume }
   set volume(volume: number) { this._audio.volume = volume }
-
+  // 若在构造函数中调用initialEvents和initialHandlers，会导致Vue无法监听到audio的事件
   constructor() {
     this._audio = new Audio()
   }
@@ -86,20 +86,14 @@ class KPlayer {
     }
   }
   /** 将audio原生事件转化为emitter事件发射 */
-  initialEvents() {
+  initEvents() {
     this._audio.ontimeupdate = () => { bus.musicUpdateCurEmit(this.time) }
     this._audio.oncanplay = () => { if (this._state === 'unload') bus.musicLoadEmit() }
     this._audio.onended = () => { bus.musicEndEmit() }
   }
   /** 初始化事件监听 */
-  initialHandlers() {
+  initHandlers() {
     bus.musicLoad(this.loaded.bind(this))
     bus.musicEnd(this.pause.bind(this))
   }
 }
-
-const player = ref(new KPlayer())
-// 若在构造函数中调用initialEvents和initialHandlers，会导致Vue无法监听到audio的事件
-player.value.initialEvents()
-player.value.initialHandlers()
-export default player

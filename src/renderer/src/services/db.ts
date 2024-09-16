@@ -1,23 +1,26 @@
 import Dexie from 'dexie'
+import bus from '@renderer/utils/emitter'
 import { getVer, addVer } from '@renderer/utils/storage'
-class KDBManager {
+
+export default class KDBManager {
   name: string = 'KrooseDB'
   db!: Dexie
-
-  async init() {
+  /** 初始化 */
+  constructor() {
     this.db = new Dexie(this.name)
     this.db.on('blocked', () => false)
-    if (!(await Dexie.exists(this.name))) {
-      this.db.version(getVer(this.name)).stores({
-        library: '++id,&name,&path,mode',
-        curlist: '&id,name,path',
-        playlist: '++id,&name'
-      })
-    }
-    // 非首次打开时为动态模式，此时不需要明确的schema
-    await this.db.open()
+    Dexie.exists(this.name).then(exists => {
+      if (!exists) {
+        this.db.version(getVer(this.name)).stores({
+          library: '++id,&name,&path,mode',
+          curlist: '&id,name,path',
+          playlist: '++id,&name'
+        })
+      }
+      // 非首次打开时为动态模式，此时不需要明确的schema
+      this.db.open().then(() => bus.dbOpenEmit())
+    })
   }
-
   // 修改数据库schema后打开为普通模式，此时需要明确的schema
   changeSchema(newSchema: { [key: string]: string | null }) {
     const curSchema = this.db.tables.reduce((res, { name, schema }) => {
@@ -75,6 +78,3 @@ class KDBManager {
     return this.db.table(libName).clear()
   }
 }
-const db = new KDBManager()
-await db.init()
-export default db

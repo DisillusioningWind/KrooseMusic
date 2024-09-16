@@ -2,20 +2,20 @@
   <div class="PLibrary">
     <div class="ToolBar">
       <span>当前目录</span>
-      <el-dropdown v-if="store.curLibs.length > 0" type="primary" split-button placement="bottom-end" popper-class="k-popper" size="large">
+      <el-dropdown v-if="curLibs.length > 0" type="primary" split-button placement="bottom-end" popper-class="k-popper" size="large">
         {{ store.curLib?.name }}
-        <template #dropdown><el-dropdown-menu><el-dropdown-item v-for="lib in store.curLibs" :key="lib.id" @click="store.curLib = lib">{{ lib.name }}</el-dropdown-item></el-dropdown-menu></template>
+        <template #dropdown><el-dropdown-menu><el-dropdown-item v-for="lib in curLibs" :key="lib.id" @click="curLib = lib">{{ lib.name }}</el-dropdown-item></el-dropdown-menu></template>
       </el-dropdown>
     </div>
     <div class="ContentBar">
       <div class="ListBar">
-        <KLibList :mode="store.curLib?.mode" :items="store.curItems" :cur-path="store.curItem?.path" @select="onItemSelect" />
+        <KLibList :mode="curLib?.mode" :items="curItems" :cur-path="curItem?.path" @select="onItemSelect" />
       </div>
-      <div class="DetailBar" v-if="store.curLib?.mode==='asmr' && store.curItem">
+      <div class="DetailBar" v-if="curLib?.mode==='asmr' && curItem">
         <div class="InfoBar">
-          <img :src="(store.curItem as ILibAlbum).pic" />
+          <img :src="(curItem as ILibAlbum).pic" />
           <div class="TitleBar">
-            <div>{{ store.curItem!.name }}</div>
+            <div>{{ curItem.name }}</div>
             <div>未知声优</div>
             <div>未知标签</div>
           </div>
@@ -30,27 +30,19 @@
 
 <script setup lang="ts">
 import { useStore } from '@renderer/store'
-import db from '@renderer/services/db'
-import player from '@renderer/services/player'
 const store = useStore()
+const { player, curLibs, curLib, curItems, curItem, curList, albumPath } = storeToRefs(store)
 const dirSelect = ref<IDirStruc>()
-onMounted(async () => {
-  const libLen = store.curLibs.length
-  store.curLibs = await db.getLibraries()
-  if (libLen === 0 && store.curLibs.length > 0) {
-    store.curLib = store.curLibs[0]
-  }
-})
 
 async function onItemSelect(item: ILibItem) {
-  if (store.curLib?.mode === 'normal' && item.path !== player.value.path) {
+  if (curLib.value?.mode === 'normal' && item.path !== player.value.path) {
     player.value.load(item.path)
-    const index = store.curItems.findIndex(v => v.path === item.path)
-    store.curList = store.curItems.slice(index).map((v, i) => { v['id'] = i; return v })
-  } else if (store.curLib?.mode === 'asmr') {
+    const index = curItems.value.findIndex(v => v.path === item.path)
+    curList.value = curItems.value.slice(index).map((v, i) => { v['id'] = i; return v })
+  } else if (curLib.value?.mode === 'asmr') {
     const res = await window.ipc.invoke('getDirStruc', item.path) as IDirStruc
     dirSelect.value = res
-    store.albumPath = item.path
+    albumPath.value = item.path
   }
 }
 function onDirMusic(path: string) {
@@ -59,7 +51,7 @@ function onDirMusic(path: string) {
 }
 function onDirMusics(musics: ILibItem[]) {
   player.value.load(musics[0].path)
-  store.curList = musics.map((v, i) => ({ ...v, id: i }))
+  curList.value = musics.map((v, i) => ({ ...v, id: i }))
 }
 </script>
 
@@ -124,7 +116,7 @@ $conBarMarginTop: 14px;
     display: flex;
     .ListBar {
       height: 100%;
-      width: v-bind('store.curLib?.mode === "asmr" ? "40%" : "100%"');
+      width: v-bind('curLib?.mode === "asmr" ? "40%" : "100%"');
     }
     .DetailBar {
       flex: 1;

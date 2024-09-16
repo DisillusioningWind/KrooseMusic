@@ -9,6 +9,7 @@ type Events = {
   musicInfoLoad: void
   musicUnload: void
   musicUpdateCur: number
+  dbOpen: void
 }
 
 class EventBus {
@@ -37,6 +38,9 @@ class EventBus {
   /** 音乐更新当前值 @param cur 当前值 */
   musicUpdateCur(h: (cur: number) => void) { this.emitter.on('musicUpdateCur', h) }
   musicUpdateCurEmit(cur: number) { this.emitter.emit('musicUpdateCur', cur) }
+  /** 数据库打开 */
+  dbOpen(h: () => void) { this.emitter.on('dbOpen', h) }
+  dbOpenEmit() { this.emitter.emit('dbOpen') }
 }
 const bus = new EventBus()
 export default bus

@@ -1,19 +1,17 @@
 <template>
-  <div class="KMusicBar" v-ctx-menu="menu">
-    <div class="sliderRow" v-no-ctx-menu>
+  <div class="KMusicBar">
+    <div class="sliderRow">
       <el-text>{{ formatTime(showTime) }}</el-text>
-      <KSlider :min="0" :max="player.duration" :cur="curTime" :disable="player.state === 'unload'" :tooltip="player.state !== 'unload'"
+      <KSlider :min="0" :max="player.duration" :cur="musicCurTime" :disable="player.state === 'unload'" :tooltip="player.state !== 'unload'"
         :tooltip-format="(v: number) => formatTime(v, 'mm:ss')" @update-cur="(time) => { showTime = time }" @drag-cur="(time) => { player.time = time }">
       </KSlider>
       <el-text>{{ formatTime(player.duration) }}</el-text>
     </div>
     <div class="buttonRow">
       <div class="detailBar">
-        <KDetailBtn :title="player.title" :artist="player.artist" :picURL="player.picURL"
-          :showPic="!store.showDetail" v-show="player.state !== 'unload'" @click="store.toggleDetail()">
-        </KDetailBtn>
+        <KDetailBtn v-show="player.state !== 'unload'" :title="player.title" :artist="player.artist" :picURL="player.picURL" :showPic="!showDetail" @click="toggleDetail()" />
       </div>
-      <div class="controlBar" v-no-ctx-menu>
+      <div class="controlBar">
         <button v-tooltip="player.state !== 'unload' ? '上一首' : ''">
           <svg>
             <path d="m10,9 l0,17"/>
@@ -48,7 +46,7 @@
         </button>
       </div>
       <div class="toolBar">
-        <button v-no-ctx-menu v-tooltip="'开启静音'">
+        <button v-tooltip="'开启静音'">
           <svg>
             <path d="m7,14.5 l0,6 l3,0 l4,4 l0,-14 l-4,4 l-3,0 z"/>
             <path d="m18,14 a 5 5 0 0 1 0,7" :visibility="curVolume == 0 ? 'hidden' : 'visible'"/>
@@ -58,10 +56,10 @@
             <path d="m18,21 l7,-7" :visibility="curVolume == 0 ? 'visible' : 'hidden'"/>
           </svg>
         </button>
-        <KSlider v-no-ctx-menu :min="0" :max="100" :cur="curVolume" :tooltip="true" :tooltip-format="(v: number) => Math.floor(v)"
+        <KSlider :min="0" :max="100" :cur="curVolume" :tooltip="true" :tooltip-format="(v: number) => Math.floor(v)"
           @update-cur="(volume) => { player.volume = curVolume = volume * 0.01 }">
         </KSlider>
-        <button v-no-ctx-menu v-tooltip="'正在播放'" @click.stop="store.toggleDrawer()">
+        <button v-tooltip="'正在播放'" @click.stop="toggleDrawer()">
           <svg>
             <path d="m8.5,10 l0,4 l3,-2 z" stroke-width="1px" fill="white"/>
             <path d="m14,12 l13,0" stroke-width="1px"/>
@@ -69,7 +67,7 @@
             <path d="m8,23 l19,0" stroke-width="1px"/>
           </svg>
         </button>
-        <button v-no-ctx-menu v-tooltip="'更多'" v-menu="menu">
+        <button v-tooltip="'更多'" v-menu="menu">
           <svg>
             <circle cx="32%" cy="50%" r="0.5"/>
             <circle cx="50%" cy="50%" r="0.5"/>
@@ -84,19 +82,18 @@
 <script setup lang="ts">
 import { useStore } from '@renderer/store'
 import { vTooltip } from '@renderer/directives/Tooltip'
-import { vMenu, vCtxMenu, vNoCtxMenu } from '@renderer/directives/Menu'
+import { vMenu } from '@renderer/directives/Menu'
 import { formatTime } from '@renderer/utils/tools'
 import { getMusicPath, setMusicPath } from '@renderer/utils/storage'
 import bus from '@renderer/utils/emitter'
-import db from '@renderer/services/db'
-import player from '@renderer/services/player'
 import svgOpenDir from '@renderer/assets/icons/dir.svg?url'
 import svgOpenFile from '@renderer/assets/icons/plus.svg?url'
 import svgCloseFile from '@renderer/assets/icons/close.svg?url'
 // 数据
 const store = useStore()
+const { showDetail, curList, player, musicCurTime, musicPath, musicPicURL, musicLyrics } = storeToRefs(store)
+const { toggleDetail, toggleDrawer } = store
 const showTime = ref(0)
-const curTime = ref(0)
 const curVolume = ref(100)
 const menu = [
   { label: '打开目录', icon: svgOpenDir, action: btnOpenDir},
@@ -106,7 +103,7 @@ const menu = [
 let lastPlay = false
 // 事件绑定
 onMounted(() => {
-  bus.musicUpdateCur((time) => { store.musicCurTime = curTime.value = time })
+  bus.musicUpdateCur((time) => { musicCurTime.value = time })
   bus.musicLoad(onMusicLoad)
   bus.musicInfoLoad(onMusicInfoLoad)
   bus.musicUnload(onMusicUnload)
@@ -118,9 +115,9 @@ onMounted(() => {
   }
 })
 function onMusicInfoLoad() {
-  store.musicPath = player.value.path
-  store.musicPicURL = player.value.picURL
-  store.musicLyrics = player.value.lyrics
+  musicPath.value = player.value.path
+  musicPicURL.value = player.value.picURL
+  musicLyrics.value = player.value.lyrics
   setMusicPath(player.value.path)
 }
 function onMusicLoad() {
@@ -130,21 +127,22 @@ function onMusicLoad() {
   }
 }
 function onMusicUnload() {
-  curTime.value = 0
-  store.musicPath = ''
-  store.musicPicURL = ''
-  store.musicLyrics = []
-  store.showDetail = false
+  musicCurTime.value = 0
+  musicPath.value = ''
+  musicPicURL.value = ''
+  musicLyrics.value = []
+  showDetail.value = false
   setMusicPath('')
 }
-async function onMusicEnd() {
-  const list = await db.getItems('curlist') as ILibItem[]
-  if (list.length === 0) return
-  const index = list.findIndex(item => item.path === player.value.path)
-  if (index === list.length - 1) {
+function onMusicEnd() {
+  if (curList.value.length === 0) return
+  const index = curList.value.findIndex(item => item.path === player.value.path)
+  if (index === -1) {
+    // WARN: 未找到当前播放文件
+  } else if (index === curList.value.length - 1) {
     // TODO: 循环模式
   } else {
-    player.value.load(list[index + 1].path)
+    player.value.load(curList.value[index + 1].path)
   }
 }
 // 按钮功能

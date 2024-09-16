@@ -3,9 +3,9 @@
     <div>
       <div class="Item" v-for="item in itemShow" :key="item.path" :class="curPath===item.path?'select':(item['id']%2===0?'odd':'')"
         v-ctx-menu="menu" @contextmenu="onItemCtx(item)" @click="onItemClick(item)">
-        <span v-tooltip.immediate.overflow="item.name">{{ item.name + (mode === 'normal'?(item as ILibMusic).ext:'') }}</span>
-        <span v-if="mode === 'normal'" v-tooltip.immediate.overflow="(item as ILibMusic).artist">{{ (item as ILibMusic).artist }}</span>
-        <span v-if="mode === 'normal'">{{ formatTime((item as ILibMusic).duration, 'mm:ss') }}</span>
+        <span v-tooltip.immediate.overflow="item.name">{{ item.name + (item['ext']?item['ext']:'') }}</span>
+        <span v-if="mode === 'normal'" v-tooltip.immediate.overflow="item['artist']">{{ item['artist'] }}</span>
+        <span v-if="mode === 'normal'">{{ formatTime(item['duration'], 'mm:ss') }}</span>
       </div>
       <div class="Blank"></div>
     </div>

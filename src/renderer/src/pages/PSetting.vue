@@ -49,12 +49,14 @@
 
 <script setup lang="ts">
 import { vTooltip } from '@renderer/directives/Tooltip'
-import db from '@renderer/utils/db'
 import Close from '@renderer/assets/icons/close.svg?component'
 import Plus from '@renderer/assets/icons/plus.svg?component'
 import Refresh from '@renderer/assets/icons/refresh.svg?component'
 import Dir from '@renderer/assets/icons/dir.svg?component'
 import Check from '@renderer/assets/icons/check.svg?component'
+import { useStore } from '@renderer/store'
+const store = useStore()
+const { db } = store
 const libs = reactive<{arr: ILibrary[]}>({ arr: [] })
 const libAddDialog = ref(false)
 const libAddSelect = ref(false)
