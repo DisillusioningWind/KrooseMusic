@@ -2,9 +2,7 @@
   <div class="KMusicBar">
     <div class="sliderRow">
       <el-text>{{ formatTime(musicShowTime) }}</el-text>
-      <KSlider :min="0" :max="musicDuration" :cur="musicCurTime" :disable="playerState==='unload'" :tooltip="playerState!=='unload'"
-        :tooltip-format="(v: number) => formatTime(v, 'mm:ss')" @update-cur="(time) => {musicShowTime=time}" @drag-cur="changeMusicTime">
-      </KSlider>
+      <KSlider :max="musicDuration" :cur="musicCurTime" :disable="playerState==='unload'" :tooltip="true" :format="v => formatTime(v, 'mm:ss')" @update="time => {musicShowTime=time}" @drag="changeMusicTime" />
       <el-text>{{ formatTime(musicDuration) }}</el-text>
     </div>
     <div class="buttonRow">
@@ -56,7 +54,7 @@
             <path d="m18,21 l7,-7" :visibility="curVol==0?'visible':'hidden'"/>
           </svg>
         </button>
-        <KSlider :min="0" :max="100" :cur="curVol" :tooltip="true" :tooltip-format="(v: number) => Math.floor(v)" @update-cur="setCurVolume" />
+        <KSlider :cur="curVol" :tooltip="true" :format="(v => Math.floor(v).toString())" @update="setCurVolume" />
         <button v-tooltip="'正在播放'" @click.stop="toggleDrawer()">
           <svg>
             <path d="m8.5,10 l0,4 l3,-2 z" stroke-width="1px" fill="white"/>

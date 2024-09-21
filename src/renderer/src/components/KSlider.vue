@@ -1,91 +1,81 @@
 <template>
   <div class="KSlider" ref="slider">
-    <div class="Use"></div>
-    <div class="Btn" :cur="tooltipFormat(cur)"></div>
-    <div class="Unuse"></div>
+    <div class="use"></div>
+    <div class="btn" :cur="tooltipFormat(cur)"></div>
+    <div class="unuse"></div>
   </div>
 </template>
 
-<script lang="ts">
-export default defineComponent({
-  props: {
-    min: Number,
-    max: Number,
-    cur: Number,
-    disable: Boolean,
-    tooltip: Boolean,
-    tooltipFormat: Function
-  },
-  emits: [
-    'updateCur', //更新当前值
-    'dragCur' //拖动当前值
-  ],
-  setup(props, { emit }) {
-    //属性
-    let sliderState: 'drag' | 'slide' = 'slide'
-    const slider = ref<HTMLElement | null>(null)
-    const min = computed(() => props.min || 0)
-    const max = computed(() => props.max || 100)
-    const len = computed(() => max.value - min.value) //范围
-    const cur = ref(props.cur || 0)
-    const perCur = computed(() => cur.value / len.value) //当前值占范围百分比
-    const perUse = computed(() => getPerUse(perCur.value)) //已使用进度条占总进度条长度百分比
-    const disable = computed(() => props.disable || false) //是否禁用
-    const tooltip = computed(() => props.tooltip || false) //是否显示提示
-    const tooltipFormat = computed(() => props.tooltipFormat || ((v: any) => v)) //提示格式化
-    /** perCur为1时，实际按钮需要停在距终点按钮自身宽度（21px）的位置，因此进行换算 */
-    const getPerUse = (perCur: number) => ((slider.value!.offsetWidth - 21) * perCur) / slider.value!.offsetWidth * 100
-    /** 同理，拖动Slider时perCur的值需要计算按钮的宽度 */
-    const getPerCur = (clientX: number) => (clientX - slider.value!.getBoundingClientRect().x - 10.5) / (slider.value!.offsetWidth - 21)
-    //监听外部传入的cur，仅当sliderState为slide且新旧值不等时更新内部cur
-    watch(() => props.cur, (newCur, oldCur) => {
-      if (sliderState === 'slide' && newCur !== oldCur) {
-        cur.value = newCur || 0
-      }
-    })
-    //限制内部cur范围，通知当前值已改变
-    watch(cur, (newCur, oldCur) => {
-      if (newCur < min.value) {
-        cur.value = min.value
-      } else if (newCur > max.value) {
-        cur.value = max.value
-      }
-      //如果新旧值相等则不通知，避免死循环
-      if (newCur === oldCur) return
-      emit('updateCur', cur.value)
-    })
-    //事件绑定
-    onMounted(() => {
-      slider.value!.addEventListener('mousedown', startDrag)
-      document.addEventListener('mousemove', onDrag)
-      document.addEventListener('mouseup', endDrag)
-    })
-    onUnmounted(() => {
-      slider.value?.removeEventListener('mousedown', startDrag)
-      document.removeEventListener('mousemove', onDrag)
-      document.removeEventListener('mouseup', endDrag)
-    })
-    //内部事件处理
-    function startDrag(e: MouseEvent) {
-      if (disable.value) return
-      if (e.button !== 0) return
-      e.preventDefault()
-      sliderState = 'drag'
-      cur.value = getPerCur(e.clientX) * len.value
-    }
-    function onDrag(e: MouseEvent) {
-      if (sliderState !== 'drag') return
-      cur.value = getPerCur(e.clientX) * len.value
-    }
-    function endDrag(e: MouseEvent) {
-      if (sliderState !== 'drag') return
-      cur.value = getPerCur(e.clientX) * len.value
-      sliderState = 'slide'
-      emit('dragCur', cur.value)
-    }
-    return { slider, perUse, cur, disable, tooltip, tooltipFormat }
-  }
+<script setup lang="ts">
+const props = defineProps<{
+  /** 默认0 */
+  min?: number,
+  /** 默认100 */
+  max?: number,
+  /** 当前值 */
+  cur: number,
+  /** 默认不禁用 */
+  disable?: boolean,
+  /** 默认不显示提示 */
+  tooltip?: boolean,
+  /** 默认显示原值 */
+  format?: (v: number) => string
+}>()
+const emit = defineEmits<{ update: [v: number], drag: [v: number] }>()
+//属性
+let state: 'drag' | 'slide' = 'slide'
+const slider = ref<HTMLElement>()
+const min = computed(() => props.min || 0)
+const max = computed(() => props.max || 100)
+const len = computed(() => max.value - min.value) //范围
+const cur = ref(props.cur || 0)
+const perCur = computed(() => cur.value / len.value) //当前值占范围百分比
+const perUse = computed(() => getPerUse(perCur.value)) //已使用进度条占总进度条长度百分比
+const disable = computed(() => props.disable) //是否禁用
+const tooltip = computed(() => props.tooltip && !props.disable) //是否显示提示
+const tooltipFormat = computed(() => props.format || ((v: number) => v)) //提示格式化
+/** perCur为1时，实际按钮需要停在距终点按钮自身宽度（21px）的位置，因此进行换算，百分比格式 */
+const getPerUse = (perCur: number) => ((slider.value!.offsetWidth - 21) * perCur) / slider.value!.offsetWidth * 100
+/** 同理，拖动Slider时perCur的值需要计算按钮的宽度，分数格式 */
+const getPerCur = (clientX: number) => (clientX - slider.value!.getBoundingClientRect().x - 10.5) / (slider.value!.offsetWidth - 21)
+//监听外部传入的cur，仅当state为slide且新旧值不等时更新内部cur
+watch(() => props.cur, (newCur, oldCur) => { if (state === 'slide' && newCur !== oldCur) { cur.value = newCur } })
+//限制内部cur范围，通知当前值已改变
+watch(cur, (newCur, oldCur) => {
+  if (newCur < min.value) { cur.value = min.value }
+  else if (newCur > max.value) { cur.value = max.value }
+  //如果新旧值相等则不通知，避免死循环
+  if (newCur === oldCur) return
+  emit('update', cur.value)
 })
+//事件绑定
+onMounted(() => {
+  slider.value!.addEventListener('mousedown', startDrag)
+  document.addEventListener('mousemove', onDrag)
+  document.addEventListener('mouseup', endDrag)
+})
+onUnmounted(() => {
+  document.removeEventListener('mousemove', onDrag)
+  document.removeEventListener('mouseup', endDrag)
+})
+//内部事件处理
+function startDrag(e: MouseEvent) {
+  if (disable.value) return
+  if (e.button !== 0) return
+  e.preventDefault()
+  state = 'drag'
+  cur.value = getPerCur(e.clientX) * len.value
+}
+function onDrag(e: MouseEvent) {
+  if (state !== 'drag') return
+  cur.value = getPerCur(e.clientX) * len.value
+}
+function endDrag(e: MouseEvent) {
+  if (state !== 'drag') return
+  cur.value = getPerCur(e.clientX) * len.value
+  state = 'slide'
+  emit('drag', cur.value)
+}
 </script>
 
 <style scoped lang="scss">
@@ -105,33 +95,30 @@ $track-left-color: #ffffff40;
   flex: 1;
   display: flex;
   align-items: center;
-  &:hover {
-    .Btn {
-      border-color: $button-hover-color;
-    }
-  }
+  &:hover { >.btn { border-color: $button-hover-color; } }
   &:active {
-    .Btn {
+    >.btn {
       background-color: $track-use-color;
       &::before {
-        opacity: v-bind('tooltip ? 1 : 0');
+        opacity: v-bind('tooltip?1:0');
         transition: opacity .2s;
       }
     }
   }
-  .Use {
+  >.use {
     height: $track-height;
-    width: v-bind('perUse + "%"');
+    width: v-bind('perUse+"%"');
     background-color: $track-use-color;
   }
-  .Unuse {
+  >.unuse {
     height: $track-height;
-    flex-grow: 1;
+    width: 0;
+    flex: 1;
     background-color: $track-left-color;
   }
-  .Btn {
+  >.btn {
     position: relative;
-    display: v-bind('disable ? "none" : "block"');
+    display: v-bind('disable?"none":"block"');
     box-sizing: border-box;
     height: $button-width;
     width: $button-width;
@@ -144,8 +131,8 @@ $track-left-color: #ffffff40;
       @include tool-tip;
       position: absolute;
       left: 50%;
-      transform: translate(-50%);
       bottom: 28px;
+      transform: translate(-50%);
       height: 28px;
       line-height: 28px;
       padding: 0 8px;
