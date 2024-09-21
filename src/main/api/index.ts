@@ -19,18 +19,18 @@ const API = {
  */
 export function bindIpcMain(window: BrowserWindow) {
   for (const key of Object.keys(API)) {
-    ipcMain.handle(key, async (_e, ...args) => {
-      return await API[key](...args)
+    ipcMain.handle(key, (_e, ...args) => {
+      return API[key](...args)
     })
   }
   for (const key of Object.keys(windowAPI)) {
-    ipcMain.handle(key, async (_e, ...args) => {
-      return await windowAPI[key](window, ...args)
+    ipcMain.handle(key, (_e, ...args) => {
+      return windowAPI[key](window, ...args)
     })
   }
   for (const key of Object.keys(libraryAPI)) {
-    ipcMain.handle(key, async (e, ...args) => {
-      return await libraryAPI[key](e, ...args)
+    ipcMain.handle(key, (e, ...args) => {
+      return libraryAPI[key](e, ...args)
     })
   }
 }

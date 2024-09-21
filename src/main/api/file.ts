@@ -88,6 +88,11 @@ export async function getMainColorFromFile(path: string): Promise<string> {
  * @returns 主色调
  */
 export async function getInfoFromFile(path: string): Promise<{ tag: ICommonTagsResult; mainColor: string }> {
-  const tag = (await parseFile(path)).common
-  return { tag, mainColor: tag.picture ? await getMainColorFromBuffer(tag.picture[0].data) : '#1a5d8e' }
+  const stime = performance.now()
+  const metadata = await parseFile(path)
+  const etime = performance.now()
+  const tag = metadata.common
+  const mainColor = tag.picture ? await getMainColorFromBuffer(tag.picture[0].data) : '#1a5d8e'
+  console.log('Time getInfoFromFile:', etime - stime, performance.now() - etime, performance.now() - stime)
+  return { tag, mainColor }
 }

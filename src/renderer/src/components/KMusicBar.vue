@@ -1,44 +1,44 @@
 <template>
   <div class="KMusicBar">
     <div class="sliderRow">
-      <el-text>{{ formatTime(showTime) }}</el-text>
-      <KSlider :min="0" :max="player.duration" :cur="musicCurTime" :disable="player.state === 'unload'" :tooltip="player.state !== 'unload'"
-        :tooltip-format="(v: number) => formatTime(v, 'mm:ss')" @update-cur="(time) => { showTime = time }" @drag-cur="(time) => { player.time = time }">
+      <el-text>{{ formatTime(musicShowTime) }}</el-text>
+      <KSlider :min="0" :max="musicDuration" :cur="musicCurTime" :disable="playerState==='unload'" :tooltip="playerState!=='unload'"
+        :tooltip-format="(v: number) => formatTime(v, 'mm:ss')" @update-cur="(time) => {musicShowTime=time}" @drag-cur="changeMusicTime">
       </KSlider>
-      <el-text>{{ formatTime(player.duration) }}</el-text>
+      <el-text>{{ formatTime(musicDuration) }}</el-text>
     </div>
     <div class="buttonRow">
       <div class="detailBar">
-        <KDetailBtn v-show="player.state !== 'unload'" :title="player.title" :artist="player.artist" :picURL="player.picURL" :showPic="!showDetail" @click="toggleDetail()" />
+        <KDetailBtn v-show="playerState!=='unload'" :title="musicTitle" :artist="musicArtist" :picURL="musicPicURL" :showPic="!showDetail" @click="toggleDetail()" />
       </div>
       <div class="controlBar">
-        <button v-tooltip="player.state !== 'unload' ? '上一首' : ''">
+        <button v-tooltip="playerState!=='unload'?'上一首':''">
           <svg>
             <path d="m10,9 l0,17"/>
             <path d="m25,10 l0,15 l-10,-7.5 z"/>
           </svg>
         </button>
-        <button v-tooltip="player.state !== 'unload' ? '向前10秒' : ''" @click="btnFastBackward">
+        <button v-tooltip="playerState!=='unload'?'向前10秒':''" @click="btnFastBackward">
           <svg>
             <path d="m7.5,17.5 a 10 10 0 1 0 10,-10"/>
             <path class="forwardPath" d="m17.5,4.5 l0,6 l-5,-3 z"/>
             <text x="50%" y="60%">10</text>
           </svg>
         </button>
-        <button class="playButton" v-tooltip="player.state !== 'unload' ? (player.state === 'play' ? '暂停' : '播放') : ''" @click="btnTogglePlay">
+        <button class="playButton" v-tooltip="playerState!=='unload'?(playerState==='play'?'暂停':'播放'):''" @click="btnTogglePlay">
           <svg>
-            <path v-show="player.state === 'play'" d="m19,12 l0,22 m8,0 l0,-22"/>
-            <path v-show="player.state !== 'play'" d="m17,13.5 l0,20 l15,-10 z"/>
+            <path v-show="playerState==='play'" d="m19,12 l0,22 m8,0 l0,-22"/>
+            <path v-show="playerState!=='play'" d="m17,13.5 l0,20 l15,-10 z"/>
           </svg>
         </button>
-        <button v-tooltip="player.state !== 'unload' ? '向后10秒' : ''" @click="btnFastForward">
+        <button v-tooltip="playerState!=='unload'?'向后10秒':''" @click="btnFastForward">
           <svg>
             <path d="m27.5,17.5 a 10 10 0 1 1 -10,-10"/>
             <path class="forwardPath" d="m17.5,4.5 l0,6 l5,-3 z"/>
             <text x="50%" y="60%">10</text>
           </svg>
         </button>
-        <button v-tooltip="player.state !== 'unload' ? '下一首' : ''">
+        <button v-tooltip="playerState!=='unload'?'下一首':''">
           <svg>
             <path d="m10,10 l0,15 l10,-7.5 z"/>
             <path d="m25,9 l0,17"/>
@@ -49,16 +49,14 @@
         <button v-tooltip="'开启静音'">
           <svg>
             <path d="m7,14.5 l0,6 l3,0 l4,4 l0,-14 l-4,4 l-3,0 z"/>
-            <path d="m18,14 a 5 5 0 0 1 0,7" :visibility="curVolume == 0 ? 'hidden' : 'visible'"/>
-            <path d="m21,11.5 a 9 9 0 0 1 0,12" :visibility="curVolume < 0.33 ? 'hidden' : 'visible'"/>
-            <path d="m23.5,8.5 a 13 13 0 0 1 0,18" :visibility="curVolume < 0.66 ? 'hidden' : 'visible'"/>
-            <path d="m18,14 l7,7" :visibility="curVolume == 0 ? 'visible' : 'hidden'"/>
-            <path d="m18,21 l7,-7" :visibility="curVolume == 0 ? 'visible' : 'hidden'"/>
+            <path d="m18,14 a 5 5 0 0 1 0,7" :visibility="curVol==0?'hidden':'visible'"/>
+            <path d="m21,11.5 a 9 9 0 0 1 0,12" :visibility="curVol<33.3?'hidden':'visible'"/>
+            <path d="m23.5,8.5 a 13 13 0 0 1 0,18" :visibility="curVol<66.6?'hidden':'visible'"/>
+            <path d="m18,14 l7,7" :visibility="curVol==0?'visible':'hidden'"/>
+            <path d="m18,21 l7,-7" :visibility="curVol==0?'visible':'hidden'"/>
           </svg>
         </button>
-        <KSlider :min="0" :max="100" :cur="curVolume" :tooltip="true" :tooltip-format="(v: number) => Math.floor(v)"
-          @update-cur="(volume) => { player.volume = curVolume = volume * 0.01 }">
-        </KSlider>
+        <KSlider :min="0" :max="100" :cur="curVol" :tooltip="true" :tooltip-format="(v: number) => Math.floor(v)" @update-cur="setCurVolume" />
         <button v-tooltip="'正在播放'" @click.stop="toggleDrawer()">
           <svg>
             <path d="m8.5,10 l0,4 l3,-2 z" stroke-width="1px" fill="white"/>
@@ -84,90 +82,29 @@ import { useStore } from '@renderer/store'
 import { vTooltip } from '@renderer/directives/Tooltip'
 import { vMenu } from '@renderer/directives/Menu'
 import { formatTime } from '@renderer/utils/tools'
-import { getMusicPath, setMusicPath } from '@renderer/utils/storage'
-import bus from '@renderer/utils/emitter'
 import svgOpenDir from '@renderer/assets/icons/dir.svg?url'
 import svgOpenFile from '@renderer/assets/icons/plus.svg?url'
 import svgCloseFile from '@renderer/assets/icons/close.svg?url'
 // 数据
 const store = useStore()
-const { showDetail, curList, player, musicCurTime, musicPath, musicPicURL, musicLyrics } = storeToRefs(store)
-const { toggleDetail, toggleDrawer } = store
-const showTime = ref(0)
-const curVolume = ref(100)
+const { showDetail, playerState, musicDuration, musicCurTime, musicTitle, musicArtist, musicPicURL, musicColor, curVol } = storeToRefs(store)
+const { toggleDetail, toggleDrawer, loadMusic, unloadMusic, toggleMusicPlay, changeMusicTime, setCurVolume } = store
+const musicShowTime = ref(0)
 const menu = [
   { label: '打开目录', icon: svgOpenDir, action: btnOpenDir},
   { label: '打开文件', icon: svgOpenFile, action: btnOpenFile },
   { label: '卸载文件', icon: svgCloseFile, action: btnUnloadFile }
 ]
-let lastPlay = false
-// 事件绑定
-onMounted(() => {
-  bus.musicUpdateCur((time) => { musicCurTime.value = time })
-  bus.musicLoad(onMusicLoad)
-  bus.musicInfoLoad(onMusicInfoLoad)
-  bus.musicUnload(onMusicUnload)
-  bus.musicEnd(onMusicEnd)
-  const defPath = getMusicPath()
-  if (defPath.length > 0) {
-    lastPlay = true
-    player.value.load(defPath)
-  }
-})
-function onMusicInfoLoad() {
-  musicPath.value = player.value.path
-  musicPicURL.value = player.value.picURL
-  musicLyrics.value = player.value.lyrics
-  setMusicPath(player.value.path)
-}
-function onMusicLoad() {
-  if (lastPlay) {
-    player.value.pause()
-    lastPlay = false
-  }
-}
-function onMusicUnload() {
-  musicCurTime.value = 0
-  musicPath.value = ''
-  musicPicURL.value = ''
-  musicLyrics.value = []
-  showDetail.value = false
-  setMusicPath('')
-}
-function onMusicEnd() {
-  if (curList.value.length === 0) return
-  const index = curList.value.findIndex(item => item.path === player.value.path)
-  if (index === -1) {
-    // WARN: 未找到当前播放文件
-  } else if (index === curList.value.length - 1) {
-    // TODO: 循环模式
-  } else {
-    player.value.load(curList.value[index + 1].path)
-  }
-}
 // 按钮功能
-function btnTogglePlay() {
-  if (player.value.state === 'play') {
-    player.value.pause()
-  } else if (player.value.state === 'pause' || player.value.state === 'stop') {
-    player.value.play()
-  }
-}
-function btnFastForward() {
-  player.value.time += 10
-}
-function btnFastBackward() {
-  player.value.time -= 10
-}
-function btnUnloadFile() {
-  player.value.unload()
-}
-async function btnOpenDir() {
-}
+function btnTogglePlay() { toggleMusicPlay() }
+function btnFastForward() { changeMusicTime(10, true) }
+function btnFastBackward() { changeMusicTime(-10, true) }
+function btnUnloadFile() { unloadMusic() }
+async function btnOpenDir() { /** TODO */ }
 async function btnOpenFile() {
   const filePath = await window.ipc.invoke('openFileWindow') as string | null
   if (!filePath) return
-  player.value.load(filePath)
+  loadMusic(filePath)
 }
 </script>
 
@@ -185,7 +122,7 @@ async function btnOpenFile() {
   &:active {
     background-color: #00000050;
   }
-  svg {
+  >svg {
     height: 100%;
     width: 100%;
     stroke: white;
@@ -204,22 +141,18 @@ async function btnOpenFile() {
 }
 
 .KMusicBar {
-  background-color: v-bind('player.mainColor');
+  background-color: v-bind('musicColor');
   .sliderRow {
-    margin: 0 12px;
     height: 32px;
+    margin: 0 12px;
     display: flex;
     align-items: center;
     .el-text {
       color: white;
       font-size: 12px;
-      visibility: v-bind('player.state === "unload" ? "hidden" : "visible" ');
-      &:first-child {
-        margin-right: 22px;
-      }
-      &:last-child {
-        margin-left: 22px;
-      }
+      visibility: v-bind('playerState==="unload"?"hidden":"visible"');
+      &:first-child { margin-right: 22px; }
+      &:last-child { margin-left: 22px; }
     }
   }
   .buttonRow {
@@ -239,37 +172,24 @@ async function btnOpenFile() {
       align-items: center;
       >button {
         @include svgButton(35px);
-        margin: 0 8px 0 8px;
-        &:hover {
-          background-color: v-bind('player.state === "unload" ? "transparent" : "#00000030"');
-        }
-        &:active {
-          background-color: v-bind('player.state === "unload" ? "transparent" : "#00000050"');
-        }
-        svg {
-          stroke: v-bind('player.state === "unload" ? "#ffffff40" : "white"');
-          .forwardPath {
-            fill: v-bind('player.state === "unload" ? "#ffffff40" : "white"');
-          }
+        margin: 0 8px;
+        &:hover { background-color: v-bind('playerState==="unload"?"transparent":"#00000030"'); }
+        &:active { background-color: v-bind('playerState==="unload"?"transparent":"#00000050"'); }
+        >svg {
+          stroke: v-bind('playerState==="unload"?"#ffffff40":"white"');
+          .forwardPath { fill: v-bind('playerState==="unload"?"#ffffff40":"white"'); }
         }
       }
-      .playButton {
+      >.playButton {
         @include svgButton(50px);
         border: 2px solid #ffffff40;
-        &:hover {
-          background-color: v-bind('player.state === "unload" ? "transparent" : "#00000030"');
-        }
-        &:active {
-          background-color: v-bind('player.state === "unload" ? "transparent" : "#00000050"');
-        }
-        svg {
-          stroke: v-bind('player.state === "unload" ? "#ffffff40" : "white"');
-        }
+        &:hover { background-color: v-bind('playerState==="unload"?"transparent":"#00000030"'); }
         &:active {
           background-color: transparent;
           border-width: 2px;
-          border-color: v-bind('player.state === "unload" ? "#ffffff40" : "white"');
+          border-color: v-bind('playerState==="unload"?"#ffffff40":"white"');
         }
+        >svg { stroke: v-bind('playerState==="unload"?"#ffffff40":"white"'); }
       }
     }
     .toolBar {
@@ -278,13 +198,9 @@ async function btnOpenFile() {
       align-items: center;
       >* {
         margin-right: 8px;
-        &:first-child {
-          margin-left: 50px;
-        }
+        &:first-child { margin-left: 50px; }
       }
-      >button {
-        @include svgButton(35px);
-      }
+      >button { @include svgButton(35px); }
     }
   }
 }

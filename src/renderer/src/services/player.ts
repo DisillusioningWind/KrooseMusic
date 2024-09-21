@@ -1,8 +1,9 @@
-import { logExeTimeAsync } from '@renderer/utils/tools'
+import { logTimeAsync } from '@renderer/utils/tools'
 import bus from '@renderer/utils/emitter'
 
 export default class KPlayer {
   private _audio: HTMLAudioElement
+  private _autoPlay: boolean = true
   private _state: 'unload' | 'play' | 'pause' | 'stop' = 'unload'
   private _path: string = ''
   private _duration: number = 0
@@ -27,10 +28,11 @@ export default class KPlayer {
   constructor() {
     this._audio = new Audio()
   }
-  @logExeTimeAsync
-  async load(path: string) {
+  @logTimeAsync
+  async load(path: string, autoPlay: boolean = true) {
     try {
       this.pause()
+      this._autoPlay = autoPlay
       this._state = 'unload'
       this._audio.src = window.url.pathToFileURL(path).href
       // 加载歌词和音乐信息
@@ -43,7 +45,7 @@ export default class KPlayer {
       this._artist = tag.artist || '未知艺术家'
       this._picURL = (tag.picture) ? URL.createObjectURL(new Blob([tag.picture[0].data])) : ''
       this._mainColor = mainColor
-      bus.musicInfoLoadEmit()
+      bus.emitMusicInfoLoad()
     } catch (e) {
       console.error(e)
     }
@@ -59,12 +61,12 @@ export default class KPlayer {
     this._mainColor = '#1a5d8e'
     this._lyrics = []
     this._state = 'unload'
-    bus.musicUnloadEmit()
+    bus.emitMusicUnload()
   }
   loaded() {
     this._state = 'stop'
     this._duration = this._audio.duration
-    this.play()
+    if (this._autoPlay) this.play()
   }
   play() {
     if (this._state === 'pause' || this._state === 'stop') {
@@ -87,13 +89,13 @@ export default class KPlayer {
   }
   /** 将audio原生事件转化为emitter事件发射 */
   initEvents() {
-    this._audio.ontimeupdate = () => { bus.musicUpdateCurEmit(this.time) }
-    this._audio.oncanplay = () => { if (this._state === 'unload') bus.musicLoadEmit() }
-    this._audio.onended = () => { bus.musicEndEmit() }
+    this._audio.ontimeupdate = () => { bus.emitMusicUpdateCur(this.time) }
+    this._audio.oncanplay = () => { if (this._state === 'unload') bus.emitMusicLoad() }
+    this._audio.onended = () => { bus.emitMusicEnd() }
   }
   /** 初始化事件监听 */
   initHandlers() {
-    bus.musicLoad(this.loaded.bind(this))
-    bus.musicEnd(this.pause.bind(this))
+    bus.onMusicLoad(this.loaded.bind(this))
+    bus.onMusicEnd(this.pause.bind(this))
   }
 }

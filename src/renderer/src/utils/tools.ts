@@ -1,3 +1,4 @@
+
 const styleNameMethod = 'background-color: #606060; color: #fff; border-radius: 3px 0 0 3px; padding: 0 2px 0 2px; font-family: "Arial";'
 const styleNameTime = 'background-color: #e07800; color: #fff; border-radius: 3px 0 0 3px; padding: 0 2px 0 2px; font-family: "Arial";'
 const styleValue = 'background-color: #007acc; color: #fff; border-radius: 0 3px 3px 0; padding: 0 2px 0 2px; margin-right: 5px; font-family: "Arial";'
@@ -7,8 +8,8 @@ const styleValue = 'background-color: #007acc; color: #fff; border-radius: 0 3px
  * @param propertyKey  函数名
  * @param descriptor 函数的描述符
  */
-export function logExeTimeAsync(_target: any, propertyKey: string, descriptor: PropertyDescriptor) {
-  const method = descriptor.value
+export function logTimeAsync(_target: any, propertyKey: string, descriptor: PropertyDescriptor) {
+  const method = descriptor.value as Function
   descriptor.value = async function (...args: any[]) {
     const starTime = performance.now()
     const result = await method.call(this, ...args)
@@ -18,6 +19,7 @@ export function logExeTimeAsync(_target: any, propertyKey: string, descriptor: P
   }
 }
 
+const pad = (num: number) => num.toString().padStart(2, '0')
 /**
  *  格式化时间，注意时长有可能会被截断
  * @param time 时间
@@ -29,7 +31,6 @@ export function formatTime(time: number, option?: 'hh:mm:ss' | 'mm:ss' | 'ss') {
   const min = Math.floor((time % 3600) / 60)
   const sec = Math.floor(time % 60)
 
-  const pad = (num: number) => num.toString().padStart(2, '0')
   const minStr = pad(min)
   const secStr = pad(sec)
 

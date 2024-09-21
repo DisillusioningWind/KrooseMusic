@@ -18,7 +18,7 @@ export default class KDBManager {
         })
       }
       // 非首次打开时为动态模式，此时不需要明确的schema
-      this.db.open().then(() => bus.dbOpenEmit())
+      this.db.open().then(() => bus.emitDbOpen())
     })
   }
   // 修改数据库schema后打开为普通模式，此时需要明确的schema

@@ -21,7 +21,7 @@
           </div>
         </div>
         <div class="DirListBar">
-          <KDirList :dir="dirSelect" :cur-path="player.path" @music="onDirMusic" @musics="onDirMusics"/>
+          <KDirList :dir="dirSelect" :cur-path="musicPath" @music="onDirMusic" @musics="onDirMusics"/>
         </div>
       </div>
     </div>
@@ -31,12 +31,13 @@
 <script setup lang="ts">
 import { useStore } from '@renderer/store'
 const store = useStore()
-const { player, curLibs, curLib, curItems, curItem, curList, albumPath } = storeToRefs(store)
+const { curLibs, curLib, curItems, curItem, curList, albumPath, musicPath } = storeToRefs(store)
+const { loadMusic } = store
 const dirSelect = ref<IDirStruc>()
 
 async function onItemSelect(item: ILibItem) {
-  if (curLib.value?.mode === 'normal' && item.path !== player.value.path) {
-    player.value.load(item.path)
+  if (curLib.value?.mode === 'normal' && item.path !== musicPath.value) {
+    loadMusic(item.path)
     const index = curItems.value.findIndex(v => v.path === item.path)
     curList.value = curItems.value.slice(index).map((v, i) => { v['id'] = i; return v })
   } else if (curLib.value?.mode === 'asmr') {
@@ -46,11 +47,11 @@ async function onItemSelect(item: ILibItem) {
   }
 }
 function onDirMusic(path: string) {
-  if (player.value.path === path) return
-  player.value.load(path)
+  if (musicPath.value === path) return
+  loadMusic(path)
 }
 function onDirMusics(musics: ILibItem[]) {
-  player.value.load(musics[0].path)
+  loadMusic(musics[0].path)
   curList.value = musics.map((v, i) => ({ ...v, id: i }))
 }
 </script>
