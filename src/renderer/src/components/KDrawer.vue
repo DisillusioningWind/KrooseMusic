@@ -21,7 +21,7 @@ function onDocClick(e: MouseEvent) {
 
 <style scoped lang="scss">
 .KDrawer {
-  position: fixed;
+  position: fixed !important;
   z-index: 1;
   top: 30px;
   right: 0;

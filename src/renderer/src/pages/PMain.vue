@@ -1,11 +1,10 @@
 <template>
   <div class="PMain" :class="showDetail?'Blur':''">
     <KTitleBar />
-    <div class="KMainBar">
-      <KNavView v-show="!showDetail" />
-      <PDetail v-show="showDetail" />
-      <KListDrawer v-model="showDrawer" />
-    </div>
+    <KNavBar v-show="!showDetail" />
+    <RouterView v-show="!showDetail" />
+    <PDetail v-show="showDetail" />
+    <KListDrawer v-model="showDrawer" />
     <KMusicBar />
   </div>
 </template>
@@ -21,6 +20,9 @@ const { showDetail, showDrawer, musicPicURL } = storeToRefs(store)
   height: 100%;
   width: 100%;
   overflow: hidden;
+  display: grid;
+  grid-template-rows: 30px calc(100% - 152px) 122px;
+  grid-template-columns: min-content 1fr 0px;
   &.Blur {
     background-repeat: no-repeat;
     background-position: 50% 0;
@@ -38,10 +40,10 @@ const { showDetail, showDrawer, musicPicURL } = storeToRefs(store)
       position: relative;
     }
   }
-  >.KMainBar {
-    height: calc(100% - 152px);
-    width: 100%;
-    display: flex;
+  >div {
+    &:first-child { grid-column: 1 / 4; }
+    &:nth-child(4) { grid-column: 1 / 3; }
+    &:last-child { grid-column: 1 / 4; }
   }
 }
 </style>

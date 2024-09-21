@@ -119,6 +119,7 @@ function onItemCtxOpen() {
         width: 100px;
       }
       &:first-child {
+        width: 0;
         flex: 1;
         text-align: left;
       }
