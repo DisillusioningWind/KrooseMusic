@@ -1,4 +1,5 @@
-export {}
+import { FunctionalComponent, SVGAttributes } from 'vue'
+import { ICommonTagsResult } from 'music-metadata'
 declare global {
   interface ILyric {
     time: number
@@ -10,16 +11,18 @@ declare global {
     mainColor: string
   }
   interface IMenuItem {
-    icon?: string
+    icon?: FunctionalComponent<SVGAttributes, {}, any, {}>
     label: string
-    action: () => void | Promise<void>
+    action: () => void
   }
   interface IDirStruc {
     name: string
     musics?: { name: string, path: string }[]
     dirs?: IDirStruc[]
   }
+
   type LibMode = 'normal' | 'asmr'
+  type ListMode = LibMode | 'playlist'
   interface ILibItem {
     name: string
     path: string

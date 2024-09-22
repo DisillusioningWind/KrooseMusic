@@ -5,7 +5,7 @@ const menuDiv = document.createElement('div')
 menuDiv.id = 'kMenu'
 document.body.appendChild(menuDiv)
 const menuApp = createApp(KMenu)
-const menuCom = menuApp.mount(menuDiv) as any
+const menuCom = menuApp.mount(menuDiv) as InstanceType<typeof KMenu>
 // 事件处理
 const showMenu = (ev: MouseEvent, menuItems: IMenuItem[]) => {
   menuCom.menuItems = menuItems

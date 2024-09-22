@@ -80,9 +80,9 @@ import { useStore } from '@renderer/store'
 import { vTooltip } from '@renderer/directives/Tooltip'
 import { vMenu } from '@renderer/directives/Menu'
 import { formatTime } from '@renderer/utils/tools'
-import svgOpenDir from '@renderer/assets/icons/dir.svg?url'
-import svgOpenFile from '@renderer/assets/icons/plus.svg?url'
-import svgCloseFile from '@renderer/assets/icons/close.svg?url'
+import svgOpenDir from '@renderer/assets/icons/dir.svg?component'
+import svgOpenFile from '@renderer/assets/icons/plus.svg?component'
+import svgCloseFile from '@renderer/assets/icons/close.svg?component'
 // 数据
 const store = useStore()
 const { showDetail, playerState, musicDuration, musicCurTime, musicTitle, musicArtist, musicPicURL, musicColor, curVol } = storeToRefs(store)
@@ -114,12 +114,8 @@ async function btnOpenFile() {
   border: none;
   border-radius: 50%;
   background-color: transparent;
-  &:hover {
-    background-color: #00000030;
-  }
-  &:active {
-    background-color: #00000050;
-  }
+  &:hover { background-color: #00000030; }
+  &:active { background-color: #00000050; }
   >svg {
     height: 100%;
     width: 100%;

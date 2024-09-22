@@ -16,7 +16,6 @@
 import { formatTime } from '@renderer/utils/tools'
 import { vTooltip } from '@renderer/directives/Tooltip'
 import { vCtxMenu } from '@renderer/directives/Menu'
-type ListMode = LibMode | 'playlist'
 const prop = defineProps<{ mode?: ListMode, items: ILibItem[], curPath?: string }>()
 const emit = defineEmits<{ select: [value: ILibItem] }>()
 const _itemStart = ref(0)
