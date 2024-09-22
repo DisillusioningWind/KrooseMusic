@@ -7,8 +7,8 @@ document.body.appendChild(menuDiv)
 const menuApp = createApp(KMenu)
 const menuCom = menuApp.mount(menuDiv) as InstanceType<typeof KMenu>
 // 事件处理
-const showMenu = (ev: MouseEvent, menuItems: IMenuItem[]) => {
-  menuCom.menuItems = menuItems
+const showMenu = (ev: MouseEvent, items: IMenuItem[]) => {
+  menuCom.items = items
   menuCom.onOpenMenu(ev)
 }
 const prevMenu = (ev: MouseEvent) => {

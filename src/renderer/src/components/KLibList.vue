@@ -1,13 +1,12 @@
 <template>
   <div class="KLibList" @scroll="onScroll" >
-    <div>
-      <div class="Item" v-for="item in itemShow" :key="item.path" :class="curPath===item.path?'select':(item['id']%2===0?'odd':'')"
+    <div class="scroll-wrap">
+      <div class="item" v-for="item in itemShow" :key="item.path" :class="curPath===item.path?'select':(item['id']%2===0?'odd':'')"
         v-ctx-menu="menu" @contextmenu="onItemCtx(item)" @click="onItemClick(item)">
         <span v-tooltip.immediate.overflow="item.name">{{ item.name + (item['ext']?item['ext']:'') }}</span>
         <span v-if="mode === 'normal'" v-tooltip.immediate.overflow="item['artist']">{{ item['artist'] }}</span>
         <span v-if="mode === 'normal'">{{ formatTime(item['duration'], 'mm:ss') }}</span>
       </div>
-      <div class="Blank"></div>
     </div>
   </div>
 </template>
@@ -56,76 +55,48 @@ function onItemCtxOpen() {
 </script>
 
 <style scoped lang="scss">
-@mixin KScrollBar($track-color: transparent){
-  &::-webkit-scrollbar {
-    width: 8px;
-  }
-  &::-webkit-scrollbar-thumb {
-    background-color: #bababa;
-    &:hover {
-      background-color: #8c8c8c;
-    }
-    &:active {
-      background-color: #5d5d5d;
-    }
-  }
-  &::-webkit-scrollbar-track {
-    background-color: $track-color;
-  }
-}
+@import '@renderer/assets/global';
+
 .KLibList {
   height: 100%;
   width: 100%;
-  overflow-y: scroll;
-  @include KScrollBar;
-  .Item {
-    height: 40px;
-    display: flex;
-    justify-content: flex-end;
-    align-items: center;
-    user-select: none;
-    &.odd {
-      background-color: #f2f2f2;
-    }
-    &:hover {
-      background-color: #d9d9d9;
-    }
-    &:active {
-      background-color: #aeaeae;
-    }
-    &.select {
-      color: white;
-      background-color: #0078d7;
-      &:hover {
-        background-color: #005a9e;
+  @include k-scroll-bar;
+  .scroll-wrap {
+    padding-bottom: v-bind('(items.length - itemStart - 20) * 40 + "px"');
+    .item {
+      height: 40px;
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      user-select: none;
+      &.odd { background-color: #f2f2f2; }
+      &:hover { background-color: #d9d9d9; }
+      &:active { background-color: #aeaeae; }
+      &.select {
+        color: white;
+        background-color: #0078d7;
+        &:hover { background-color: #005a9e; }
+        &:active { background-color: #00487e; }
       }
-      &:active {
-        background-color: #00487e;
-      }
-    }
-    >span {
-      margin-left: 10px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      font-size: 14px;
-      &:last-child {
-        margin-right: 10px;
-        width: 50px;
-        text-align: center;
-      }
-      &:nth-child(2) {
-        width: 100px;
-      }
-      &:first-child {
-        width: 0;
-        flex: 1;
-        text-align: left;
+      >span {
+        margin-left: 10px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        font-size: 14px;
+        &:nth-child(2) { width: 100px; }
+        &:last-child {
+          width: 50px;
+          margin-right: 10px;
+          text-align: center;
+        }
+        &:first-child {
+          width: 0;
+          flex: 1;
+          text-align: left;
+        }
       }
     }
-  }
-  .Blank {
-    height: v-bind('(items.length - itemStart - 20) * 40 + "px"');
   }
 }
 </style>

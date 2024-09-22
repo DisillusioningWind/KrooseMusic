@@ -57,23 +57,8 @@ function onDirMusics(musics: ILibItem[]) {
 </script>
 
 <style scoped lang="scss">
-@mixin KScrollBar($track-color: transparent){
-  &::-webkit-scrollbar {
-    width: 8px;
-  }
-  &::-webkit-scrollbar-thumb {
-    background-color: #bababa;
-    &:hover {
-      background-color: #8c8c8c;
-    }
-    &:active {
-      background-color: #5d5d5d;
-    }
-  }
-  &::-webkit-scrollbar-track {
-    background-color: $track-color;
-  }
-}
+@import '@renderer/assets/global';
+
 $toolBarHeight: 45px;
 $conBarMarginTop: 14px;
 .PLibrary {
@@ -155,11 +140,8 @@ $conBarMarginTop: 14px;
         width: 100%;
         height: calc(100% - $img-size);
         background-color: #f6f6f6;
-        overflow-y: scroll;
-        @include KScrollBar;
-        >div {
-          margin-bottom: 10px;
-        }
+        @include k-scroll-bar(scroll);
+        >div { margin-bottom: 10px; }
       }
     }
   }

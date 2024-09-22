@@ -12,9 +12,7 @@
         </template>
       </el-image>
     </div>
-    <div class="LrcDiv">
-      <KLyric />
-    </div>
+    <KLyric class="LrcDiv" :curStat="store.playerState" :curTime="store.musicCurTime" :curLrcs="store.musicLyrics"/>
   </div>
 </template>
 
@@ -53,8 +51,9 @@ $paddingWidth: 12px;
   }
   .LrcDiv {
     width: 73%;
-    padding-top: $paddingWidth;
-    padding-bottom: $paddingWidth;
+    height: calc(100% - 2 * $paddingWidth);
+    margin-top: $paddingWidth;
+    margin-bottom: $paddingWidth;
   }
 }
 </style>

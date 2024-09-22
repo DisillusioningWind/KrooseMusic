@@ -1,6 +1,6 @@
 <template>
-  <div class="KMenu" ref="menuDiv" :class="menuShow?'visible':''">
-    <div class="item" v-for="item in menuItems" :key="item.label" @click="onClick(item)">
+  <div class="KMenu" ref="menu" :class="show?'visible':''">
+    <div class="item" v-for="item in items" :key="item.label" @click="onClick(item)">
       <component v-if="item.icon" :is="item.icon" />
       <span>{{ item.label }}</span>
     </div>
@@ -8,9 +8,9 @@
 </template>
 
 <script setup lang="ts">
-const menuItems = shallowRef<IMenuItem[]>([])
-const menuShow = ref(false)
-const menuDiv = ref<HTMLDivElement>()
+const menu = ref<HTMLDivElement>()
+const show = ref(false)
+const items = shallowRef<IMenuItem[]>([])
 const x = ref(0)
 const y = ref(0)
 // 事件绑定
@@ -27,16 +27,17 @@ function onOpenMenu(e: MouseEvent) {
   e.preventDefault()
   e.stopPropagation()
   nextTick(() => {
-    const divWidth = menuDiv.value!.offsetWidth
-    const divHeight = menuDiv.value!.offsetHeight
+    if (!menu.value) return
+    const divWidth = menu.value.offsetWidth
+    const divHeight = menu.value.offsetHeight
     x.value = e.clientX + divWidth > window.innerWidth ? e.clientX - divWidth : e.clientX
     y.value = e.clientY + divHeight > window.innerHeight ? e.clientY - divHeight : e.clientY
-    menuShow.value = true
+    show.value = true
   })
 }
 function onCloseMenu() {
-  menuShow.value = false
-  menuItems.value = []
+  show.value = false
+  items.value = []
   x.value = 0
   y.value = 0
 }
@@ -44,7 +45,7 @@ function onClick(item: IMenuItem) {
   onCloseMenu()
   item.action()
 }
-defineExpose({ menuItems, onOpenMenu })
+defineExpose({ items, onOpenMenu })
 </script>
 
 <style scoped lang="scss">
@@ -54,11 +55,10 @@ $item-padding: 11px;
 $icon-size: 17px;
 
 .KMenu {
-  position: fixed;
-  left: v-bind('x+"px"');
-  top: v-bind('y+"px"');
+  @include k-tool-tip(fixed);
+  left: v-bind('x + "px"');
+  top: v-bind('y + "px"');
   z-index: 1;
-  @include tool-tip;
   padding: 4px 0;
   clip-path: polygon(0 0, 100% 0, 100% 0, 0 0);
   &.visible {

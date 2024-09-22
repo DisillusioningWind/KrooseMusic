@@ -1,5 +1,17 @@
-@mixin tool-tip {
+@mixin k-tool-tip($pos: absolute) {
+  position: $pos;
   background-color: #f2f2f2;
   border: 1.5px solid #d1d1d1;
   border-radius: 4px;
+}
+
+@mixin k-scroll-bar($over: auto, $color: transparent) {
+  overflow-y: $over;
+  &::-webkit-scrollbar { width: 8px; }
+  &::-webkit-scrollbar-track { background-color: $color; }
+  &::-webkit-scrollbar-thumb {
+    background-color: #bababa;
+    &:hover { background-color: #8c8c8c; }
+    &:active { background-color: #5d5d5d; }
+  }
 }

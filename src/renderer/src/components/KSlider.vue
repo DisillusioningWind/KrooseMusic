@@ -128,8 +128,7 @@ $track-left-color: #ffffff40;
     background-color: transparent;
     // 提示
     &::before {
-      @include tool-tip;
-      position: absolute;
+      @include k-tool-tip;
       left: 50%;
       bottom: 28px;
       transform: translate(-50%);

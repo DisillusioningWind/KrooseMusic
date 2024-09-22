@@ -1,84 +1,73 @@
 <template>
-  <div class="KLyric">
-    <div class="List" ref="list" @wheel="startScroll">
-      <span v-for="(item, i) in store.musicLyrics" :key="item.uid" :class=" i == index ? 'active' : ''">
-        {{ item.lyric }}
-      </span>
-    </div>
+  <div class="KLyric" ref="list" @scroll="scrolling" @scrollend="scrollend">
+    <span v-for="(item, i) in lrcs" :key="item.uid" :class="i==idx?'active':''">{{ item.lyric }}</span>
   </div>
 </template>
 
 <script setup lang="ts">
-import { useStore } from '@renderer/store'
-const store = useStore()
-const list = ref<HTMLElement | null>(null)
-const index = ref(0)
-let scrolled = false
+const props = defineProps<{ curStat: string, curTime: number, curLrcs: ILyric[] }>()
+const stat = computed(() => props.curStat)
+const time = computed(() => props.curTime)
+const lrcs = computed(() => props.curLrcs)
+const list = ref<HTMLElement>()
+const idx = ref(0)
+let scrollAuto = false
+let scrollUser = false
+let scrollTimer: NodeJS.Timeout | null = null
 // 根据当前时间自动滚动歌词
-watch(() => store.musicCurTime, (val) => {
-  index.value = store.musicLyrics.findIndex((item) => item.time >= val) - 1
-  if (index.value >= 0 && !scrolled) {
-    list.value?.scrollTo({
-      top: (index.value - 10) * 22,
-      behavior: 'smooth'
-    })
-  }
+watch(time, (val) => {
+  idx.value = lrcs.value.findLastIndex(item => item.time <= val)
+})
+watch(idx, (newIdx, oldIdx) => {
+  if (newIdx === oldIdx || scrollUser) { return }
+  scrollAuto = true
+  list.value?.scrollTo({ top: (newIdx - 10) * 24, behavior: 'smooth' })
 })
 // 鼠标滚动时停止自动滚动
-function startScroll() {
-  scrolled = true
-  setTimeout(() => {
-    scrolled = false
-  }, 7000)
+function scrolling() {
+  if (scrollAuto) { return }
+  if (scrollTimer) { clearTimeout(scrollTimer) }
+  scrollUser = true
+  scrollTimer = setTimeout(() => {
+    scrollUser = false
+    if (stat.value !== 'play') { return }
+    // 延迟结束后立即自动滚动，仅当播放状态时
+    scrollAuto = true
+    list.value?.scrollTo({ top: (idx.value - 10) * 24, behavior: 'smooth' })
+  }, 6000)
 }
+function scrollend() { if (scrollAuto) scrollAuto = false }
 </script>
 
 <style scoped lang="scss">
+$span-height: 24px;
+
 .KLyric {
+  position: relative;
   height: 100%;
   width: 100%;
-  position: relative;
-  .List {
-    height: 100%;
-    width: 100%;
-    position: absolute;
-    display: flex;
-    flex-direction: column;
-    align-items: stretch;
-    overflow: auto;
-    span {
-      font-size: 18px;
-      font-weight: 500;
-      text-shadow: 0 0.5px 0 #484848;
-      text-align: center;
-      color: #bdbdbd;
-      &:empty {
-        min-height: 22px;
-      }
-      &.active {
-        color: #fff;
-        text-shadow: none;
-        filter: brightness(1.5);
-      }
-    }
-    &::-webkit-scrollbar {
-      width: 15px;
-      background-color: transparent;
-    }
-    &::-webkit-scrollbar-track {
-      background-color: transparent;
-    }
-    &::-webkit-scrollbar-thumb {
-      background-color: #cdcdcd;
-      background-clip: padding-box;
-      border-left: 6px solid transparent;
-      border-right: 6px solid transparent;
-      &:hover {
-        background-clip: border-box;
-      }
-      &:active {
-        background-color: #fff;
-      }
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  overflow: auto;
+  &::-webkit-scrollbar { width: 15px; }
+  &::-webkit-scrollbar-thumb {
+    background: linear-gradient(to right, transparent 0 6px, #cdcdcd 6px 9px, transparent 9px 15px);
+    &:hover { background-color: #cdcdcd; }
+    &:active { background: none; background-color: #fff; }
+  }
+  >span {
+    height: $span-height;
+    line-height: $span-height;
+    font-size: 18px;
+    font-weight: 500;
+    text-shadow: 0 0.5px 0 #484848;
+    text-align: center;
+    color: #bdbdbd;
+    &:empty { min-height: $span-height; }
+    &.active {
+      color: #fff;
+      text-shadow: none;
     }
   }
 }
