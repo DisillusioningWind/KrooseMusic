@@ -5,10 +5,17 @@
 </template>
 
 <script setup lang="ts">
-const props = defineProps<{ curStat: string, curTime: number, curLrcs: ILyric[] }>()
-const stat = computed(() => props.curStat)
-const time = computed(() => props.curTime)
-const lrcs = computed(() => props.curLrcs)
+const props = defineProps<{
+  /** 播放器状态 */
+  stat: string,
+  /** 当前播放时间 */
+  time: number,
+  /** 歌词列表 */
+  lrcs: ILyric[]
+}>()
+const stat = computed(() => props.stat)
+const time = computed(() => props.time)
+const lrcs = computed(() => props.lrcs)
 const list = ref<HTMLElement>()
 const idx = ref(0)
 let scrollAuto = false
@@ -43,7 +50,6 @@ function scrollend() { if (scrollAuto) scrollAuto = false }
 $span-height: 24px;
 
 .KLyric {
-  position: relative;
   height: 100%;
   width: 100%;
   display: flex;
@@ -57,13 +63,12 @@ $span-height: 24px;
     &:active { background: none; background-color: #fff; }
   }
   >span {
-    height: $span-height;
     line-height: $span-height;
     font-size: 18px;
     font-weight: 500;
+    color: #bdbdbd;
     text-shadow: 0 0.5px 0 #484848;
     text-align: center;
-    color: #bdbdbd;
     &:empty { min-height: $span-height; }
     &.active {
       color: #fff;

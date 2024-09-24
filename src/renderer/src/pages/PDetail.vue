@@ -1,18 +1,7 @@
 <template>
   <div class="PDetail">
-    <div class="PicDiv">
-      <el-image :src="store.musicPicURL || ''">
-        <template #error>
-          <div class="ImgFail">
-            <svg viewBox="0 0 1024 1024">
-              <path d="M875.008 295.424a34.133333 34.133333 0 1 0-58.197333 35.669333c35.328 57.514667 53.930667 123.562667 53.930666 191.488 0 201.898667-164.352 366.250667-366.250666 366.250667S138.24 724.48 138.24 522.581333 302.592 156.330667 504.490667 156.330667c18.773333 0 34.133333-15.36 34.133333-34.133334s-15.36-34.133333-34.133333-34.133333C264.874667 88.064 69.973333 282.965333 69.973333 522.581333s194.901333 434.517333 434.517334 434.517334 434.517333-194.901333 434.517333-434.517334c0.170667-80.384-22.016-159.061333-64-227.157333z"/>
-              <path d="M501.248 389.973333c-77.653333 0-140.8 63.146667-140.8 140.8s63.146667 140.8 140.8 140.8 140.8-63.146667 140.8-140.8V224.256c0-19.456 15.872-35.328 35.328-35.328 19.456 0 35.328 15.872 35.328 35.328 0 18.773333 15.36 34.133333 34.133333 34.133333s34.133333-15.36 34.133334-34.133333c0-57.173333-46.421333-103.594667-103.594667-103.594667s-103.594667 46.421333-103.594667 103.594667v186.026667a140.526933 140.526933 0 0 0-72.533333-20.309334z m0 213.333334a72.704 72.704 0 0 1-72.533333-72.533334 72.704 72.704 0 0 1 72.533333-72.533333 72.704 72.704 0 0 1 72.533333 72.533333 72.704 72.704 0 0 1-72.533333 72.533334z"/>
-            </svg>
-          </div>
-        </template>
-      </el-image>
-    </div>
-    <KLyric class="LrcDiv" :curStat="store.playerState" :curTime="store.musicCurTime" :curLrcs="store.musicLyrics"/>
+    <KImage class="img" :url="store.musicPicURL" />
+    <KLyric class="lrc" :stat="store.playerState" :time="store.musicCurTime" :lrcs="store.musicLyrics" />
   </div>
 </template>
 
@@ -22,38 +11,23 @@ const store = useStore()
 </script>
 
 <style scoped lang="scss">
-$paddingWidth: 12px;
+$margin-height: 12px;
+
 .PDetail {
   height: 100%;
   width: 100%;
   display: flex;
-  .PicDiv {
+  .img {
     width: 27%;
-    padding: $paddingWidth;
-    display: flex;
-    .el-image {
-      width: 100%;
-      max-width: 300px;
-      align-self: flex-end;
-      .ImgFail {
-        padding-top: 100%;
-        background-color: #f2f2f2;
-        position: relative;
-        svg {
-          position: absolute;
-          top: calc(50% - 30px);
-          left: calc(50% - 30px);
-          height: 60px;
-          fill: #616161;
-        }
-      }
-    }
+    margin: $margin-height;
+    max-width: 300px;
+    max-height: 300px;
+    align-self: flex-end;
   }
-  .LrcDiv {
+  .lrc {
     width: 73%;
-    height: calc(100% - 2 * $paddingWidth);
-    margin-top: $paddingWidth;
-    margin-bottom: $paddingWidth;
+    height: calc(100% - 2 * $margin-height);
+    margin: $margin-height 0;
   }
 }
 </style>

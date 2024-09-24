@@ -21,6 +21,7 @@ declare module 'vue' {
     KDetailBtn: typeof import('./../components/KDetailBtn.vue')['default']
     KDirList: typeof import('./../components/KDirList.vue')['default']
     KDrawer: typeof import('./../components/KDrawer.vue')['default']
+    KImage: typeof import('./../components/KImage.vue')['default']
     KLibList: typeof import('./../components/KLibList.vue')['default']
     KListDrawer: typeof import('./../components/KListDrawer.vue')['default']
     KLyric: typeof import('./../components/KLyric.vue')['default']
