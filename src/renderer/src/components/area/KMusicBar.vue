@@ -1,9 +1,9 @@
 <template>
   <div class="KMusicBar">
     <div class="sliderRow">
-      <el-text>{{ formatTime(musicShowTime) }}</el-text>
+      <span>{{ formatTime(musicShowTime) }}</span>
       <KSlider :max="musicDuration" :cur="musicCurTime" :disable="playerState==='unload'" :tooltip="true" :format="v => formatTime(v, 'mm:ss')" @update="time => {musicShowTime=time}" @drag="changeMusicTime" />
-      <el-text>{{ formatTime(musicDuration) }}</el-text>
+      <span>{{ formatTime(musicDuration) }}</span>
     </div>
     <div class="buttonRow">
       <div class="detailBar">
@@ -141,7 +141,7 @@ async function btnOpenFile() {
     margin: 0 12px;
     display: flex;
     align-items: center;
-    .el-text {
+    >span {
       color: white;
       font-size: 12px;
       visibility: v-bind('playerState==="unload"?"hidden":"visible"');

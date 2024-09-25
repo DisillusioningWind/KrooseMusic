@@ -15,7 +15,6 @@ declare module 'vue' {
     ElOption: typeof import('element-plus/es')['ElOption']
     ElProgress: typeof import('element-plus/es')['ElProgress']
     ElSelect: typeof import('element-plus/es')['ElSelect']
-    ElText: typeof import('element-plus/es')['ElText']
     KDetailBtn: typeof import('./../components/function/KDetailBtn.vue')['default']
     KDialog: typeof import('./../components/common/KDialog.vue')['default']
     KDirList: typeof import('./../components/function/KDirList.vue')['default']

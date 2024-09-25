@@ -22,21 +22,24 @@ const props = defineProps<{
   format?: (v: number) => string
 }>()
 const emit = defineEmits<{ update: [v: number], drag: [v: number] }>()
-//属性
-let state: 'drag' | 'slide' = 'slide'
 const slider = ref<HTMLElement>()
+const sliderWidth = ref(1)
 const min = computed(() => props.min || 0)
 const max = computed(() => props.max || 100)
-const len = computed(() => max.value - min.value) //范围
+const len = computed(() => max.value - min.value)
 const cur = ref(props.cur || 0)
-const perCur = computed(() => cur.value / len.value) //当前值占范围百分比
-const perUse = computed(() => getPerUse(perCur.value)) //已使用进度条占总进度条长度百分比
-const disable = computed(() => props.disable) //是否禁用
-const tooltip = computed(() => props.tooltip && !props.disable) //是否显示提示
-const tooltipFormat = computed(() => props.format || ((v: number) => v)) //提示格式化
-/** perCur为1时，实际按钮需要停在距终点按钮自身宽度（21px）的位置，因此进行换算，百分比格式 */
-const getPerUse = (perCur: number) => ((slider.value!.offsetWidth - 21) * perCur) / slider.value!.offsetWidth * 100
-/** 同理，拖动Slider时perCur的值需要计算按钮的宽度，分数格式 */
+//当前值占范围百分比
+const perCur = computed(() => cur.value / len.value)
+/** 已使用进度条占总进度条长度百分比，perCur为1时，实际按钮需要停在距终点按钮自身宽度（21px）的位置，因此进行换算，百分比格式 */
+const perUse = computed(() => ((sliderWidth.value - 21) * perCur.value) / sliderWidth.value * 100)
+const disable = computed(() => props.disable)
+//是否显示提示
+const tooltip = computed(() => props.tooltip && !props.disable)
+//提示格式化
+const tooltipFormat = computed(() => props.format || ((v: number) => v))
+let state: 'drag' | 'slide' = 'slide'
+let observer: ResizeObserver | null = null
+/** 拖动Slider时perCur的值需要计算按钮的宽度，分数格式 */
 const getPerCur = (clientX: number) => (clientX - slider.value!.getBoundingClientRect().x - 10.5) / (slider.value!.offsetWidth - 21)
 //监听外部传入的cur，仅当state为slide且新旧值不等时更新内部cur
 watch(() => props.cur, (newCur, oldCur) => { if (state === 'slide' && newCur !== oldCur) { cur.value = newCur } })
@@ -53,10 +56,14 @@ onMounted(() => {
   slider.value!.addEventListener('mousedown', startDrag)
   document.addEventListener('mousemove', onDrag)
   document.addEventListener('mouseup', endDrag)
+  sliderWidth.value = slider.value!.offsetWidth
+  observer = new ResizeObserver(() => { sliderWidth.value = slider.value!.offsetWidth })
+  observer.observe(slider.value!)
 })
 onUnmounted(() => {
   document.removeEventListener('mousemove', onDrag)
   document.removeEventListener('mouseup', endDrag)
+  observer?.disconnect()
 })
 //内部事件处理
 function startDrag(e: MouseEvent) {
@@ -92,6 +99,7 @@ $track-left-color: #ffffff40;
 .KSlider {
   height: $slider-height;
   width: 100%;
+  min-width: $slider-height;
   flex: 1;
   display: flex;
   align-items: center;
@@ -125,6 +133,7 @@ $track-left-color: #ffffff40;
     border: $button-border-width solid $track-use-color;
     border-radius: 50%;
     margin: $button-margin-width;
+    flex-shrink: 0;
     background-color: transparent;
     // 提示
     &::before {

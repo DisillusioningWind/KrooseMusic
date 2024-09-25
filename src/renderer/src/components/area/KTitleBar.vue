@@ -61,7 +61,7 @@ const { showDetail, navExpand } = storeToRefs(store)
     height: 100%;
     background-color: transparent;
     border: none;
-    svg {
+    >svg {
       stroke: #000;
       stroke-width: 1px;
     }
@@ -94,6 +94,9 @@ const { showDetail, navExpand } = storeToRefs(store)
       &:hover { @include k-stroke(#000); }
       &:active { @include k-stroke(#000); }
     }
+  }
+  .min {
+    svg { stroke-width: 0.5px; }
   }
   .close {
     @include k-title-btn(#e81123, #f1707a);
