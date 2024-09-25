@@ -1,7 +1,7 @@
 <template>
   <div class="PSetting">
     <p class="PTitle">设置</p>
-    <KSettingItem title="音乐目录">
+    <KSetting title="音乐目录">
       <div class="Library">
         <div v-for="item in libs.arr" :key="item.id">
           <span v-tooltip.immediate.overflow="item.name">{{ item.name }}</span>
@@ -43,7 +43,7 @@
           </template>
         </el-dialog>
       </div>
-    </KSettingItem>
+    </KSetting>
   </div>
 </template>
 
