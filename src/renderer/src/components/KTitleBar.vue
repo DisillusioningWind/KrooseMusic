@@ -1,6 +1,6 @@
 <template>
   <div class="KTitleBar">
-    <button class="BackBtn" :class="showDetail?'Detail':(navExpand?'Expand':'')" @click="store.toggleDetail()">
+    <button class="back" :class="showDetail?'detail':(navExpand?'expand':'')" @click="store.toggleDetail()">
       <span v-show="navExpand && !showDetail">Kroose 音乐</span>
       <svg height="100%" width="100%" v-show="showDetail">
         <line x1="31%" y1="50%" x2="68%" y2="50%"/>
@@ -8,17 +8,17 @@
         <line x1="31%" y1="50%" x2="46%" y2="66%"/>
       </svg>
     </button>
-    <button class="MinBtn" :class="showDetail?'Detail':''" @click="ipc.invoke('minWindow')">
+    <button class="min" :class="showDetail?'detail':''" @click="ipc.invoke('minWindow')">
       <svg height="100%" width="100%">
         <line x1="35%" y1="50%" x2="65%" y2="50%"/>
       </svg>
     </button>
-    <button class="MaxBtn" :class="showDetail?'Detail':''" @click="ipc.invoke('maxWindow')">
+    <button class="max" :class="showDetail?'detail':''" @click="ipc.invoke('maxWindow')">
       <svg height="100%" width="100%">
         <rect x="34%" y="32%" width="28%" height="36%" fill="transparent"/>
       </svg>
     </button>
-    <button class="CloseBtn" :class="showDetail?'Detail':''" @click="ipc.invoke('closeWindow')">
+    <button class="close" :class="showDetail?'detail':''" @click="ipc.invoke('closeWindow')">
       <svg height="100%" width="100%">
         <line x1="36%" y1="34%" x2="64%" y2="66%"/>
         <line x1="64%" y1="34%" x2="36%" y2="66%"/>
@@ -31,27 +31,22 @@
 import { useStore } from '@renderer/store'
 const ipc = window.ipc
 const store = useStore()
-const showDetail = computed(() => store.showDetail)
-const navExpand = computed(() => store.navExpand)
+const { showDetail, navExpand } = storeToRefs(store)
 </script>
 
 <style scoped lang="scss">
-@mixin BackBtn($color) {
+@mixin k-title-btn($hoverColor, $activeColor) {
+  width: 46px;
+  -webkit-app-region: no-drag;
+  &:hover { background-color: $hoverColor; }
+  &:active { background-color: $activeColor; }
+}
+@mixin k-back-btn($color) {
   width: 48px;
   margin-right: auto;
   background-color: $color;
 }
-@mixin TitleBtn($hoverColor, $activeColor) {
-  width: 46px;
-  -webkit-app-region: no-drag;
-  &:hover {
-    background-color: $hoverColor;
-  }
-  &:active {
-    background-color: $activeColor;
-  }
-}
-@mixin Stroke($color) {
+@mixin k-stroke($color) {
   svg { stroke: $color; }
 }
 
@@ -59,6 +54,7 @@ const navExpand = computed(() => store.navExpand)
   height: 30px;
   width: 100%;
   -webkit-app-region: drag;
+  z-index: 1;
   display: flex;
   justify-content: flex-end;
   >button {
@@ -70,10 +66,10 @@ const navExpand = computed(() => store.navExpand)
       stroke-width: 1px;
     }
   }
-  .BackBtn {
-    @include BackBtn(#f2f2f2);
-    transition: width .15s;
-    &.Expand {
+  .back {
+    @include k-back-btn(#f2f2f2);
+    transition: width .15s, background-color .4s;
+    &.expand {
       width: 200px;
       transition: width .15s;
       padding: 0;
@@ -84,26 +80,26 @@ const navExpand = computed(() => store.navExpand)
         white-space: nowrap;
       }
     }
-    &.Detail {
-      @include TitleBtn(#0e4c7b, #1c3d59);
-      @include BackBtn(#005a9e);
-      @include Stroke(#fff);
+    &.detail {
+      @include k-title-btn(#0e4c7b, #1c3d59);
+      @include k-back-btn(#005a9e);
+      @include k-stroke(#fff);
     }
   }
-  .MinBtn,.MaxBtn{
-    @include TitleBtn(#f0f0f0, #d0d0d0);
+  .min,.max{
+    @include k-title-btn(#f0f0f0, #d0d0d0);
     svg { shape-rendering: crispEdges;}
-    &.Detail {
-      @include Stroke(#fff);
-      &:hover { @include Stroke(#000); }
-      &:active { @include Stroke(#000); }
+    &.detail {
+      @include k-stroke(#fff);
+      &:hover { @include k-stroke(#000); }
+      &:active { @include k-stroke(#000); }
     }
   }
-  .CloseBtn {
-    @include TitleBtn(#e81123, #f1707a);
-    &.Detail { @include Stroke(#fff); }
-    &:hover { @include Stroke(#fff); }
-    &:active { @include Stroke(#000); }
+  .close {
+    @include k-title-btn(#e81123, #f1707a);
+    &.detail { @include k-stroke(#fff); }
+    &:hover { @include k-stroke(#fff); }
+    &:active { @include k-stroke(#000); }
   }
 }
 </style>
