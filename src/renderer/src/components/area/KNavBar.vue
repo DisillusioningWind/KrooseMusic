@@ -1,11 +1,11 @@
 <template>
   <div class="KNavBar" :class="expand?'expand':''">
     <div v-for="menu in menus" :key="menu.path" :class="onMenuClass($route.fullPath, menu.path)" @click="onMenuClick(menu.path)">
-      <el-icon v-if="menu.path!=='/Search' || !expand"><component :is="menu.icon"></component></el-icon>
-      <span v-if="menu.path!=='/Search' || !expand">{{ menu.title }}</span>
-      <div v-if="menu.path==='/Search' && expand"><input v-model="search" type="text" placeholder="搜索" spellcheck="false"/></div>
-      <div v-if="menu.path==='/Search' && expand && search.length > 0" @click="onCloseClick"><SVGClose /></div>
-      <div v-if="menu.path==='/Search' && expand" @click="onSearchClick"><SVGSearch /></div>
+      <component class="icon" v-if="menu.path!=='/Search' || !expand" :is="menu.icon" />
+      <span class="title" v-if="menu.path!=='/Search' || !expand">{{ menu.title }}</span>
+      <input class="input" v-if="menu.path==='/Search' && expand" v-model="search" type="text" placeholder="搜索" spellcheck="false" />
+      <div class="cancel" v-if="menu.path==='/Search' && expand && search.length > 0" @click="onCancelClick"><SVGClose /></div>
+      <div class="confirm" v-if="menu.path==='/Search' && expand" @click="onSearchClick"><SVGSearch /></div>
     </div>
   </div>
 </template>
@@ -31,44 +31,28 @@ const menus = [
   { path: '/List', title: '播放列表', icon: SVGPlayList },
   { path: '/Setting', title: '设置', icon: SVGSetting }
 ]
-onMounted(() => {
-  onMenuClick('/Library')
-})
+onMounted(() => { onMenuClick('/Library') }) // 默认路径
 watch(expand, v => store.navExpand = v)
 function onMenuClass(routePath: string, menuPath: string) {
-  if (routePath === menuPath && routePath !== '/Search') {
-    return 'select'
-  } else if (menuPath === '/Search' && expand.value) {
-    return 'search'
-  } else {
-    return ''
-  }
+  if (menuPath !== '/Search' && menuPath === routePath) { return 'select' }
+  else if (menuPath === '/Search' && expand.value) { return 'search' }
+  else { return '' }
 }
 function onMenuClick(path: string) {
-  if (path === '/Max') {
-    expand.value = !expand.value
-  } else if (path === '/Search') {
-    if (!expand.value) {
-      expand.value = true
-    }
-  } else {
-    router.push(path)
-  }
+  if (path === '/Max') { expand.value = !expand.value }
+  else if (path !== '/Search') { router.push(path) }
+  else if (path === '/Search' && !expand.value) { expand.value = true }
 }
-function onCloseClick() {
-  search.value = ''
-}
+function onCancelClick() { search.value = '' }
 function onSearchClick() {
-  if (search.value.length > 0) {
-    router.push('/Search')
-  }
+  if (search.value.length > 0) { router.push('/Search') }
 }
 </script>
 
 <style scoped lang="scss">
 $border-width: 4px;
 $left-len: 6px;
-@mixin cutline {
+@mixin k-cutline {
   position: relative;
   &::before {
     content: '';
@@ -81,106 +65,78 @@ $left-len: 6px;
     visibility: v-bind('expand? "visible": "hidden"');
   }
 }
+
 .KNavBar {
   height: 100%;
   width: 48px;
   background-color: #f2f2f2;
-  border: none;
   display: flex;
   flex-direction: column;
   overflow: hidden;
   transition: width .15s;
-  &.expand {
-    width: 200px;
-    transition: width .15s;
-  }
+  &.expand { width: 200px; }
   >div {
     height: 50px;
     width: 100%;
-    padding: 0;
-    border-left: $border-width solid transparent;
     box-sizing: border-box;
-    color: #000000;
+    border-left: $border-width solid transparent;
+    user-select: none;
     display: flex;
     align-items: center;
-    &:hover {
-      background-color: #dadada;
+    &:hover { background-color: #dadada; }
+    &:active { background-color: #c2c2c2; }
+    &.select { border-left: 4px solid #005a9e; }
+    >.icon {
+      height: 18px;
+      width: 18px;
+      margin: 11px;
+      margin-right: 11px + $border-width;
+      flex-shrink: 0;
     }
-    &:active {
-      background-color: #c2c2c2;
-    }
+    >.title { white-space: nowrap; }
+    // 设置
     &:last-child {
       margin-top: auto;
-      @include cutline;
+      @include k-cutline;
     }
-    &:first-child {
-      @include cutline;
-    }
-    &.select {
-      border-left: 4px solid #005a9e;
-    }
-    >.el-icon {
-      width: 40px;
-      margin-right: $border-width;
-      flex-shrink: 0;
-      svg {
-        height: 18px;
-        width: 18px;
-      }
-    }
-    >span {
-      white-space: nowrap;
-      user-select: none;
-    }
+    // 搜索
     &.search {
-      user-select: none;
-      &:hover {
-        background-color: #f2f2f2;
-      }
-      &:active {
-        background-color: #f2f2f2;
-      }
-      >div:first-child {
+      padding: 0 10px 0 $left-len;
+      &:hover { background-color: #f2f2f2; }
+      &:active { background-color: #f2f2f2; }
+      %k-search-btn {
         height: 65%;
-        flex: 1;
-        display: flex;
-        align-items: center;
-        margin-left: 6px;
-        >input {
-          height: 100%;
-          width: 100%;
-          box-sizing: border-box;
-          border: 0;
-          outline: 0;
-          padding: 0;
-          padding-left: 8px;
-          background-color: #fafafa;
-          font-size: 15px;
-        }
-      }
-      >div:not(:first-child) {
-        height: 65%;
-        width: 30px;
         box-sizing: border-box;
-        flex-shrink: 0;
+        background-color: #fafafa;
+      }
+      >.input {
+        @extend %k-search-btn;
+        width: 0;
+        flex: 1;
+        border: 0;
+        outline: 0;
+        padding: 0 0 0 8px;
+        font-size: 15px;
+      }
+      >.confirm {
+        @extend %k-search-btn;
+        width: 30px;
         display: flex;
         align-items: center;
         justify-content: center;
-        background-color: #fafafa;
         svg {
           height: 60%;
           width: 50%;
         }
-        &:hover {
-          svg { fill: #0078d7; }
-        }
+        &:hover { svg { fill: #0078d7; } }
         &:active {
           background-color: #0078d7;
           svg { fill: #fff; }
         }
       }
-      >div:last-child {
-        margin-right: 10px;
+      >.cancel {
+        @extend .confirm;
+        svg { width: 60%; }
       }
     }
   }

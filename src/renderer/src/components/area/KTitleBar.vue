@@ -2,7 +2,7 @@
   <div class="KTitleBar">
     <button class="back" :class="showDetail?'detail':(navExpand?'expand':'')" @click="store.toggleDetail()">
       <span v-show="navExpand && !showDetail">Kroose 音乐</span>
-      <svg height="100%" width="100%" v-show="showDetail">
+      <svg v-show="showDetail" height="100%" width="100%">
         <line x1="31%" y1="50%" x2="68%" y2="50%"/>
         <line x1="31%" y1="50%" x2="46%" y2="34%"/>
         <line x1="31%" y1="50%" x2="46%" y2="66%"/>
@@ -71,7 +71,6 @@ const { showDetail, navExpand } = storeToRefs(store)
     transition: width .15s, background-color .4s;
     &.expand {
       width: 200px;
-      transition: width .15s;
       padding: 0;
       display: flex;
       align-items: center;
@@ -86,7 +85,11 @@ const { showDetail, navExpand } = storeToRefs(store)
       @include k-stroke(#fff);
     }
   }
-  .min,.max{
+  .min {
+    @extend .max;
+    svg { stroke-width: 0.5px; }
+  }
+  .max{
     @include k-title-btn(#f0f0f0, #d0d0d0);
     svg { shape-rendering: crispEdges;}
     &.detail {
@@ -94,9 +97,6 @@ const { showDetail, navExpand } = storeToRefs(store)
       &:hover { @include k-stroke(#000); }
       &:active { @include k-stroke(#000); }
     }
-  }
-  .min {
-    svg { stroke-width: 0.5px; }
   }
   .close {
     @include k-title-btn(#e81123, #f1707a);
