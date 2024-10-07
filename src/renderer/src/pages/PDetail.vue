@@ -25,12 +25,14 @@ $show-time: 0.4s;
   background-position: 0 (-$title-height);// 背景图片从标题栏开始
   background-repeat: no-repeat;
   background-size: 100% auto;
-  background-image: v-bind('musicPicURL?("url(" + store.musicPicURL + ")"):("linear-gradient(150deg, #3b3b3b, #6b6b6b 20%, #ffffff)")');
+  background-image: v-bind('musicPicURL?("url(" + store.musicPicURL + ")"):"linear-gradient(150deg, #3b3b3b, #6b6b6b 20%, #ffffff)"');
+  background-color: #ffffff;
   opacity: 0;
   pointer-events: none;// 不显示时不响应点击事件
   transition: opacity $show-time;
   display: grid;
   grid-template-columns: 27% 73%;
+  // 模糊背景
   &::after {
     content: '';
     position: absolute;

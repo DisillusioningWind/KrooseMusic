@@ -1,8 +1,8 @@
 <template>
   <div class="PMain">
     <KTitleBar />
-    <KNavBar v-show="!showDetail" />
-    <RouterView v-show="!showDetail" />
+    <KNavBar />
+    <RouterView />
     <PDetail />
     <KListDrawer v-model="showDrawer" />
     <KMusicBar />
@@ -12,7 +12,7 @@
 <script setup lang="ts">
 import { useStore } from '@renderer/store'
 const store = useStore()
-const { showDetail, showDrawer } = storeToRefs(store)
+const { showDrawer } = storeToRefs(store)
 </script>
 
 <style scoped lang="scss">
