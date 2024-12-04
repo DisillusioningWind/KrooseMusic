@@ -10,9 +10,10 @@ export interface ILyric {
  * @returns 格式化后的歌词
  */
 export async function formatLyrics(text: string): Promise<ILyric[]> {
-  const lines = text.split('\n')
+  //按行分割时注意格式为LF或CRLF的情况
+  const lines = text.split(/\r?\n/)
   const lyrics: ILyric[] = []
-  const reg = /^\[(\d+:\d+.\d+)\](.*)$/
+  const reg = /^\[(\d+:\d+\.\d+)\](.*)$/
   for (const line of lines) {
     const matchs = line.match(reg)
     if (matchs) {
