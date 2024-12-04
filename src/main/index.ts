@@ -36,15 +36,29 @@ class MainWindow extends BrowserWindow {
   }
 }
 
-app.setPath('userData', join(app.getAppPath(), 'Data', 'userData'))
-app.setPath('sessionData', join(app.getAppPath(), 'Data', 'sessionData'))
-console.log('userDataDir:', app.getPath('userData'))
-console.log('sessionDataDir:', app.getPath('sessionData'))
+//设置用户数据目录
+if (process.env.NODE_ENV === 'development') {
+  const appPath = app.getAppPath()
+  app.setPath('userData', join(appPath, 'data', 'userData'))
+  app.setPath('sessionData', join(appPath, 'data', 'sessionData'))
+  console.log('userDataDir: ', app.getPath('userData'))
+  console.log('sessDataDir: ', app.getPath('sessionData'))
+} else {
+  //被打包后的exe文件路径
+  const exePath = app.getPath('exe')
+  const exeDir = exePath.substring(0, exePath.lastIndexOf('\\'))
+  app.setPath('userData', join(exeDir, 'data', 'userData'))
+  app.setPath('sessionData', join(exeDir, 'data', 'sessionData'))
+}
 
 app.whenReady().then(() => {
   const mainWindow = new MainWindow()
   bindIpcMain(mainWindow)
-  session.defaultSession.loadExtension('C:/Users/WHR/AppData/Local/Microsoft/Edge/User Data/Default/Extensions/olofadcdnkkjdfgjcmjaadnlehnnihnl/6.6.3_0')
+  //打包时注意删除
+  if (process.env.NODE_ENV === 'development') {
+    //Vue Devtools
+    session.defaultSession.loadExtension('C:/Users/WHR/AppData/Local/Microsoft/Edge/User Data/Default/Extensions/olofadcdnkkjdfgjcmjaadnlehnnihnl/6.6.3_0')
+  }
 })
 
 app.on('window-all-closed', () => {
