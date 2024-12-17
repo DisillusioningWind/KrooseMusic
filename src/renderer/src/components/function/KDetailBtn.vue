@@ -18,22 +18,21 @@ const loopKeyframes = [
   { transform: 'translateX(0%)' },
   { transform: 'translateX(calc(-100% - 25px))' }
 ]
-let loopTimer: NodeJS.Timeout | null = null
+// 滚动文字的定时器，防止重复触发，标题和艺术家分开
+let timers: NodeJS.Timeout | null [] = []
 // 鼠标进入时文字循环滚动
 function onMouseEnter(e: MouseEvent) {
   const target = e.target as HTMLElement
+  const index = target.classList.contains('title') ? 0 : 1
   // 能全部显示或正在滚动则返回
-  if (target.parentElement!.offsetWidth >= target.scrollWidth || loopTimer) return
-  const loopOption = {
-    duration: target.scrollWidth * 30,
-    easing: 'linear',
-    iterations: 1
-  }
+  if (target.parentElement!.offsetWidth >= target.scrollWidth || timers[index]) return
+  const loopOption = { duration: target.scrollWidth * 30, easing: 'linear', iterations: 1 }
+  // 添加scroll类，使用after伪元素制造滚动效果
   target.classList.add('scroll')
   target.animate(loopKeyframes, loopOption)
-  loopTimer = setTimeout(() => {
+  timers[index] = setTimeout(() => {
     target.classList.remove('scroll')
-    loopTimer = null
+    timers[index] = null
   }, loopOption.duration)
 }
 </script>
@@ -48,6 +47,7 @@ $after-left: 25px;
   font-weight: $weight;
   color: white;
   white-space: nowrap;
+  // 伪元素制造文字从右向左滚动效果
   &.scroll::after {
     content: attr(text);
     position: absolute;

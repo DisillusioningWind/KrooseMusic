@@ -43,6 +43,8 @@ const perCur = computed(() => cur.value / len.value)
 const perUse = computed(() => ((sliderWidth.value - 21) * perCur.value) / sliderWidth.value * 100)
 /** 拖动状态，仅有滑动和拖动两个状态 */
 let state: 'drag' | 'slide' = 'slide'
+/** 滑动条总长监听器 */
+let ob = new ResizeObserver(() => { sliderWidth.value = slider.value?.offsetWidth || 1 })
 
 //监听外部传入的cur，仅当state为slide且新旧值不等时更新内部cur
 watch(() => props.cur, (newCur, oldCur) => {
@@ -65,16 +67,14 @@ onMounted(() => {
   slider.value.addEventListener('mousedown', startDrag)
   document.addEventListener('mousemove', onDrag)
   document.addEventListener('mouseup', endDrag)
-  window.addEventListener('resize', onResize)
-  onResize()
+  ob.observe(slider.value)
 })
 onUnmounted(() => {
   document.removeEventListener('mousemove', onDrag)
   document.removeEventListener('mouseup', endDrag)
-  window.removeEventListener('resize', onResize)
+  ob.disconnect()
 })
 
-function onResize() { sliderWidth.value = slider.value?.offsetWidth || 1 }
 /** 拖动Slider时perCur的值需要计算按钮的宽度，分数格式 */
 function getPerCur(clientX: number) {
   if (!slider.value) { return 0 }
