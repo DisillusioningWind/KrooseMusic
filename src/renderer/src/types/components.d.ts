@@ -7,19 +7,17 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
-    ElDialog: typeof import('element-plus/es')['ElDialog']
     ElDropdown: typeof import('element-plus/es')['ElDropdown']
     ElDropdownItem: typeof import('element-plus/es')['ElDropdownItem']
     ElDropdownMenu: typeof import('element-plus/es')['ElDropdownMenu']
-    ElIcon: typeof import('element-plus/es')['ElIcon']
     ElOption: typeof import('element-plus/es')['ElOption']
-    ElProgress: typeof import('element-plus/es')['ElProgress']
     ElSelect: typeof import('element-plus/es')['ElSelect']
     KDetailBtn: typeof import('./../pages/PMain/components/KDetailBtn.vue')['default']
     KDialog: typeof import('./../components/KDialog.vue')['default']
     KDirList: typeof import('./../pages/PLibrary/components/KDirList.vue')['default']
     KDrawer: typeof import('./../components/KDrawer.vue')['default']
     KImage: typeof import('./../components/KImage.vue')['default']
+    KLibDialog: typeof import('./../pages/PSetting/components/KLibDialog.vue')['default']
     KLibList: typeof import('./../components/KLibList.vue')['default']
     KListDrawer: typeof import('./../pages/PMain/components/KListDrawer.vue')['default']
     KLyric: typeof import('./../pages/PDetail/components/KLyric.vue')['default']
