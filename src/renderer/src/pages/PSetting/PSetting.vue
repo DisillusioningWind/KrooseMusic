@@ -7,10 +7,7 @@
           <span v-tooltip.immediate.overflow="item.name">{{ item.name }}</span>
           <span v-tooltip.immediate.overflow="item.path">{{ item.path }}</span>
           <span>模式</span>
-          <el-select v-model="item.mode" popper-class="k-popper" @change="onChangeMode(item)">
-            <el-option label="普通" value="normal" />
-            <el-option label="ASMR" value="asmr" />
-          </el-select>
+          <span>{{ item.mode==='normal'?'普通':'ASMR' }}</span>
           <button @click="onDeleteDir(item.id)"><Close /></button>
         </div>
         <div class="AddDiv" @click="onOpenAddDialog"><Plus /></div>
@@ -64,9 +61,6 @@ async function onDeleteDir(id: number) {
   libs.arr = libs.arr.filter(item => item.id !== id)
   console.log('音乐目录删除成功')
 }
-async function onChangeMode(item: ILibrary) {
-  db.updateLibrary(item.id, item.mode)
-}
 async function onGetData(_e, music: ILibItem) {
   await db.addItem(libAddDirName, music)
   libAddNum.value++
@@ -90,6 +84,7 @@ $icon-size: 20px;
   .Library {
     $item-height: 40px;
     $item-padding: 10px;
+    // 音乐目录
     >div {
       height: $item-height;
       padding-left: $item-padding;
@@ -97,6 +92,11 @@ $icon-size: 20px;
       display: flex;
       justify-content: flex-end;
       align-items: center;
+      &:hover {
+        background-color: #d9d9d9;
+        button { background-color: #d9d9d9; }
+      }
+      // 添加按钮
       &.AddDiv {
         position: relative;
         justify-content: flex-start;
@@ -117,39 +117,31 @@ $icon-size: 20px;
           width: $icon-size;
         }
       }
-      &:hover {
-        background-color: #d9d9d9;
-        button {
-          background-color: #d9d9d9;
-        }
-      }
+      // 目录信息
       &>span {
         margin-right: 10px;
         white-space: nowrap;
-        &:not(:last-of-type) {
-          overflow: hidden;
-          text-overflow: ellipsis;
-        }
+        // 第一项文本左对齐
         &:first-child {
           margin-right: auto;
           padding-right: 10px;
         }
-        &:nth-child(2) {
+        // 前两项文本溢出显示省略号
+        &:nth-child(-n+3) {
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+        // 第三项及以后文本禁止选中
+        &:nth-child(n+3) { user-select: none; }
+        // 第四项文本右对齐
+        &:nth-child(4) { width: 40px; }
+        // 第二项和第四项字体颜色，若添加第六项，需修改
+        &:nth-child(even) {
           font-size: 14px;
           color: #797a7a;
         }
-        &:last-of-type {
-          user-select: none;
-        }
       }
-      &:deep(.el-select) {
-        width: 100px;
-        flex-shrink: 0;
-        .el-select__wrapper {
-          box-shadow: none;
-          border-radius: 0;
-        }
-      }
+      // 删除按钮
       &>button {
         width: $item-height;
         padding: 0;

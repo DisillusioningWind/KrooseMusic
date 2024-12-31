@@ -9,10 +9,7 @@
         <!-- 第二行 -->
         <span></span>
         <span>选择模式</span>
-        <el-select v-model="mode" size="small" popper-class="k-popper">
-          <el-option label="普通" value="normal" />
-          <el-option label="ASMR" value="asmr" />
-        </el-select>
+        <KSelect class="modeSelect" v-model="mode" :options="options" />
       </div>
       <div v-else class="adding">
         <Refre />
@@ -44,6 +41,10 @@ const props = defineProps<{
 }>()
 const step = ref<'confirm' | 'adding'>('confirm')// 确认步骤和添加步骤
 const mode = ref<LibMode>('normal')// 确认时提交给父组件
+const options = [
+  { label: '普通', value: 'normal' },
+  { label: 'ASMR', value: 'asmr' }
+]
 // 弹窗显示时自动切换到确认步骤
 watch(show, v => { if (v) { step.value = 'confirm' } })
 // 添加音乐数量达到总数时自动关闭弹窗
@@ -68,6 +69,8 @@ $svg-width: 21px;
 }
 
 .KLibDialog {
+  // 允许诸如下拉框等元素溢出
+  overflow: visible;
   .container {
     padding: 13px;
     background-color: #005a9e;
@@ -77,12 +80,17 @@ $svg-width: 21px;
     // 确认步骤
     .confirm {
       display: grid;
-      grid-template-rows: auto auto;
+      grid-template-rows: auto 25px;
       grid-template-columns: 25px 74px auto;
       row-gap: 5px;
       align-items: start;
       // 文件夹图标
       >svg { @include k-svg; }
+      // 模式选择
+      >.modeSelect {
+        height: 25px;
+        width: 90px;
+      }
     }
     // 添加步骤
     .adding {
