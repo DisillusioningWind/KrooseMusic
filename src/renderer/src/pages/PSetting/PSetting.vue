@@ -14,7 +14,7 @@
           <button @click="onDeleteDir(item.id)"><Close /></button>
         </div>
         <div class="AddDiv" @click="onOpenAddDialog"><Plus /></div>
-        <KLibDialog v-model="libAddShow" :path="libAddDirPath" :num="libAddNum" :total="libAddTotal" @confirm="onConfirmDir"/>
+        <KLibDialog v-model="libAddShow" :path="libAddDirPath" :num="libAddNum" :total="libAddTotal" @confirm="onConfirmDir" />
       </div>
     </KSetting>
   </div>
@@ -47,10 +47,10 @@ onUnmounted(() => {
 async function onOpenAddDialog() {
   const path = await window.ipc.invoke('openDirectoryWindow') as string | null
   if (!path) return
-  libAddShow.value = true
   libAddDirName = window.path.basename(path)
   libAddDirPath = path
   libAddNum.value = 0
+  libAddShow.value = true
 }
 async function onConfirmDir(mode: LibMode) {
   const id = await db.addLibrary(libAddDirName, libAddDirPath, mode)

@@ -1,6 +1,7 @@
 <template>
   <KDialog class="KLibDialog" :show="show" :center="30">
-    <div v-if="step==='confirm'" class="confirm">
+    <div class="container">
+      <div v-if="step==='confirm'" class="confirm">
         <!-- 第一行 -->
         <Direc />
         <span>当前目录</span>
@@ -12,15 +13,16 @@
           <el-option label="普通" value="normal" />
           <el-option label="ASMR" value="asmr" />
         </el-select>
-    </div>
-    <div v-else class="adding">
-      <Refre />
-      <span>正在添加音乐</span>
-      <span>{{ num }} 首音乐，共计 {{ total }} 首</span>
-    </div>
-    <div class="btnList">
-      <button v-show="step==='confirm'" @click="onConfirm"><Check /></button>
-      <button @click="onClose"><Close /></button>
+      </div>
+      <div v-else class="adding">
+        <Refre />
+        <span>正在添加音乐</span>
+        <span>{{ num }} 首音乐，共计 {{ total }} 首</span>
+      </div>
+      <div class="btnList">
+        <button v-show="step==='confirm'" @click="onConfirm"><Check /></button>
+        <button @click="onClose"><Close /></button>
+      </div>
     </div>
   </KDialog>
 </template>
@@ -66,59 +68,60 @@ $svg-width: 21px;
 }
 
 .KLibDialog {
-  border: none;
-  padding: 13px;
-  background-color: #005a9e;
-  color: #ffffff;
-  font-size: 17px;
-  display: flex;
-  // 确认步骤
-  .confirm {
-    display: grid;
-    grid-template-rows: auto auto;
-    grid-template-columns: 25px 74px auto;
-    row-gap: 5px;
-    align-items: start;
-    // 文件夹图标
-    >svg { @include k-svg; }
-  }
-  // 添加步骤
-  .adding {
-    display: grid;
-    grid-template-rows: auto auto;
-    grid-template-columns: 25px 300px;
-    row-gap: 5px;
-    align-items: center;
-    user-select: none;
-    // 刷新图标
-    >svg {
-      @include k-svg;
-      @keyframes rotate {
-        0% { transform: rotate(0deg); }
-        100% { transform: rotate(-360deg); }
-      }
-      animation: rotate 1s infinite;
-    }
-    >span:last-child {
-      grid-column: 1 / 3;
-      font-size: 15px;
-      font-weight: 100;
-      color: #ffffffd8;
-    }
-  }
-  // 按钮列表
-  .btnList {
+  .container {
+    padding: 13px;
+    background-color: #005a9e;
+    color: #ffffff;
+    font-size: 17px;
     display: flex;
-    >button {
-      width: $btn-width;
-      height: 100%;
-      border: none;
-      padding: 0;
-      background-color: transparent;
+    // 确认步骤
+    .confirm {
+      display: grid;
+      grid-template-rows: auto auto;
+      grid-template-columns: 25px 74px auto;
+      row-gap: 5px;
+      align-items: start;
+      // 文件夹图标
       >svg { @include k-svg; }
-      &:hover {
-        cursor: pointer;
-        >svg { fill: #b1b1b1; }
+    }
+    // 添加步骤
+    .adding {
+      display: grid;
+      grid-template-rows: auto auto;
+      grid-template-columns: 25px 300px;
+      row-gap: 5px;
+      align-items: center;
+      user-select: none;
+      // 刷新图标
+      >svg {
+        @include k-svg;
+        @keyframes rotate {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(-360deg); }
+        }
+        animation: rotate 1s infinite;
+      }
+      >span:last-child {
+        grid-column: 1 / 3;
+        font-size: 15px;
+        font-weight: 100;
+        color: #ffffffd8;
+      }
+    }
+    // 按钮列表
+    .btnList {
+      display: flex;
+      >button {
+        width: $btn-width;
+        height: 100%;
+        border: none;
+        padding: 0;
+        background-color: transparent;
+        &:hover {
+          cursor: pointer;
+          >svg { fill: #b1b1b1; }
+        }
+        >svg { @include k-svg; }
       }
     }
   }
