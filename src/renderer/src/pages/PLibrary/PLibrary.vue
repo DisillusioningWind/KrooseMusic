@@ -2,10 +2,7 @@
   <div class="PLibrary">
     <div class="ToolBar">
       <span>当前目录</span>
-      <el-dropdown v-if="curLibs.length > 0" type="primary" split-button placement="bottom-end" popper-class="k-popper" size="large">
-        {{ store.curLib?.name }}
-        <template #dropdown><el-dropdown-menu><el-dropdown-item v-for="lib in curLibs" :key="lib.id" @click="curLib = lib">{{ lib.name }}</el-dropdown-item></el-dropdown-menu></template>
-      </el-dropdown>
+      <KLibSelect class="LibSelect" v-model="curLibName" :options="libOptions" />
     </div>
     <div class="ContentBar">
       <div class="ListBar">
@@ -34,6 +31,11 @@ const store = useStore()
 const { curLibs, curLib, curItems, curItem, curList, albumPath, musicPath } = storeToRefs(store)
 const { loadMusic } = store
 const dirSelect = ref<IDirStruc>()
+const libOptions = computed(() => curLibs.value.map(lib => ({ label: lib.name, value: lib.name })))
+const curLibName = computed({
+  get: () => curLib.value?.name || '',
+  set: (name: string) => { curLib.value = curLibs.value.find(lib => lib.name === name) }
+})
 
 async function onItemSelect(item: ILibItem) {
   if (curLib.value?.mode === 'normal' && item.path !== musicPath.value) {
@@ -58,9 +60,9 @@ function onDirMusics(musics: ILibItem[]) {
 
 <style scoped lang="scss">
 @import '@renderer/assets/global';
-
 $toolBarHeight: 45px;
 $conBarMarginTop: 14px;
+
 .PLibrary {
   height: 100%;
   box-sizing: border-box;
@@ -70,6 +72,7 @@ $conBarMarginTop: 14px;
     height: $toolBarHeight;
     display: flex;
     align-items: center;
+    // 当前目录
     >span {
       line-height: $toolBarHeight;
       font-size: 34px;
@@ -77,21 +80,10 @@ $conBarMarginTop: 14px;
       margin-right: 15px;
       white-space: nowrap;
     }
-    :deep(>.el-dropdown) {
-      .el-button-group {
-        .el-button {
-          &:first-child {
-            max-width: 135px;
-            span {
-              overflow: hidden;
-              font-size: 18px;
-              line-height: 40px;
-              white-space: nowrap;
-              text-overflow: ellipsis;
-            }
-          }
-        }
-      }
+    // 当前目录选择
+    >.LibSelect {
+      height: 40px;
+      max-width: 200px;
     }
   }
   .ContentBar {

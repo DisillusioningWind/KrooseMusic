@@ -7,9 +7,6 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
-    ElDropdown: typeof import('element-plus/es')['ElDropdown']
-    ElDropdownItem: typeof import('element-plus/es')['ElDropdownItem']
-    ElDropdownMenu: typeof import('element-plus/es')['ElDropdownMenu']
     KDetailBtn: typeof import('./../pages/PMain/components/KDetailBtn.vue')['default']
     KDialog: typeof import('./../components/KDialog.vue')['default']
     KDirList: typeof import('./../pages/PLibrary/components/KDirList.vue')['default']
@@ -18,6 +15,7 @@ declare module 'vue' {
     KImage: typeof import('./../components/KImage.vue')['default']
     KLibDialog: typeof import('./../pages/PSetting/components/KLibDialog.vue')['default']
     KLibList: typeof import('./../components/KLibList.vue')['default']
+    KLibSelect: typeof import('./../pages/PLibrary/components/KLibSelect.vue')['default']
     KListDrawer: typeof import('./../pages/PMain/components/KListDrawer.vue')['default']
     KLyric: typeof import('./../pages/PDetail/components/KLyric.vue')['default']
     KMenu: typeof import('./../directives/Menu/KMenu.vue')['default']
