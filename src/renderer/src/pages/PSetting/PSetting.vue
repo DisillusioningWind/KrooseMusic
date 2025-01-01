@@ -132,7 +132,10 @@ $icon-size: 20px;
           text-overflow: ellipsis;
         }
         // 第三项及以后文本禁止选中
-        &:nth-child(n+3) { user-select: none; }
+        &:nth-child(n+3) {
+          flex-shrink: 0;
+          user-select: none;
+        }
         // 第四项文本右对齐
         &:nth-child(4) { width: 40px; }
         // 第二项和第四项字体颜色，若添加第六项，需修改
