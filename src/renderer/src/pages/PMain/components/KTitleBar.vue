@@ -1,6 +1,6 @@
 <template>
   <div class="KTitleBar">
-    <button class="back" :class="showDetail?'detail':(navExpand?'expand':'')" @click="store.toggleDetail()">
+    <button class="back" :class="showDetail?'detail':(navExpand?'expand':'')" @click="btnChangeDetail">
       <span v-show="navExpand && !showDetail">Kroose 音乐</span>
       <svg v-show="showDetail" height="100%" width="100%">
         <line x1="31%" y1="50%" x2="68%" y2="50%"/>
@@ -8,17 +8,17 @@
         <line x1="31%" y1="50%" x2="46%" y2="66%"/>
       </svg>
     </button>
-    <button class="min" :class="showDetail?'detail':''" @click="ipc.invoke('minWindow')">
+    <button class="min" :class="showDetail?'detail':''" @click="btnChangeWindow('minWindow')">
       <svg height="100%" width="100%">
         <line x1="35%" y1="50%" x2="65%" y2="50%"/>
       </svg>
     </button>
-    <button class="max" :class="showDetail?'detail':''" @click="ipc.invoke('maxWindow')">
+    <button class="max" :class="showDetail?'detail':''" @click="btnChangeWindow('maxWindow')">
       <svg height="100%" width="100%">
         <rect x="34%" y="32%" width="28%" height="36%" fill="transparent"/>
       </svg>
     </button>
-    <button class="close" :class="showDetail?'detail':''" @click="ipc.invoke('closeWindow')">
+    <button class="close" :class="showDetail?'detail':''" @click="btnChangeWindow('closeWindow')">
       <svg height="100%" width="100%">
         <line x1="36%" y1="34%" x2="64%" y2="66%"/>
         <line x1="64%" y1="34%" x2="36%" y2="66%"/>
@@ -29,9 +29,10 @@
 
 <script setup lang="ts">
 import { useStore } from '@renderer/store'
-const ipc = window.ipc
-const store = useStore()
-const { showDetail, navExpand } = storeToRefs(store)
+import bus from '@renderer/utils/emitter'
+const { showDetail, navExpand } = storeToRefs(useStore())
+function btnChangeDetail() { bus.emChangeDetailState() }
+function btnChangeWindow(type: string) { window.ipc.invoke(type) }
 </script>
 
 <style scoped lang="scss">

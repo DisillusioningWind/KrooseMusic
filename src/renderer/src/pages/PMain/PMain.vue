@@ -11,8 +11,7 @@
 
 <script setup lang="ts">
 import { useStore } from '@renderer/store'
-const store = useStore()
-const { showDrawer } = storeToRefs(store)
+const { showDrawer } = storeToRefs(useStore())
 </script>
 
 <style scoped lang="scss">

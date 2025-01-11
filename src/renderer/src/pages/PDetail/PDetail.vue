@@ -1,14 +1,15 @@
 <template>
   <div class="PDetail" :class="showDetail?'show':''">
-    <KImage class="img" :url="musicPicURL" />
-    <KLyric class="lrc" :stat="playerState" :time="musicCurTime" :lrcs="musicLyrics" />
+    <KImage class="img" :url="mscPicURL" />
+    <KLyric class="lrc" :stat="mscState" :time="mscTime" :lrcs="mscLyrics" />
   </div>
 </template>
 
 <script setup lang="ts">
-import { useStore } from '@renderer/store'
-const store = useStore()
-const { showDetail, musicPicURL, playerState, musicCurTime, musicLyrics } = storeToRefs(store)
+import { useStore, useAudioStore, useInfoStore } from '@renderer/store'
+const { showDetail } = storeToRefs(useStore())
+const { mscState, mscTime } = storeToRefs(useAudioStore())
+const { mscPicURL, mscLyrics } = storeToRefs(useInfoStore())
 </script>
 
 <style scoped lang="scss">
@@ -25,7 +26,7 @@ $show-time: 0.4s;
   background-position: 0 (-$title-height);// 背景图片从标题栏开始
   background-repeat: no-repeat;
   background-size: 100% auto;
-  background-image: v-bind('musicPicURL?("url(" + store.musicPicURL + ")"):"linear-gradient(150deg, #3b3b3b, #6b6b6b 20%, #ffffff)"');
+  background-image: v-bind('mscPicURL?("url(" + mscPicURL + ")"):"linear-gradient(150deg, #3b3b3b, #6b6b6b 20%, #ffffff)"');
   background-color: #ffffff;
   opacity: 0;
   pointer-events: none;// 不显示时不响应点击事件
@@ -46,6 +47,7 @@ $show-time: 0.4s;
     opacity: 1;
     pointer-events: auto;
   }
+  // 音乐图片
   .img {
     z-index: 1;
     max-height: 300px;
@@ -53,6 +55,7 @@ $show-time: 0.4s;
     margin: $margin-height;
     align-self: end;
   }
+  // 音乐歌词
   .lrc {
     z-index: 1;
     height: calc(100% - 2 * $margin-height);

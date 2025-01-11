@@ -18,7 +18,7 @@
           </div>
         </div>
         <div class="DirListBar">
-          <KDirList :dir="dirSelect" :cur-path="musicPath" @music="onDirMusic" @musics="onDirMusics"/>
+          <KDirList :dir="dirSelect" :cur-path="mscPath" @music="onDirMusic" @musics="onDirMusics"/>
         </div>
       </div>
     </div>
@@ -26,10 +26,10 @@
 </template>
 
 <script setup lang="ts">
-import { useStore } from '@renderer/store'
-const store = useStore()
-const { curLibs, curLib, curItems, curItem, curList, albumPath, musicPath } = storeToRefs(store)
-const { loadMusic } = store
+import { useStore, useInfoStore } from '@renderer/store'
+import bus from '@renderer/utils/emitter'
+const { curLibs, curLib, curItems, curItem, curList, albumPath } = storeToRefs(useStore())
+const { mscPath } = storeToRefs(useInfoStore())
 const dirSelect = ref<IDirStruc>()
 const libOptions = computed(() => curLibs.value.map(lib => ({ label: lib.name, value: lib.name })))
 const curLibName = computed({
@@ -38,8 +38,9 @@ const curLibName = computed({
 })
 
 async function onItemSelect(item: ILibItem) {
-  if (curLib.value?.mode === 'normal' && item.path !== musicPath.value) {
-    loadMusic(item.path)
+  curItem.value = item
+  if (curLib.value?.mode === 'normal' && item.path !== mscPath.value) {
+    bus.emLoadMsc(item.path)
     const index = curItems.value.findIndex(v => v.path === item.path)
     curList.value = curItems.value.slice(index).map((v, i) => { v['id'] = i; return v })
   } else if (curLib.value?.mode === 'asmr') {
@@ -49,11 +50,11 @@ async function onItemSelect(item: ILibItem) {
   }
 }
 function onDirMusic(path: string) {
-  if (musicPath.value === path) return
-  loadMusic(path)
+  if (mscPath.value === path) return
+  bus.emLoadMsc(path)
 }
 function onDirMusics(musics: ILibItem[]) {
-  loadMusic(musics[0].path)
+  bus.emLoadMsc(musics[0].path)
   curList.value = musics.map((v, i) => ({ ...v, id: i }))
 }
 </script>
