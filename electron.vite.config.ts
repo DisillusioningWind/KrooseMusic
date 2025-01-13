@@ -1,6 +1,5 @@
 import { resolve } from 'path'
 import { defineConfig, externalizeDepsPlugin } from 'electron-vite'
-import { ElementPlusResolver } from 'unplugin-vue-components/resolvers'
 import vue from '@vitejs/plugin-vue'
 import svgLoader from 'vite-svg-loader'
 import AutoImport from 'unplugin-auto-import/vite'
@@ -24,12 +23,10 @@ export default defineConfig({
       svgLoader(),
       AutoImport({
         imports: ['vue', 'vue-router', 'pinia'],
-        resolvers: [ElementPlusResolver()],
         dts: 'src/types/auto-imports.d.ts'
       }),
       Components({
         dirs: ['src/components', 'src/pages', 'src/directives'],
-        resolvers: [ElementPlusResolver()],
         extensions: ['vue'],
         dts: 'src/types/components.d.ts'
       }),

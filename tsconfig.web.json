@@ -13,9 +13,6 @@
       "@renderer/*": [
         "src/renderer/src/*"
       ]
-    },
-    "emitDecoratorMetadata": true,
-    "experimentalDecorators": true,
-    // "noUnusedLocals": false,
+    }
   }
 }

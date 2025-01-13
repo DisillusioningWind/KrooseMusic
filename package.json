@@ -41,6 +41,7 @@
     "mitt": "^3.0.1",
     "music-metadata": "^9.0.1",
     "pinia": "^2.1.7",
+    "pinia-plugin-persistedstate": "^4.2.0",
     "sass": "^1.77.6",
     "typescript": "^5.5.2",
     "unplugin-auto-import": "^0.17.6",

@@ -2,7 +2,8 @@ import { defineStore } from 'pinia'
 import bus from '@renderer/utils/emitter'
 
 type AudioState = 'unload' | 'loading' | 'play' | 'pause' | 'stop'
-export const useAudioStore = defineStore('audio', () => {
+/** 音乐播放控制 */
+export const useAudioStore = defineStore('store-audio', () => {
   const audio = new Audio()
   const state = ref<AudioState>('unload')// 播放状态
   const autoplay = ref(true)// 是否自动播放
@@ -76,5 +77,10 @@ export const useAudioStore = defineStore('audio', () => {
     mscDur: duration,
     /** 当前进度，禁止外部直接更改 */
     mscTime: curtime
+  }
+}, {
+  persist: {
+    // 仅有音量需要持久化
+    pick: ['mscVol']
   }
 })

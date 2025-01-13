@@ -4,7 +4,7 @@ import { getVer, addVer } from '@renderer/utils/storage'
 
 export default class KDBManager {
   name: string = 'KrooseDB'
-  db!: Dexie
+  db: Dexie
   /** 初始化 */
   constructor() {
     this.db = new Dexie(this.name)

@@ -28,7 +28,7 @@
 <script setup lang="ts">
 import { useStore, useInfoStore } from '@renderer/store'
 import bus from '@renderer/utils/emitter'
-const { curLibs, curLib, curItems, curItem, curList, albumPath } = storeToRefs(useStore())
+const { curLibs, curLib, curItems, curItem, curList } = storeToRefs(useStore())
 const { mscPath } = storeToRefs(useInfoStore())
 const dirSelect = ref<IDirStruc>()
 const libOptions = computed(() => curLibs.value.map(lib => ({ label: lib.name, value: lib.name })))
@@ -46,7 +46,6 @@ async function onItemSelect(item: ILibItem) {
   } else if (curLib.value?.mode === 'asmr') {
     const res = await window.ipc.invoke('getDirStruc', item.path) as IDirStruc
     dirSelect.value = res
-    albumPath.value = item.path
   }
 }
 function onDirMusic(path: string) {

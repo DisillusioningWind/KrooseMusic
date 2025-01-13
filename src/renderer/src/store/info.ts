@@ -1,7 +1,8 @@
 import { defineStore } from 'pinia'
 import bus from '@renderer/utils/emitter'
 
-export const useInfoStore = defineStore('info', () => {
+/** 当前音乐信息 */
+export const useInfoStore = defineStore('store-info', () => {
   const mscPath = ref('')
   const mscTitle = ref('')
   const mscArtist = ref('')
@@ -27,6 +28,7 @@ export const useInfoStore = defineStore('info', () => {
     mscPath.value = ''
     mscTitle.value = ''
     mscArtist.value = ''
+    URL.revokeObjectURL(mscPicURL.value)
     mscPicURL.value = ''
     mscColor.value = '#1a5d8e'
     mscLyrics.value = []

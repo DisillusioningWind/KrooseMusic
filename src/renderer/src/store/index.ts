@@ -4,7 +4,7 @@ import KDBManager from '@renderer/services/db'
 export { useAudioStore } from '@renderer/store/audio'
 export { useInfoStore } from '@renderer/store/info'
 
-export const useStore = defineStore('main', () => {
+export const useStore = defineStore('store-main', () => {
   // 界面状态
   const navExpand = ref(false)
   const showDetail = ref(false)
@@ -16,11 +16,10 @@ export const useStore = defineStore('main', () => {
   const curItems = shallowRef<ILibItem[]>([])
   const curItem = ref<ILibItem>()
   const curList = shallowRef<ILibItem[]>([])
-  const albumPath = ref('')
   // 监听事件
   bus.onChangeDetailState(switchDetailState)
   bus.onChangeDrawerState(switchDrawerState)
-  bus.onDbOpen(initCurLibs)// 初始化当前曲库
+  bus.onDbOpen(initLibs)// 初始化当前曲库
   bus.onMscEnd(loopMusic)
   bus.onLoopMsc(loopMusic)
   // 监视
@@ -37,9 +36,11 @@ export const useStore = defineStore('main', () => {
     await db.addItems('curlist', curList)
   })
   // 事件处理
-  async function initCurLibs() {
+  async function initLibs() {
     curLibs.value = await db.getLibraries()
-    if (curLibs.value.length > 0) curLib.value = curLibs.value[0]
+    // 若无曲库或已设置当前曲库则返回
+    if (curLibs.value.length === 0 || curLib) return
+    curLib.value = curLibs.value[0]
   }
   function loopMusic(next = true) {
     const idx = curList.value.findIndex(item => item.path === curItem.value?.path)
@@ -67,7 +68,10 @@ export const useStore = defineStore('main', () => {
     curLib,
     curItems,
     curItem,
-    curList,
-    albumPath
+    curList
+  }
+}, {
+  persist: {
+    pick: ['curLib', 'curItem'],
   }
 })
