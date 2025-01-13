@@ -39,7 +39,7 @@ export const useStore = defineStore('store-main', () => {
   async function initLibs() {
     curLibs.value = await db.getLibraries()
     // 若无曲库或已设置当前曲库则返回
-    if (curLibs.value.length === 0 || curLib) return
+    if (curLibs.value.length === 0 || curLib.value) return
     curLib.value = curLibs.value[0]
   }
   function loopMusic(next = true) {

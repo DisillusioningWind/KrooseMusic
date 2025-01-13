@@ -18,7 +18,7 @@
           </div>
         </div>
         <div class="DirListBar">
-          <KDirList :dir="dirSelect" :cur-path="mscPath" @music="onDirMusic" @musics="onDirMusics"/>
+          <KDirList :dir="dirSelect" :path="mscPath" @music="onDirMusic" @musics="onDirMusics"/>
         </div>
       </div>
     </div>
@@ -48,9 +48,9 @@ async function onItemSelect(item: ILibItem) {
     dirSelect.value = res
   }
 }
-function onDirMusic(path: string) {
-  if (mscPath.value === path) return
-  bus.emLoadMsc(path)
+function onDirMusic(music: ILibItem) {
+  if (mscPath.value === music.path) return
+  bus.emLoadMsc(music.path)
 }
 function onDirMusics(musics: ILibItem[]) {
   bus.emLoadMsc(musics[0].path)
