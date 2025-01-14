@@ -26,11 +26,11 @@ defineExpose({ show, text, x, y })
 </script>
 
 <style scoped lang="scss">
-@import '@renderer/assets/global';
+@use '@renderer/assets/global';
 $tooltip-height: 26px;
 
 .KTooltip {
-  @include k-tool-tip(fixed);
+  @include global.k-tool-tip(fixed);
   left: v-bind('x + "px"');
   top: v-bind('y + "px"');
   z-index: 1;

@@ -103,11 +103,11 @@ $svg-width: 21px;
       // 刷新图标
       >svg {
         @include k-svg;
+        animation: rotate 1s infinite;
         @keyframes rotate {
           0% { transform: rotate(0deg); }
           100% { transform: rotate(-360deg); }
         }
-        animation: rotate 1s infinite;
       }
       >span:last-child {
         grid-column: 1 / 3;

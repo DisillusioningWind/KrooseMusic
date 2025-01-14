@@ -59,7 +59,7 @@ function onDirMusics(musics: ILibItem[]) {
 </script>
 
 <style scoped lang="scss">
-@import '@renderer/assets/global';
+@use '@renderer/assets/global';
 $toolBarHeight: 45px;
 $conBarMarginTop: 14px;
 
@@ -132,7 +132,7 @@ $conBarMarginTop: 14px;
         width: 100%;
         height: calc(100% - $img-size);
         background-color: #f6f6f6;
-        @include k-scroll-bar(scroll);
+        @include global.k-scroll-bar(scroll);
         >div { margin-bottom: 10px; }
       }
     }

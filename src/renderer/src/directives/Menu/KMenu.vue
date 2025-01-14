@@ -49,13 +49,13 @@ defineExpose({ items, onOpenMenu })
 </script>
 
 <style scoped lang="scss">
-@import '@renderer/assets/global';
+@use '@renderer/assets/global';
 $item-height: 30px;
 $item-padding: 11px;
 $icon-size: 17px;
 
 .KMenu {
-  @include k-tool-tip(fixed);
+  @include global.k-tool-tip(fixed);
   left: v-bind('x + "px"');
   top: v-bind('y + "px"');
   z-index: 1;

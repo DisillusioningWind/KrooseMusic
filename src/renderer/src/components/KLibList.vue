@@ -58,12 +58,12 @@ function onItemCtxOpen() {
 </script>
 
 <style scoped lang="scss">
-@import '@renderer/assets/global';
+@use '@renderer/assets/global';
 
 .KLibList {
   height: 100%;
   width: 100%;
-  @include k-scroll-bar;
+  @include global.k-scroll-bar;
   .scroll-wrap {
     // 维持虚拟列表的滚动条为原长度
     padding-bottom: v-bind('(items.length - itemStart - itemShowNum) * itemHeight + "px"');

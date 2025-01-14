@@ -18,6 +18,14 @@ export default defineConfig({
         '@renderer': resolve('src/renderer/src')
       }
     },
+    // 使用scss现代api
+    css: {
+      preprocessorOptions: {
+        scss: {
+          api: 'modern',
+        },
+      },
+    },
     plugins: [
       vue(),
       svgLoader(),
