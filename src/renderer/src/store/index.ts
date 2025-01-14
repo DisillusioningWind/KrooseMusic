@@ -72,6 +72,9 @@ export const useStore = defineStore('store-main', () => {
   }
 }, {
   persist: {
-    pick: ['curLib', 'curItem'],
+    enabled: true,
+    strategies: [
+      { storage: localStorage, paths: ['curLib', 'curItem'] }
+    ]
   }
 })

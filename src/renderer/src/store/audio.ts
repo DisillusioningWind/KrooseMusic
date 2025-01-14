@@ -80,7 +80,10 @@ export const useAudioStore = defineStore('store-audio', () => {
   }
 }, {
   persist: {
-    // 仅有音量需要持久化
-    pick: ['mscVol']
+    enabled: true,
+    strategies: [
+      // 仅有音量需要持久化
+      { storage: localStorage, paths: ['mscVol'] }
+    ]
   }
 })

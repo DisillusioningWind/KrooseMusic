@@ -13,6 +13,9 @@
       "@renderer/*": [
         "src/renderer/src/*"
       ]
-    }
+    },
+    "types": [
+      "pinia-plugin-persist"
+    ]
   }
 }
