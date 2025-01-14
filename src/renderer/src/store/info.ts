@@ -14,8 +14,8 @@ export const useInfoStore = defineStore('store-info', () => {
   bus.onUnloadMsc(unloadMusicInfo)// 卸载音乐信息
   // 事件处理
   async function loadMusicInfo(path: string) {
-    const lyrcRes = window.ipc.invoke('getLyricFromFile', path)
-    const infoRes = window.ipc.invoke('getInfoFromFile', path)
+    const lyrcRes = window.api.loadMusicLyrics(path)
+    const infoRes = window.api.loadMusicInfo(path)
     const { tag, mainColor } = await infoRes as IMusicInfo
     mscLyrics.value = await lyrcRes as ILyric[]
     mscPath.value = path

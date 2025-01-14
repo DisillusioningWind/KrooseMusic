@@ -8,17 +8,17 @@
         <line x1="31%" y1="50%" x2="46%" y2="66%"/>
       </svg>
     </button>
-    <button class="min" :class="showDetail?'detail':''" @click="btnChangeWindow('minWindow')">
+    <button class="min" :class="showDetail?'detail':''" @click="btnChangeWindow('min')">
       <svg height="100%" width="100%">
         <line x1="35%" y1="50%" x2="65%" y2="50%"/>
       </svg>
     </button>
-    <button class="max" :class="showDetail?'detail':''" @click="btnChangeWindow('maxWindow')">
+    <button class="max" :class="showDetail?'detail':''" @click="btnChangeWindow('max')">
       <svg height="100%" width="100%">
         <rect x="34%" y="32%" width="28%" height="36%" fill="transparent"/>
       </svg>
     </button>
-    <button class="close" :class="showDetail?'detail':''" @click="btnChangeWindow('closeWindow')">
+    <button class="close" :class="showDetail?'detail':''" @click="btnChangeWindow('close')">
       <svg height="100%" width="100%">
         <line x1="36%" y1="34%" x2="64%" y2="66%"/>
         <line x1="64%" y1="34%" x2="36%" y2="66%"/>
@@ -32,7 +32,13 @@ import { useStore } from '@renderer/store'
 import bus from '@renderer/utils/emitter'
 const { showDetail, navExpand } = storeToRefs(useStore())
 function btnChangeDetail() { bus.emChangeDetailState() }
-function btnChangeWindow(type: string) { window.ipc.invoke(type) }
+function btnChangeWindow(type: string) {
+  switch (type) {
+    case 'min': window.api.minWindow(); break
+    case 'max': window.api.maxWindow(); break
+    case 'close': window.api.closeWindow(); break
+  }
+}
 </script>
 
 <style scoped lang="scss">

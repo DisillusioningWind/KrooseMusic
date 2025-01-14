@@ -31,18 +31,10 @@ const libAddTotal = ref(10)
 let libAddDirName = ''
 let libAddDirPath = ''
 
-onMounted(async () => {
-  libs.arr = await db.getLibraries()
-  window.ipc.on('musicLength', (_e, length) => libAddTotal.value = length)
-  window.ipc.on('musicData', onGetData)
-})
-onUnmounted(() => {
-  window.ipc.removeAllListeners('musicLength')
-  window.ipc.removeAllListeners('musicData')
-})
+onMounted(async () => { libs.arr = await db.getLibraries() })
 
 async function onOpenAddDialog() {
-  const path = await window.ipc.invoke('openDirectoryWindow') as string | null
+  const path = await window.api.openDirectoryWindow()
   if (!path) return
   libAddDirName = window.path.basename(path)
   libAddDirPath = path
@@ -53,17 +45,21 @@ async function onConfirmDir(mode: LibMode) {
   const id = await db.addLibrary(libAddDirName, libAddDirPath, mode)
   libs.arr.push({ id, name: libAddDirName, path: libAddDirPath, mode })
   console.log('音乐目录添加成功')
-  const funcName = mode === 'normal' ? 'getDirMusics' : 'getDirAlbums'
-  window.ipc.invoke(funcName, libAddDirPath)
+  libAddTotal.value = await window.api.getDirLength(mode, libAddDirPath)
+  for (let i = 0; i < libAddTotal.value; i++) {
+    const item = await window.api.getDirItemData(i)
+    if (!item) {
+      console.error('获取音乐目录数据失败')
+      break
+    }
+    await db.addItem(libAddDirName, item)
+    libAddNum.value++
+  }
 }
 async function onDeleteDir(id: number) {
   db.deleteLibrary(id)
   libs.arr = libs.arr.filter(item => item.id !== id)
   console.log('音乐目录删除成功')
-}
-async function onGetData(_e, music: ILibItem) {
-  await db.addItem(libAddDirName, music)
-  libAddNum.value++
 }
 </script>
 

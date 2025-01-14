@@ -1,6 +1,6 @@
 import { app, BrowserWindow, session } from 'electron/main'
 import { join } from 'path'
-import { bindIpcMain } from './api/index.js'
+import { registerAPI } from './api/index.js'
 
 class MainWindow extends BrowserWindow {
   constructor() {
@@ -53,7 +53,7 @@ if (process.env.NODE_ENV === 'development') {
 
 app.whenReady().then(() => {
   const mainWindow = new MainWindow()
-  bindIpcMain(mainWindow)
+  registerAPI(mainWindow)
   //打包时注意删除
   if (process.env.NODE_ENV === 'development') {
     //Vue Devtools

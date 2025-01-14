@@ -115,9 +115,9 @@ function btnNextMusic() { bus.emLoopMsc(true) }
 function btnUnloadFile() { bus.emUnloadMsc() }
 async function btnOpenDir() { /** TODO */ }
 async function btnOpenFile() {
-  const filePath = await window.ipc.invoke('openFileWindow') as string | null
-  if (!filePath) return
-  bus.emLoadMsc(filePath)
+  const path = await window.api.openFileWindow()
+  if (!path) return
+  bus.emLoadMsc(path)
 }
 </script>
 

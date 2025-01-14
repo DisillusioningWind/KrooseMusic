@@ -1,36 +1,23 @@
-import { ipcMain } from 'electron'
-import { BrowserWindow } from 'electron'
-import * as fileAPI from './file.js'
-import * as musicAPI from './music.js'
-import * as storeAPI from './store.js'
+import { ipcMain, BrowserWindow } from 'electron/main'
 import * as windowAPI from './window.js'
-import * as libraryAPI from './library.js'
+import * as settingAPI from './setting.js'
+import * as musicDirAPI from './musicDir.js'
+import * as musicInfoAPI from './musicInfo.js'
 
-/** 所有API */
-const API = {
-  ...fileAPI,
-  ...musicAPI,
-  ...storeAPI,
+const normalAPI = {
+  ...settingAPI,
+  ...musicDirAPI,
+  ...musicInfoAPI,
 }
-
-/**
- * 绑定ipcMain接收的信号至执行函数，对于需要window作为参数的API，将window作为第一个参数传入
- * @param window ipcMain绑定的窗口
- */
-export function bindIpcMain(window: BrowserWindow) {
-  for (const key of Object.keys(API)) {
-    ipcMain.handle(key, (_e, ...args) => {
-      return API[key](...args)
-    })
-  }
-  for (const key of Object.keys(windowAPI)) {
-    ipcMain.handle(key, (_e, ...args) => {
-      return windowAPI[key](window, ...args)
-    })
-  }
-  for (const key of Object.keys(libraryAPI)) {
-    ipcMain.handle(key, (e, ...args) => {
-      return libraryAPI[key](e, ...args)
-    })
-  }
+const API = {
+  ...normalAPI,
+  ...windowAPI,
+}
+/** 所有API的类型 */
+export type API = typeof API
+/** 注册ipcMain的API @param window API绑定的窗口 */
+export function registerAPI(window: BrowserWindow) {
+  ipcMain.handle('getAPINames', () => { return Object.keys(API) })
+  for (const key of Object.keys(normalAPI)) { ipcMain.handle(key, (_, ...args) => { return normalAPI[key](...args) }) }
+  for (const key of Object.keys(windowAPI)) { ipcMain.handle(key, (_, ...args) => { return windowAPI[key](window, ...args) }) }
 }

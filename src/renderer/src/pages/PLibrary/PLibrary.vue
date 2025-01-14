@@ -44,7 +44,8 @@ async function onItemSelect(item: ILibItem) {
     const index = curItems.value.findIndex(v => v.path === item.path)
     curList.value = curItems.value.slice(index).map((v, i) => { v['id'] = i; return v })
   } else if (curLib.value?.mode === 'asmr') {
-    const res = await window.ipc.invoke('getDirStruc', item.path) as IDirStruc
+    const res = await window.api.getDirStruc(item.path)
+    if (!res) return
     dirSelect.value = res
   }
 }
