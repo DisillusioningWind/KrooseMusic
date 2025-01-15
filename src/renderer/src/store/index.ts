@@ -14,7 +14,8 @@ export const useStore = defineStore('store-main', () => {
   const curLibs = shallowRef<ILibrary[]>([])
   const curLib = ref<ILibrary>()
   const curItems = shallowRef<ILibItem[]>([])
-  const curItem = ref<ILibItem>()
+  const curItem = ref<ILibItem>()// 当前选中项目，与curMsc不同点在于curItem在asmr模式下代表当前专辑
+  const curMsc = ref<ILibItem>()// 当前播放音乐，只需要其中的path值
   const curList = shallowRef<ILibItem[]>([])
   // 监听事件
   bus.onChangeDetailState(switchDetailState)
@@ -34,6 +35,10 @@ export const useStore = defineStore('store-main', () => {
   watch(curList, async (curList) => {
     await db.clearItems('curlist')
     await db.addItems('curlist', curList)
+  })
+  watch(curMsc, (curMsc) => {
+    if (!curMsc) return
+    bus.emLoadMsc(curMsc.path)
   })
   // 事件处理
   async function initLibs() {
@@ -68,13 +73,14 @@ export const useStore = defineStore('store-main', () => {
     curLib,
     curItems,
     curItem,
+    curMsc,
     curList
   }
 }, {
   persist: {
     enabled: true,
     strategies: [
-      { storage: localStorage, paths: ['curLib', 'curItem'] }
+      { storage: localStorage, paths: ['curLib', 'curItem', 'curMsc'] }
     ]
   }
 })

@@ -6,7 +6,7 @@
     </div>
     <div class="ContentBar">
       <div class="ListBar">
-        <KLibList :mode="curLib?.mode" :items="curItems" :cur-path="curItem?.path" @select="onItemSelect" />
+        <KLibList :mode="curLib?.mode" :items="curItems" :path="curItem?.path" @select="onItemSelect" />
       </div>
       <div class="DetailBar" v-if="curLib?.mode==='asmr' && curItem">
         <div class="InfoBar">
@@ -18,7 +18,7 @@
           </div>
         </div>
         <div class="DirListBar">
-          <KDirList :dir="dirSelect" :path="mscPath" @music="onDirMusic" @musics="onDirMusics"/>
+          <KDirList :dir="dirSelect" :path="curMsc?.path" @music="onDirMusic" @musics="onDirMusics" />
         </div>
       </div>
     </div>
@@ -26,10 +26,8 @@
 </template>
 
 <script setup lang="ts">
-import { useStore, useInfoStore } from '@renderer/store'
-import bus from '@renderer/utils/emitter'
-const { curLibs, curLib, curItems, curItem, curList } = storeToRefs(useStore())
-const { mscPath } = storeToRefs(useInfoStore())
+import { useStore } from '@renderer/store'
+const { curLibs, curLib, curItems, curItem, curMsc, curList } = storeToRefs(useStore())
 const dirSelect = ref<IDirStruc>()
 const libOptions = computed(() => curLibs.value.map(lib => ({ label: lib.name, value: lib.name })))
 const curLibName = computed({
@@ -38,24 +36,25 @@ const curLibName = computed({
 })
 
 async function onItemSelect(item: ILibItem) {
+  if (!curLib.value || curItem.value?.path === item.path) return
   curItem.value = item
-  if (curLib.value?.mode === 'normal' && item.path !== mscPath.value) {
-    bus.emLoadMsc(item.path)
-    const index = curItems.value.findIndex(v => v.path === item.path)
-    curList.value = curItems.value.slice(index).map((v, i) => { v['id'] = i; return v })
-  } else if (curLib.value?.mode === 'asmr') {
-    const res = await window.api.getDirStruc(item.path)
-    if (!res) return
-    dirSelect.value = res
+  if (curLib.value.mode === 'normal') {
+    curMsc.value = item
+    const idx = curItems.value.findIndex(v => v.path === item.path)
+    curList.value = curItems.value.slice(idx)
+  } else if (curLib.value.mode === 'asmr') {
+    const dir = await window.api.getDirStruc(item.path)
+    if (!dir) return
+    dirSelect.value = dir
   }
 }
 function onDirMusic(music: ILibItem) {
-  if (mscPath.value === music.path) return
-  bus.emLoadMsc(music.path)
+  if (curMsc.value?.path === music.path) return
+  curMsc.value = music
 }
 function onDirMusics(musics: ILibItem[]) {
-  bus.emLoadMsc(musics[0].path)
-  curList.value = musics.map((v, i) => ({ ...v, id: i }))
+  curMsc.value = musics[0]
+  curList.value = musics
 }
 </script>
 

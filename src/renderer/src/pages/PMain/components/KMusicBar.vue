@@ -66,7 +66,7 @@
             <path d="m8,23 l19,0" stroke-width="1px"/>
           </svg>
         </button>
-        <button v-tooltip="'更多'" v-menu="menu">
+        <button v-tooltip="'更多'" v-menu="mscMenu">
           <svg>
             <circle cx="32%" cy="50%" r="0.5"/>
             <circle cx="50%" cy="50%" r="0.5"/>
@@ -88,13 +88,12 @@ import svgOpenDir from '@renderer/assets/icons/dir.svg?component'
 import svgOpenFile from '@renderer/assets/icons/plus.svg?component'
 import svgCloseFile from '@renderer/assets/icons/close.svg?component'
 // 数据
-const { showDetail } = storeToRefs(useStore())
+const { showDetail, curMsc } = storeToRefs(useStore())
 const { mscState, mscVol, mscDur, mscTime } = storeToRefs(useAudioStore())
 const { mscTitle, mscArtist, mscPicURL, mscColor } = storeToRefs(useInfoStore())
-/** 音乐未加载状态 */
-const mscUnload = computed(() => mscState.value === 'unload')
-const mscShowTime = ref(0)// 滑动条滑动时实际进度不改变，等松开时才改变，但是显示进度实时更新
-const menu = [
+const mscUnload = computed(() => mscState.value === 'unload')// 音乐未加载状态
+const mscShowTime = ref(0)// 滑动条显示进度，滑动时实际进度不改变，等松开时才改变，但是显示进度实时更新
+const mscMenu = [
   { label: '打开目录', icon: svgOpenDir, action: btnOpenDir},
   { label: '打开文件', icon: svgOpenFile, action: btnOpenFile },
   { label: '卸载文件', icon: svgCloseFile, action: btnUnloadFile }
@@ -117,7 +116,10 @@ async function btnOpenDir() { /** TODO */ }
 async function btnOpenFile() {
   const path = await window.api.openFileWindow()
   if (!path) return
-  bus.emLoadMsc(path)
+  curMsc.value = {
+    name: window.path.basename(path),
+    path: path
+  } as ILibItem
 }
 </script>
 
