@@ -1,15 +1,12 @@
 import { defineStore } from 'pinia'
 import bus from '@renderer/utils/emitter'
 import KDBManager from '@renderer/services/db'
-export { useAudioStore } from '@renderer/store/audio'
+export { useUIStore } from '@renderer/store/interface'
 export { useInfoStore } from '@renderer/store/info'
+export { useAudioStore } from '@renderer/store/audio'
 
+// 曲库数据
 export const useStore = defineStore('store-main', () => {
-  // 界面状态
-  const navExpand = ref(false)
-  const showDetail = ref(false)
-  const showDrawer = ref(false)
-  // 曲库数据
   const db = new KDBManager()
   const curLibs = shallowRef<ILibrary[]>([])
   const curLib = ref<ILibrary>()
@@ -18,8 +15,6 @@ export const useStore = defineStore('store-main', () => {
   const curMsc = ref<ILibItem>()// 当前播放音乐，只需要其中的path值
   const curList = shallowRef<ILibItem[]>([])
   // 监听事件
-  bus.onChangeDetailState(switchDetailState)
-  bus.onChangeDrawerState(switchDrawerState)
   bus.onDbOpen(initLibs)// 初始化当前曲库
   bus.onMscEnd(loopMusic)
   bus.onLoopMsc(loopMusic)
@@ -61,13 +56,8 @@ export const useStore = defineStore('store-main', () => {
       curItem.value = curList.value[idxLoad]
     }
   }
-  function switchDetailState() { showDetail.value = !showDetail.value }
-  function switchDrawerState() { showDrawer.value = !showDrawer.value }
   // 导出
   return {
-    navExpand,
-    showDetail,
-    showDrawer,
     db,
     curLibs,
     curLib,

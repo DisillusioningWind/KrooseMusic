@@ -28,9 +28,9 @@
 </template>
 
 <script setup lang="ts">
-import { useStore } from '@renderer/store'
+import { useUIStore } from '@renderer/store'
 import bus from '@renderer/utils/emitter'
-const { showDetail, navExpand } = storeToRefs(useStore())
+const { showDetail, navExpand } = storeToRefs(useUIStore())
 function btnChangeDetail() { bus.emChangeDetailState() }
 function btnChangeWindow(type: string) {
   switch (type) {

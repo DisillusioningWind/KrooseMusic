@@ -11,7 +11,7 @@
 </template>
 
 <script setup lang="ts">
-import { useStore } from '@renderer/store'
+import { useUIStore } from '@renderer/store'
 import router from '@renderer/router'
 import SVGMax from '@renderer/assets/icons/max.svg?component'
 import SVGSearch from '@renderer/assets/icons/search.svg?component'
@@ -20,8 +20,7 @@ import SVGMusic from '@renderer/assets/icons/music.svg?component'
 import SVGLike from '@renderer/assets/icons/like.svg?component'
 import SVGPlayList from '@renderer/assets/icons/playList.svg?component'
 import SVGSetting from '@renderer/assets/icons/setting.svg?component'
-const store = useStore()
-const expand = ref(false)
+const { navExpand: expand } = storeToRefs(useUIStore())
 const search = ref('')
 const menus = [
   { path: '/Max', title: '', icon: SVGMax },
@@ -32,7 +31,6 @@ const menus = [
   { path: '/Setting', title: '设置', icon: SVGSetting }
 ]
 onMounted(() => { onMenuClick('/Library') }) // 默认路径
-watch(expand, v => store.navExpand = v)
 function onMenuClass(routePath: string, menuPath: string) {
   if (menuPath !== '/Search' && menuPath === routePath) { return 'select' }
   else if (menuPath === '/Search' && expand.value) { return 'search' }

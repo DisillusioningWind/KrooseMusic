@@ -10,8 +10,8 @@
 </template>
 
 <script setup lang="ts">
-import { useStore } from '@renderer/store'
-const { showDrawer } = storeToRefs(useStore())
+import { useUIStore } from '@renderer/store'
+const { showDrawer } = storeToRefs(useUIStore())
 </script>
 
 <style scoped lang="scss">

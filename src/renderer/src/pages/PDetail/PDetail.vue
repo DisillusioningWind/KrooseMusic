@@ -6,8 +6,8 @@
 </template>
 
 <script setup lang="ts">
-import { useStore, useAudioStore, useInfoStore } from '@renderer/store'
-const { showDetail } = storeToRefs(useStore())
+import { useUIStore, useAudioStore, useInfoStore } from '@renderer/store'
+const { showDetail } = storeToRefs(useUIStore())
 const { mscState, mscTime } = storeToRefs(useAudioStore())
 const { mscPicURL, mscLyrics } = storeToRefs(useInfoStore())
 </script>

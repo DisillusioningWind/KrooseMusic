@@ -79,7 +79,7 @@
 </template>
 
 <script setup lang="ts">
-import { useStore, useAudioStore, useInfoStore } from '@renderer/store'
+import { useStore, useUIStore, useAudioStore, useInfoStore } from '@renderer/store'
 import { vTooltip } from '@renderer/directives/Tooltip'
 import { vMenu } from '@renderer/directives/Menu'
 import { formatTime } from '@renderer/utils/tools'
@@ -88,7 +88,8 @@ import svgOpenDir from '@renderer/assets/icons/dir.svg?component'
 import svgOpenFile from '@renderer/assets/icons/plus.svg?component'
 import svgCloseFile from '@renderer/assets/icons/close.svg?component'
 // 数据
-const { showDetail, curMsc } = storeToRefs(useStore())
+const { curMsc } = storeToRefs(useStore())
+const { showDetail } = storeToRefs(useUIStore())
 const { mscState, mscVol, mscDur, mscTime } = storeToRefs(useAudioStore())
 const { mscTitle, mscArtist, mscPicURL, mscColor } = storeToRefs(useInfoStore())
 const mscUnload = computed(() => mscState.value === 'unload')// 音乐未加载状态
