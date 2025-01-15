@@ -31,6 +31,7 @@ export const useStore = defineStore('store-main', () => {
     await db.clearItems('curlist')
     await db.addItems('curlist', curList)
   })
+  // 加载音乐唯一方法
   watch(curMsc, (curMsc) => {
     if (!curMsc) return
     bus.emLoadMsc(curMsc.path)
@@ -52,8 +53,8 @@ export const useStore = defineStore('store-main', () => {
       // WARN: 已经是第一首音乐
     } else {
       const idxLoad = next ? idx + 1 : idx - 1
-      bus.emLoadMsc(curList.value[idxLoad].path)
       curItem.value = curList.value[idxLoad]
+      curMsc.value = curItem.value
     }
   }
   // 导出
