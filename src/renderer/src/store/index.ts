@@ -1,44 +1,34 @@
 import { defineStore } from 'pinia'
 import bus from '@renderer/utils/emitter'
-import KDBManager from '@renderer/services/db'
 export { useUIStore } from '@renderer/store/interface'
 export { useInfoStore } from '@renderer/store/info'
 export { useAudioStore } from '@renderer/store/audio'
 
 // 曲库数据
 export const useStore = defineStore('store-main', () => {
-  const db = new KDBManager()
   const curLibs = shallowRef<ILibrary[]>([])
   const curLib = ref<ILibrary>()
   const curItems = shallowRef<ILibItem[]>([])
   const curItem = ref<ILibItem>()// 当前选中项目，与curMsc不同点在于curItem在asmr模式下代表当前专辑
   const curMsc = ref<ILibItem>()// 当前播放音乐，只需要其中的path值
   const curList = shallowRef<ILibItem[]>([])
-  // 监听事件
-  bus.onDbOpen(initLibs)// 初始化当前曲库
+  // 监听事件并初始化
+  initLibs()
   bus.onMscEnd(loopMusic)
   bus.onLoopMsc(loopMusic)
-  // 监视
+  // 曲库变化时更新当前曲库项目
   watch(curLib, async (curLib) => {
     if (!curLib) return
-    const cnt = await db.getItemNums(curLib.name)
-    const size = 500
-    const res = [] as ILibItem[]
-    for (let i = 0; i < cnt; i += size) { res.push(...await db.getItems(curLib.name, i, size)) }
-    curItems.value = res
+    curItems.value = await window.api.getItems(curLib.name)
   })
-  watch(curList, async (curList) => {
-    await db.clearItems('curlist')
-    await db.addItems('curlist', curList)
-  })
-  // 加载音乐唯一方法
+  // 加载音乐，这里是唯一的入口
   watch(curMsc, (curMsc) => {
     if (!curMsc) return
     bus.emLoadMsc(curMsc.path)
   })
-  // 事件处理
+  // 初始化曲库表和当前曲库
   async function initLibs() {
-    curLibs.value = await db.getLibraries()
+    curLibs.value = await window.api.getLibraries()
     // 若无曲库或已设置当前曲库则返回
     if (curLibs.value.length === 0 || curLib.value) return
     curLib.value = curLibs.value[0]
@@ -59,7 +49,6 @@ export const useStore = defineStore('store-main', () => {
   }
   // 导出
   return {
-    db,
     curLibs,
     curLib,
     curItems,

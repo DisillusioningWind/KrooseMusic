@@ -3,12 +3,12 @@
     <p class="PTitle">设置</p>
     <KSetting title="音乐目录">
       <div class="Library">
-        <div v-for="item in libs.arr" :key="item.id">
-          <span v-tooltip.immediate.overflow="item.name">{{ item.name }}</span>
-          <span v-tooltip.immediate.overflow="item.path">{{ item.path }}</span>
+        <div v-for="lib in curLibs" :key="lib.id">
+          <span v-tooltip.immediate.overflow="lib.name">{{ lib.name }}</span>
+          <span v-tooltip.immediate.overflow="lib.path">{{ lib.path }}</span>
           <span>模式</span>
-          <span>{{ item.mode==='normal'?'普通':'ASMR' }}</span>
-          <button @click="onDeleteDir(item.id)"><Close /></button>
+          <span>{{ lib.mode==='normal'?'普通':'ASMR' }}</span>
+          <button @click="onDeleteDir(lib)"><Close /></button>
         </div>
         <div class="AddDiv" @click="onOpenAddDialog"><Plus /></div>
         <KLibDialog v-model="libAddShow" :path="libAddDirPath" :num="libAddNum" :total="libAddTotal" @confirm="onConfirmDir" />
@@ -22,17 +22,13 @@ import { vTooltip } from '@renderer/directives/Tooltip'
 import Close from '@renderer/assets/icons/close.svg?component'
 import Plus from '@renderer/assets/icons/plus.svg?component'
 import { useStore } from '@renderer/store'
-const store = useStore()
-const { db } = store
-const libs = reactive<{arr: ILibrary[]}>({ arr: [] })
+const { curLibs } = storeToRefs(useStore())
 const libAddShow = ref(false)
 const libAddNum = ref(0)
 const libAddTotal = ref(10)
 let libAddDirName = ''
 let libAddDirPath = ''
-
-onMounted(async () => { libs.arr = await db.getLibraries() })
-
+// 打开添加音乐目录对话框
 async function onOpenAddDialog() {
   const path = await window.api.openDirectoryWindow()
   if (!path) return
@@ -41,24 +37,21 @@ async function onOpenAddDialog() {
   libAddNum.value = 0
   libAddShow.value = true
 }
+// 确认添加音乐目录和音乐数据到数据库，同时更新curLibs
 async function onConfirmDir(mode: LibMode) {
-  const id = await db.addLibrary(libAddDirName, libAddDirPath, mode)
-  libs.arr.push({ id, name: libAddDirName, path: libAddDirPath, mode })
-  console.log('音乐目录添加成功')
+  const id = await window.api.addLibrary(libAddDirName, libAddDirPath, mode)
   libAddTotal.value = await window.api.getDirLength(mode, libAddDirPath)
-  for (let i = 0; i < libAddTotal.value; i++) {
-    const item = await window.api.getDirItemData(i)
-    if (!item) {
-      console.error('获取音乐目录数据失败')
-      break
-    }
-    await db.addItem(libAddDirName, item)
-    libAddNum.value++
+  curLibs.value.push({ id, name: libAddDirName, path: libAddDirPath, mode })
+  console.log('音乐目录添加成功')
+  for (libAddNum.value = 0; libAddNum.value < libAddTotal.value; libAddNum.value++) {
+    await window.api.addItem(libAddDirName, mode, libAddNum.value)
   }
+  console.log('音乐目录数据添加成功')
 }
-async function onDeleteDir(id: number) {
-  db.deleteLibrary(id)
-  libs.arr = libs.arr.filter(item => item.id !== id)
+// 删除音乐目录和音乐数据，同时更新curLibs
+async function onDeleteDir(lib: ILibrary) {
+  await window.api.deleteLibrary(lib.name)
+  curLibs.value.splice(lib.id, 1)
   console.log('音乐目录删除成功')
 }
 </script>

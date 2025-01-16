@@ -26,7 +26,7 @@ export async function getDirLength(mode: LibMode, path: string): Promise<number>
   return dirItems.length
 }
 /**
- * 获取目录中指定索引的文件信息
+ * 获取目录中指定索引的文件信息，不应当由渲染进程调用
  * @param index 文件索引
  * @returns 文件信息，包括音乐或子目录
  */
@@ -49,7 +49,7 @@ export async function getDirItemData(index: number): Promise<ILibMusic | ILibAlb
     return {
       name: item.name,
       path: path,
-      ...(pic ? { pic: join(pic.parentPath, pic.name) } : {})
+      pic: pic ? join(pic.parentPath, pic.name) : ''
     }
   }
 }

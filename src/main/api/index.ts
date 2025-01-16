@@ -3,11 +3,13 @@ import * as windowAPI from './window.js'
 import * as settingAPI from './setting.js'
 import * as musicDirAPI from './musicDir.js'
 import * as musicInfoAPI from './musicInfo.js'
+import * as databaseAPI from './database.js'
 
 const normalAPI = {
   ...settingAPI,
   ...musicDirAPI,
   ...musicInfoAPI,
+  ...databaseAPI,
 }
 const API = {
   ...normalAPI,
