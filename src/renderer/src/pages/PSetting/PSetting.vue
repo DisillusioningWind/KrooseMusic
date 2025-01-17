@@ -3,12 +3,12 @@
     <p class="PTitle">设置</p>
     <KSetting title="音乐目录">
       <div class="Library">
-        <div v-for="lib in curLibs" :key="lib.id">
+        <div v-for="lib, idx in curLibs" :key="lib.id">
           <span v-tooltip.immediate.overflow="lib.name">{{ lib.name }}</span>
           <span v-tooltip.immediate.overflow="lib.path">{{ lib.path }}</span>
           <span>模式</span>
           <span>{{ lib.mode==='normal'?'普通':'ASMR' }}</span>
-          <button @click="onDeleteDir(lib)"><Close /></button>
+          <button @click="onDeleteDir(idx, lib.name)"><Close /></button>
         </div>
         <div class="AddDiv" @click="onOpenAddDialog"><Plus /></div>
         <KLibDialog v-model="libAddShow" :path="libAddDirPath" :num="libAddNum" :total="libAddTotal" @confirm="onConfirmDir" />
@@ -49,9 +49,9 @@ async function onConfirmDir(mode: LibMode) {
   console.log('音乐目录数据添加成功')
 }
 // 删除音乐目录和音乐数据，同时更新curLibs
-async function onDeleteDir(lib: ILibrary) {
-  await window.api.deleteLibrary(lib.name)
-  curLibs.value.splice(lib.id, 1)
+async function onDeleteDir(idx: number, name: string) {
+  await window.api.deleteLibrary(name)
+  curLibs.value.splice(idx, 1)
   console.log('音乐目录删除成功')
 }
 </script>

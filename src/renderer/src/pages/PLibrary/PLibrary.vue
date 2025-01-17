@@ -2,7 +2,7 @@
   <div class="PLibrary">
     <div class="ToolBar">
       <span>当前目录</span>
-      <KLibSelect class="LibSelect" v-model="curLibName" :options="libOptions" />
+      <KLibSelect v-if="curLib" class="LibSelect" v-model="curLibName" :options="libOptions" />
     </div>
     <div class="ContentBar">
       <div class="ListBar">

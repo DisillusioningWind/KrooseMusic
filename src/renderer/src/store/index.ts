@@ -7,19 +7,32 @@ export { useAudioStore } from '@renderer/store/audio'
 // 曲库数据
 export const useStore = defineStore('store-main', () => {
   const curLibs = shallowRef<ILibrary[]>([])
-  const curLib = ref<ILibrary>()
   const curItems = shallowRef<ILibItem[]>([])
+  const curList = shallowRef<ILibItem[]>([])
+  const curLib = ref<ILibrary>()
   const curItem = ref<ILibItem>()// 当前选中项目，与curMsc不同点在于curItem在asmr模式下代表当前专辑
   const curMsc = ref<ILibItem>()// 当前播放音乐，只需要其中的path值
-  const curList = shallowRef<ILibItem[]>([])
   // 监听事件并初始化
-  initLibs()
+  initCurLibs()
   bus.onMscEnd(loopMusic)
   bus.onLoopMsc(loopMusic)
-  // 曲库变化时更新当前曲库项目
-  watch(curLib, async (curLib) => {
-    if (!curLib) return
-    curItems.value = await window.api.getItems(curLib.name)
+  // 曲库列表变化时更新当前曲库
+  watch(curLibs, (curLibs) => {
+    // 无曲库时清空当前曲库
+    if (curLibs.length === 0) { curLib.value = undefined }
+    // 无当前曲库时默认选中第一个
+    else if (!curLib.value) { curLib.value = curLibs[0] }
+    // 当前曲库不存在时清空当前曲库
+    else if (curLib.value) { curLib.value = curLibs.find(lib => lib.name === curLib.value?.name) }
+  })
+  // 当前曲库变化时更新当前曲库项目
+  watch(curLib, async (curLib, lastLib) => {
+    // 无当前曲库时清空当前曲库项目
+    if (!curLib) { curItems.value = [] }
+    // 当前曲库无变化时不更新当前曲库项目
+    else if ( curLib.name === lastLib?.name ) { return }
+    // 当前曲库存在时更新当前曲库项目
+    else { curItems.value = await window.api.getItems(curLib.name) }
   })
   // 加载音乐，这里是唯一的入口
   watch(curMsc, (curMsc) => {
@@ -27,12 +40,8 @@ export const useStore = defineStore('store-main', () => {
     bus.emLoadMsc(curMsc.path)
   })
   // 初始化曲库表和当前曲库
-  async function initLibs() {
-    curLibs.value = await window.api.getLibraries()
-    // 若无曲库或已设置当前曲库则返回
-    if (curLibs.value.length === 0 || curLib.value) return
-    curLib.value = curLibs.value[0]
-  }
+  async function initCurLibs() { curLibs.value = await window.api.getLibraries() }
+  // 处理音乐循环
   function loopMusic(next = true) {
     const idx = curList.value.findIndex(item => item.path === curItem.value?.path)
     if (idx === -1) {
