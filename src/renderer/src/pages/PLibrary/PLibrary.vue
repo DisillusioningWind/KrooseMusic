@@ -18,7 +18,7 @@
           </div>
         </div>
         <div class="DirListBar">
-          <KDirList :dir="dirSelect" :path="curMscPath" @music="onDirMusic" @musics="onDirMusics" />
+          <KDirList :dir="dirSelect" :path="curPath" @music="onDirMusic" @musics="onDirMusics" />
         </div>
       </div>
     </div>
@@ -26,9 +26,9 @@
 </template>
 
 <script setup lang="ts">
-import { useStore } from '@renderer/store'
+import { useLibStore } from '@renderer/store'
 import bus from '@renderer/utils/emitter'
-const { curLibs, curLib, curItems, curItem, curMscPath, curList } = storeToRefs(useStore())
+const { curLibs, curLib, curItems, curItem, curPath, curList } = storeToRefs(useLibStore())
 const dirSelect = ref<IDirStruc>()
 const libOptions = computed(() => curLibs.value.map(lib => ({ label: lib.name, value: lib.name })))
 const curLibName = computed({
@@ -50,7 +50,7 @@ async function onItemSelect(item: ILibItem) {
   }
 }
 function onDirMusic(music: ILibItem) {
-  if (curMscPath.value === music.path) return
+  if (curPath.value === music.path) return
   bus.emLoadMsc(music.path)
 }
 function onDirMusics(musics: ILibItem[]) {

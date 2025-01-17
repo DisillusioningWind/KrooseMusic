@@ -21,8 +21,8 @@
 import { vTooltip } from '@renderer/directives/Tooltip'
 import Close from '@renderer/assets/icons/close.svg?component'
 import Plus from '@renderer/assets/icons/plus.svg?component'
-import { useStore } from '@renderer/store'
-const { curLibs } = storeToRefs(useStore())
+import { useLibStore } from '@renderer/store'
+const { curLibs } = storeToRefs(useLibStore())
 const libAddShow = ref(false)
 const libAddNum = ref(0)
 const libAddTotal = ref(10)

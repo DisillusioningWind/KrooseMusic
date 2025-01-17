@@ -1,12 +1,12 @@
 <template>
   <KDrawer>
-    <KLibList mode="playlist" :items="curList" :path="curMsc?.path" />
+    <KLibList mode="playlist" :items="curList" :path="curPath" />
   </KDrawer>
 </template>
 
 <script setup lang="ts">
-import { useStore } from '@renderer/store'
-const { curList, curMsc } = storeToRefs(useStore())
+import { useLibStore } from '@renderer/store'
+const { curList, curPath } = storeToRefs(useLibStore())
 </script>
 
 <style scoped lang="scss">
