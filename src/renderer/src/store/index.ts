@@ -11,11 +11,15 @@ export const useStore = defineStore('store-main', () => {
   const curList = shallowRef<ILibItem[]>([])
   const curLib = ref<ILibrary>()
   const curItem = ref<ILibItem>()// 当前选中项目，与curMsc不同点在于curItem在asmr模式下代表当前专辑
-  const curMsc = ref<ILibItem>()// 当前播放音乐，只需要其中的path值
-  // 监听事件并初始化
-  initCurLibs()
+  const curMscPath = ref('')// 当前播放音乐，只需要其中的path值
+  // 在所有store初始化后初始化当前曲库和当前音乐
+  onMounted(() => {
+    initCurLibs()
+    initCurMscPath()
+  })
   bus.onMscEnd(loopMusic)
   bus.onLoopMsc(loopMusic)
+  bus.onLoadMsc(saveCurMscPath)
   // 曲库列表变化时更新当前曲库
   watch(curLibs, (curLibs) => {
     // 无曲库时清空当前曲库
@@ -34,13 +38,18 @@ export const useStore = defineStore('store-main', () => {
     // 当前曲库存在时更新当前曲库项目
     else { curItems.value = await window.api.getItems(curLib.name) }
   })
-  // 加载音乐，这里是唯一的入口
-  watch(curMsc, (curMsc) => {
-    if (!curMsc) return
-    bus.emLoadMsc(curMsc.path)
-  })
   // 初始化曲库表和当前曲库
   async function initCurLibs() { curLibs.value = await window.api.getLibraries() }
+  // 初始化最后播放的音乐并取消自动播放
+  function initCurMscPath() {
+    const path = localStorage.getItem('cur-path')
+    if (path) { bus.emLoadMsc(path, false) }
+  }
+  // 保存最后播放的音乐
+  function saveCurMscPath(path: string) {
+    curMscPath.value = path
+    localStorage.setItem('cur-path', path)
+  }
   // 处理音乐循环
   function loopMusic(next = true) {
     const idx = curList.value.findIndex(item => item.path === curItem.value?.path)
@@ -53,23 +62,22 @@ export const useStore = defineStore('store-main', () => {
     } else {
       const idxLoad = next ? idx + 1 : idx - 1
       curItem.value = curList.value[idxLoad]
-      curMsc.value = curItem.value
     }
   }
   // 导出
   return {
     curLibs,
-    curLib,
     curItems,
+    curList,
+    curLib,
     curItem,
-    curMsc,
-    curList
+    curMscPath
   }
 }, {
   persist: {
     enabled: true,
     strategies: [
-      { storage: localStorage, paths: ['curLib', 'curItem', 'curMsc'] }
+      { storage: localStorage, paths: ['curLib', 'curItem'] }
     ]
   }
 })

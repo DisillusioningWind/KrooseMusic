@@ -4,9 +4,9 @@ type Events = {
   ChangeDetailState: void
   ChangeDrawerState: void
   LoopMusic: boolean
-  LoadMusic: string
+  LoadMusic: { path: string, auto?: boolean }
   UnloadMusic: void
-  UpdateMusic: [number, boolean?]
+  UpdateMusic: { time: number, offset?: boolean }
   ChangeMusicState: void
   ChangeMusicVolume: number
   musicLoad: void
@@ -29,15 +29,15 @@ class EventBus {
   /** 使播放器循环音乐 @param next 是否下一首 */
   onLoopMsc(h: (next: boolean) => void) { this.emitter.on('LoopMusic', h) }
   emLoopMsc(next: boolean) { this.emitter.emit('LoopMusic', next) }
-  /** 使播放器加载音乐 @param path 音乐路径 */
-  onLoadMsc(h: (path: string) => void) { this.emitter.on('LoadMusic', h) }
-  emLoadMsc(path: string) { this.emitter.emit('LoadMusic', path) }
+  /** 使播放器加载音乐 @param path 路径 @param auto 是否自动播放 */
+  onLoadMsc(h: (path: string, auto?: boolean) => void) { this.emitter.on('LoadMusic', (e) => h(e.path, e.auto)) }
+  emLoadMsc(path: string, auto?: boolean) { this.emitter.emit('LoadMusic', { path, auto }) }
   /** 使播放器卸载音乐 */
   onUnloadMsc(h: () => void) { this.emitter.on('UnloadMusic', h) }
   emUnloadMsc() { this.emitter.emit('UnloadMusic') }
-  /** 使播放器更新音乐 @param cur 当前进度 @param offset 是否使用偏移 */
-  onUpdateMsc(h: (cur: number, offset?: boolean) => void) { this.emitter.on('UpdateMusic', (e) => h(e[0], e[1])) }
-  emUpdateMsc(cur: number, offset?: boolean) { this.emitter.emit('UpdateMusic', [cur, offset]) }
+  /** 使播放器更新音乐进度 @param time 时间 @param offset 是否偏移 */
+  onUpdateMsc(h: (time: number, offset?: boolean) => void) { this.emitter.on('UpdateMusic', (e) => h(e.time, e.offset)) }
+  emUpdateMsc(time: number, offset?: boolean) { this.emitter.emit('UpdateMusic', { time, offset }) }
   /** 使播放器改变状态 */
   onChangeMscState(h: () => void) { this.emitter.on('ChangeMusicState', h) }
   emChangeMscState() { this.emitter.emit('ChangeMusicState') }

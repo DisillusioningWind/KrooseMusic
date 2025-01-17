@@ -27,8 +27,9 @@ export const useAudioStore = defineStore('store-audio', () => {
   bus.onChangeMscState(changeState)// 外部命令改变播放状态
   bus.onChangeMscVol(vol => { volume.value = vol })// 外部命令改变音量
   // 控制方法
-  function load(path: string) {
+  function load(path: string, auto: boolean = true) {
     state.value = 'loading'
+    autoplay.value = auto
     // 本地文件路径转URL
     audio.src = window.url.pathToFileURL(path).href
   }
