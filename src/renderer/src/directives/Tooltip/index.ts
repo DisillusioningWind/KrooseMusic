@@ -28,11 +28,11 @@ const hideText = () => {
  * @modifiers immediate 立即显示
  * @modifiers overflow 溢出才显示
  */
-export const vTooltip: Directive<HTMLElement, string> = {
+export const vTooltip: Directive<HTMLElement, string | undefined> = {
   mounted: (el, binding) => {
     const delay = binding.modifiers.immediate ? 100 : 800
     const overShow = binding.modifiers.overflow || false
-    el.dataset.kTooltip = binding.value
+    el.dataset.kTooltip = binding.value || ''
     el.addEventListener('mouseenter', () => showText(el, delay, overShow))
     el.addEventListener('mouseleave', hideText)
     el.addEventListener('click', hideText)

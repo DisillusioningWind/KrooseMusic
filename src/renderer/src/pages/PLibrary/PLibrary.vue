@@ -2,7 +2,7 @@
   <div class="PLibrary">
     <div class="ToolBar">
       <span>当前目录</span>
-      <KLibSelect v-if="curLib" class="LibSelect" v-model="curLibName" :options="libOptions" />
+      <KLibSelect v-if="curLib" class="LibSelect" v-model="curLib" :options="libOptions" />
     </div>
     <div class="ContentBar">
       <div class="ListBar">
@@ -30,11 +30,7 @@ import { useLibStore } from '@renderer/store'
 import bus from '@renderer/utils/emitter'
 const { curLibs, curLib, curItems, curItem, curPath, curList } = storeToRefs(useLibStore())
 const dirSelect = ref<IDirStruc>()
-const libOptions = computed(() => curLibs.value.map(lib => ({ label: lib.name, value: lib.name })))
-const curLibName = computed({
-  get: () => curLib.value?.name || '',
-  set: (name: string) => { curLib.value = curLibs.value.find(lib => lib.name === name) }
-})
+const libOptions = computed(() => curLibs.value.map(lib => ({ label: lib.name, value: lib })))
 
 async function onItemSelect(item: ILibItem) {
   if (!curLib.value || curItem.value?.path === item.path) return
