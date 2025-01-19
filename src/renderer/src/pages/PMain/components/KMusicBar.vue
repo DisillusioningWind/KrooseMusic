@@ -46,6 +46,7 @@
         </button>
       </div>
       <div class="toolBar">
+        <KLoopBtn v-model="loopMode" />
         <button v-tooltip="'开启静音'">
           <svg>
             <path d="m7,14.5 l0,6 l3,0 l4,4 l0,-14 l-4,4 l-3,0 z"/>
@@ -79,7 +80,7 @@
 </template>
 
 <script setup lang="ts">
-import { useUIStore, useAudioStore, useInfoStore } from '@renderer/store'
+import { useLibStore, useUIStore, useAudioStore, useInfoStore } from '@renderer/store'
 import { vTooltip } from '@renderer/directives/Tooltip'
 import { vMenu } from '@renderer/directives/Menu'
 import { formatTime } from '@renderer/utils/tools'
@@ -88,6 +89,7 @@ import svgOpenDir from '@renderer/assets/icons/dir.svg?component'
 import svgOpenFile from '@renderer/assets/icons/plus.svg?component'
 import svgCloseFile from '@renderer/assets/icons/close.svg?component'
 // 数据
+const { loopMode } = storeToRefs(useLibStore())
 const { showDetail } = storeToRefs(useUIStore())
 const { mscState, mscVol, mscDur, mscTime } = storeToRefs(useAudioStore())
 const { mscTitle, mscArtist, mscPicURL, mscColor } = storeToRefs(useInfoStore())
@@ -108,8 +110,8 @@ function btnChangeDrawer() { bus.emChangeDrawerState() }
 function btnChangeState() { bus.emChangeMscState() }
 function btnFastForward() { bus.emUpdateMsc(10, true) }
 function btnFastBackward() { bus.emUpdateMsc(-10, true) }
-function btnLastMusic() { bus.emLoopMsc(false) }
-function btnNextMusic() { bus.emLoopMsc(true) }
+function btnLastMusic() { bus.emLoopMsc(false, mscState.value) }
+function btnNextMusic() { bus.emLoopMsc(true, mscState.value) }
 // 文件操作
 function btnUnloadFile() { bus.emUnloadMsc() }
 async function btnOpenDir() { /** TODO */ }
@@ -207,7 +209,7 @@ async function btnOpenFile() {
       align-items: center;
       >* {
         margin-right: 8px;
-        &:first-child { margin-left: 50px; }
+        // &:first-child { margin-left: 50px; }
       }
       >button { @include svgButton(35px); }
     }

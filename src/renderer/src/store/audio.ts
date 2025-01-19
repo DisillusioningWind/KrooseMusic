@@ -1,7 +1,6 @@
 import { defineStore } from 'pinia'
 import bus from '@renderer/utils/emitter'
 
-type AudioState = 'unload' | 'loading' | 'play' | 'pause' | 'stop'
 /** 音乐播放控制 */
 export const useAudioStore = defineStore('store-audio', () => {
   const audio = new Audio()
@@ -70,13 +69,13 @@ export const useAudioStore = defineStore('store-audio', () => {
     else audio.currentTime = time
   }
   return {
-    /** 播放状态，禁止外部直接更改 */
+    /** 播放状态，禁止直接更改 */
     mscState: state,
-    /** 音量 */
+    /** 音量，禁止直接更改 */
     mscVol: volume,
-    /** 总时长，禁止外部更改 */
+    /** 总时长，只读 */
     mscDur: duration,
-    /** 当前进度，禁止外部直接更改 */
+    /** 当前进度，禁止直接更改 */
     mscTime: curtime
   }
 }, {

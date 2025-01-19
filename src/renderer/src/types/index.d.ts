@@ -3,6 +3,9 @@ import { ICommonTagsResult } from 'music-metadata'
 declare global {
   type LibMode = 'normal' | 'asmr'
   type ListMode = LibMode | 'playlist'
+  type AudioState = 'unload' | 'loading' | 'play' | 'pause' | 'stop'
+  /** 循环模式 @property listOnce 列表单次 @property listLoop 列表循环 @property singleLoop 单曲循环 @property random 随机播放 */
+  type LoopMode = 'listOnce' | 'listLoop' | 'singleLoop' | 'random'
   /** 菜单项 @member icon 图标 @member label 标签 @member action 动作 */
   interface IMenuItem {
     icon?: FunctionalComponent<SVGAttributes, {}, any, {}>

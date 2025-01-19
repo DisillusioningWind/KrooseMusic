@@ -3,7 +3,7 @@ import mitt from 'mitt'
 type Events = {
   ChangeDetailState: void
   ChangeDrawerState: void
-  LoopMusic: boolean
+  LoopMusic: { next: boolean, state: AudioState }
   LoadMusic: { path: string, auto?: boolean }
   UnloadMusic: void
   UpdateMusic: { time: number, offset?: boolean }
@@ -15,7 +15,6 @@ type Events = {
   musicUpdate: number
   musicStateChange: string
   musicDurChange: number
-  dbOpen: void
 }
 
 class EventBus {
@@ -26,9 +25,9 @@ class EventBus {
   /** 使抽屉状态改变 */
   onChangeDrawerState(h: () => void) { this.emitter.on('ChangeDrawerState', h) }
   emChangeDrawerState() { this.emitter.emit('ChangeDrawerState') }
-  /** 使播放器循环音乐 @param next 是否下一首 */
-  onLoopMsc(h: (next: boolean) => void) { this.emitter.on('LoopMusic', h) }
-  emLoopMsc(next: boolean) { this.emitter.emit('LoopMusic', next) }
+  /** 使播放器循环音乐 @param next 是否播放下/上一首 @param state 当前音乐播放状态 */
+  onLoopMsc(h: (next: boolean, state: AudioState) => void) { this.emitter.on('LoopMusic', (e) => h(e.next, e.state)) }
+  emLoopMsc(next: boolean, state: AudioState) { this.emitter.emit('LoopMusic', { next, state }) }
   /** 使播放器加载音乐 @param path 路径 @param auto 是否自动播放 */
   onLoadMsc(h: (path: string, auto?: boolean) => void) { this.emitter.on('LoadMusic', (e) => h(e.path, e.auto)) }
   emLoadMsc(path: string, auto?: boolean) { this.emitter.emit('LoadMusic', { path, auto }) }
@@ -62,9 +61,6 @@ class EventBus {
   /** 播放器音乐时长改变 @param dur 时长 */
   onMscDurChange(h: (dur: number) => void) { this.emitter.on('musicDurChange', h) }
   emMscDurChange(dur: number) { this.emitter.emit('musicDurChange', dur) }
-  /** 数据库打开完成 */
-  onDbOpen(h: () => void) { this.emitter.on('dbOpen', h) }
-  emitDbOpen() { this.emitter.emit('dbOpen') }
 }
 const bus = new EventBus()
 export default bus

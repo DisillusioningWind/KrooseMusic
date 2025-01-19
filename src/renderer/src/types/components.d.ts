@@ -17,6 +17,7 @@ declare module 'vue' {
     KLibList: typeof import('./../components/KLibList.vue')['default']
     KLibSelect: typeof import('./../pages/PLibrary/components/KLibSelect.vue')['default']
     KListDrawer: typeof import('./../pages/PMain/components/KListDrawer.vue')['default']
+    KLoopBtn: typeof import('./../pages/PMain/components/KLoopBtn.vue')['default']
     KLyric: typeof import('./../pages/PDetail/components/KLyric.vue')['default']
     KMenu: typeof import('./../directives/Menu/KMenu.vue')['default']
     KMusicBar: typeof import('./../pages/PMain/components/KMusicBar.vue')['default']

@@ -6,13 +6,13 @@
     </div>
     <div class="ContentBar">
       <div class="ListBar">
-        <KLibList :mode="curLib?.mode" :items="curItems" :path="curItem?.path" @select="onItemSelect" />
+        <KLibList :mode="curLib?.mode" :items="curItems" :path="curLib?.mode==='normal'?curItem?.path:curAlbum?.path" @select="onItemSelect" />
       </div>
-      <div class="DetailBar" v-if="curLib?.mode==='asmr' && curItem">
+      <div class="DetailBar" v-if="curLib?.mode==='asmr' && curAlbum">
         <div class="InfoBar">
-          <img :src="(curItem as ILibAlbum).pic" />
+          <img :src="curAlbum.pic" />
           <div class="TitleBar">
-            <div>{{ curItem.name }}</div>
+            <div>{{ curAlbum.name }}</div>
             <div>未知声优</div>
             <div>未知标签</div>
           </div>
@@ -28,18 +28,22 @@
 <script setup lang="ts">
 import { useLibStore } from '@renderer/store'
 import bus from '@renderer/utils/emitter'
-const { curLibs, curLib, curItems, curItem, curPath, curList } = storeToRefs(useLibStore())
+const { curLibs, curLib, curItems, curItem, curAlbum, curPath, curList } = storeToRefs(useLibStore())
 const dirSelect = ref<IDirStruc>()
 const libOptions = computed(() => curLibs.value.map(lib => ({ label: lib.name, value: lib })))
 
 async function onItemSelect(item: ILibItem) {
-  if (!curLib.value || curItem.value?.path === item.path) return
-  curItem.value = item
+  if (!curLib.value) return
   if (curLib.value.mode === 'normal') {
+    if (curItem.value?.path === item.path) return
+    curItem.value = item
+    curAlbum.value = undefined
     bus.emLoadMsc(item.path)
     const idx = curItems.value.findIndex(v => v.path === item.path)
     curList.value = curItems.value.slice(idx)
   } else if (curLib.value.mode === 'asmr') {
+    if (curAlbum.value?.path === item.path) return
+    curAlbum.value = item as ILibAlbum
     const dir = await window.api.getDirStruc(item.path)
     if (!dir) return
     dirSelect.value = dir
@@ -48,9 +52,12 @@ async function onItemSelect(item: ILibItem) {
 function onDirMusic(music: ILibItem) {
   if (curPath.value === music.path) return
   bus.emLoadMsc(music.path)
+  curItem.value = music
+  curList.value = [music]
 }
 function onDirMusics(musics: ILibItem[]) {
   bus.emLoadMsc(musics[0].path)
+  curItem.value = musics[0]
   curList.value = musics
 }
 </script>
