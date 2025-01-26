@@ -1,8 +1,8 @@
 <template>
-  <div class="KMenu" ref="menu" :class="show?'visible':''">
+  <div class="KMenu" ref="menu" :class="{ visible: show }">
     <div class="item" v-for="item in items" :key="item.label" @click="onClick(item)">
-      <component v-if="item.icon" :is="item.icon" />
-      <span>{{ item.label }}</span>
+      <component class="icon" v-if="item.icon" :is="item.icon" />
+      <span class="label">{{ item.label }}</span>
     </div>
   </div>
 </template>
@@ -13,6 +13,7 @@ const show = ref(false)
 const items = shallowRef<IMenuItem[]>([])
 const x = ref(0)
 const y = ref(0)
+defineExpose({ items, onOpenMenu })
 // 事件绑定
 onMounted(() => {
   document.addEventListener('click', onCloseMenu, true)
@@ -45,7 +46,6 @@ function onClick(item: IMenuItem) {
   onCloseMenu()
   item.action()
 }
-defineExpose({ items, onOpenMenu })
 </script>
 
 <style scoped lang="scss">
@@ -56,10 +56,11 @@ $icon-size: 17px;
 
 .KMenu {
   @include global.k-tool-tip(fixed);
+  z-index: 1;
   left: v-bind('x + "px"');
   top: v-bind('y + "px"');
-  z-index: 1;
   padding: 4px 0;
+  user-select: none;
   clip-path: polygon(0 0, 100% 0, 100% 0, 0 0);
   &.visible {
     clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
@@ -70,19 +71,14 @@ $icon-size: 17px;
     padding: 0 $item-padding;
     display: flex;
     align-items: center;
-    &:hover {
-      cursor: default;
-      background-color: #dadada;
-    }
-    &:active {
-      background-color: #c2c2c2;
-    }
-    >svg {
+    &:hover { background-color: #dadada; }
+    &:active { background-color: #c2c2c2; }
+    >.icon {
       height: $icon-size;
       width: $icon-size;
       margin-right: 8px;
     }
-    >span {
+    >.label {
       line-height: $item-height;
       font-size: 15px;
     }

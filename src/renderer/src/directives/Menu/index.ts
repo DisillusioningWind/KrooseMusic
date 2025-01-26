@@ -1,17 +1,17 @@
 import { Directive } from 'vue'
 import KMenu from './KMenu.vue'
-
+// 创建菜单并挂载
 const menuDiv = document.createElement('div')
 menuDiv.id = 'kMenu'
 document.body.appendChild(menuDiv)
 const menuApp = createApp(KMenu)
 const menuCom = menuApp.mount(menuDiv) as InstanceType<typeof KMenu>
 // 事件处理
-const showMenu = (ev: MouseEvent, items: IMenuItem[]) => {
+function showMenu(ev: MouseEvent, items: IMenuItem[]) {
   menuCom.items = items
   menuCom.onOpenMenu(ev)
 }
-const prevMenu = (ev: MouseEvent) => {
+function prevMenu(ev: MouseEvent) {
   ev.preventDefault()
   ev.stopPropagation()
 }
