@@ -1,21 +1,17 @@
 {
   "extends": "@electron-toolkit/tsconfig/tsconfig.web.json",
   "include": [
-    "src/renderer/src/types/env.d.ts",
+    "src/preload/*.d.ts",
     "src/renderer/src/**/*",
     "src/renderer/src/**/*.vue",
-    "src/preload/*.d.ts"
+    "src/renderer/src/types/*.d.ts",
   ],
   "compilerOptions": {
     "composite": true,
     "baseUrl": ".",
+    "types": ["pinia-plugin-persist"],
     "paths": {
-      "@renderer/*": [
-        "src/renderer/src/*"
-      ]
+      "@renderer/*": ["src/renderer/src/*"]
     },
-    "types": [
-      "pinia-plugin-persist"
-    ]
   }
 }

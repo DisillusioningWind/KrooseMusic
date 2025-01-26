@@ -1,14 +1,14 @@
 import { Directive } from "vue"
 import KTooltip from "./KTooltip.vue"
-
+// 创建悬停提示组件并挂载
 const tooltipDiv = document.createElement('div')
 tooltipDiv.id = 'kTooltip'
 document.body.appendChild(tooltipDiv)
 const tooltipApp = createApp(KTooltip)
 const tooltipCom = tooltipApp.mount(tooltipDiv) as InstanceType<typeof KTooltip>
-let tooltipTimer: NodeJS.Timeout | null = null
+let tooltipTimer: NodeJS.Timeout | undefined
 // 事件处理
-const showText = (el: HTMLElement, delay: number, overShow: boolean) => {
+function showText(el: HTMLElement, delay: number, overShow: boolean) {
   tooltipTimer = setTimeout(() => {
     const rect = el.getBoundingClientRect()
     const text = el.dataset.kTooltip || ''
@@ -19,8 +19,8 @@ const showText = (el: HTMLElement, delay: number, overShow: boolean) => {
     tooltipCom.y = rect.top
   }, delay)
 }
-const hideText = () => {
-  if (tooltipTimer) { clearTimeout(tooltipTimer) }
+function hideText() {
+  clearTimeout(tooltipTimer)
   tooltipCom.show = false
 }
 /**
@@ -28,14 +28,14 @@ const hideText = () => {
  * @modifiers immediate 立即显示
  * @modifiers overflow 溢出才显示
  */
-export const vTooltip: Directive<HTMLElement, string | undefined> = {
-  mounted: (el, binding) => {
-    const delay = binding.modifiers.immediate ? 100 : 800
-    const overShow = binding.modifiers.overflow || false
-    el.dataset.kTooltip = binding.value || ''
+export const vTooltip: Directive<HTMLElement, string | undefined, 'immediate' | 'overflow'> = {
+  mounted: (el, { modifiers, value }) => {
+    const delay = modifiers.immediate ? 100 : 800
+    const overShow = modifiers.overflow || false
+    el.dataset.kTooltip = value || ''
     el.addEventListener('mouseenter', () => showText(el, delay, overShow))
     el.addEventListener('mouseleave', hideText)
     el.addEventListener('click', hideText)
   },
-  updated: (el, binding) => { el.dataset.kTooltip = binding.value }
+  updated: (el, { value }) => { el.dataset.kTooltip = value }
 }

@@ -4,49 +4,67 @@ declare global {
   type LibMode = 'normal' | 'asmr'
   type ListMode = LibMode | 'playlist'
   type AudioState = 'unload' | 'loading' | 'play' | 'pause' | 'stop'
-  /** 循环模式 @property listOnce 列表单次 @property listLoop 列表循环 @property singleLoop 单曲循环 @property random 随机播放 */
-  type LoopMode = 'listOnce' | 'listLoop' | 'singleLoop' | 'random'
-  /** 菜单项 @member icon 图标 @member label 标签 @member action 动作 */
+  enum LoopMode { listOnce, listLoop, singLoop, randLoop }
+  /** 菜单项 */
   interface IMenuItem {
+    /** 图标 */
     icon?: FunctionalComponent<SVGAttributes, {}, any, {}>
+    /** 标签 */
     label: string
+    /** 动作 */
     action: () => void
   }
-  /** 音乐歌词 @member time 时间戳 @member lyric 歌词内容 @member uid 歌词唯一标识 */
+  /** 音乐歌词 */
   interface ILyric {
+    /** 时间戳 */
     time: number
+    /** 歌词 */
     lyric: string
+    /** 唯一标识 */
     uid: string
   }
-  /** 音乐信息 @member tag 音乐标签 @member mainColor 音乐主色调 */
+  /** 音乐信息 */
   interface IMusicInfo {
+    /** 标签 */
     tag: ICommonTagsResult
+    /** 主色调 */
     mainColor: string
   }
-  /** 目录结构 @member name 目录名 @member musics 音乐列表 @member dirs 子目录 */
+  /** 目录结构 */
   interface IDirStruc {
+    /** 目录名 */
     name: string
-    musics?: { name: string, path: string }[]
+    /** 音乐列表 */
+    musics?: ILibItem[]
+    /** 子目录列表 */
     dirs?: IDirStruc[]
   }
-  /** 曲库项目 @member name 项目名 @member path 项目路径 */
+  /** 曲库项目 */
   interface ILibItem {
+    /** 名称 */
     name: string
+    /** 路径 */
     path: string
   }
-  /** 曲库 @member id 项目id @member mode 项目模式 */
+  /** 曲库 */
   interface ILibrary extends ILibItem {
+    /** 曲库id */
     id: number
+    /** 模式 */
     mode: LibMode
   }
-  /** 普通曲库项目 @member ext 文件后缀 @member artist 艺术家 @member duration 时长 */
+  /** 音乐曲库项目 */
   interface ILibMusic extends ILibItem {
+    /** 文件后缀 */
     ext: string
+    /** 艺术家 */
     artist: string
+    /** 时长 */
     duration: number
   }
-  /** 专辑曲库项目 @member pic 专辑封面 */
+  /** 专辑曲库项目 */
   interface ILibAlbum extends ILibItem {
+    /** 封面路径 */
     pic: string
   }
 }

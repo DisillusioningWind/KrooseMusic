@@ -1,6 +1,17 @@
 import { defineStore } from 'pinia'
 import bus from '@renderer/utils/emitter'
 
+/** 循环模式 */
+export enum LoopMode {
+  /** 列表播放 */
+  listOnce,
+  /** 列表循环 */
+  listLoop,
+  /** 单曲循环 */
+  singLoop,
+  /** 随机播放 */
+  randLoop
+}
 /** 曲库数据 */
 export const useLibStore = defineStore('store-lib', () => {
   const curLibs = shallowRef<ILibrary[]>([])
@@ -10,7 +21,7 @@ export const useLibStore = defineStore('store-lib', () => {
   const curItem = ref<ILibItem>()// 当前选中项目，手动更新
   const curAlbum = ref<ILibAlbum>()// 当前选中专辑，手动更新
   const curPath = ref('')// 当前音乐路径，监听LoadMsc事件自动更新
-  const loopMode = ref<LoopMode>('listOnce')// 循环模式
+  const loopMode = ref<LoopMode>(LoopMode.listOnce)// 循环模式
   // 在所有store初始化后初始化当前曲库和当前音乐
   onMounted(() => {
     initCurLibs()
@@ -19,6 +30,7 @@ export const useLibStore = defineStore('store-lib', () => {
   bus.onMscEnd(loopMusic)
   bus.onLoopMsc((next, state) => loopMusic(next, false, state))
   bus.onLoadMsc((path) => curPath.value = path)
+  bus.onUnloadMsc(() => { curPath.value = ''; curItem.value = undefined })
   // 曲库列表变化时更新当前曲库
   watch(curLibs, (curLibs) => {
     // 无曲库时清空当前曲库
@@ -33,12 +45,12 @@ export const useLibStore = defineStore('store-lib', () => {
     // 无当前曲库时清空当前曲库项目
     if (!curLib) { curItems.value = [] }
     // 当前曲库无变化时不更新当前曲库项目
-    else if ( curLib.name === lastLib?.name ) { return }
+    else if (curLib.name === lastLib?.name) { return }
     // 当前曲库存在时更新当前曲库项目
     else { curItems.value = await window.api.getItems(curLib.name) }
   })
   // 初始化曲库表和当前曲库
-  async function initCurLibs() { curLibs.value = await window.api.getLibraries() }
+  function initCurLibs() { window.api.getLibraries().then(libs => curLibs.value = libs) }
   // 初始化最后播放的音乐并取消自动播放
   function initCurPath() { if (curPath.value) bus.emLoadMsc(curPath.value, false) }
   /** 处理音乐循环 @param next 是否播放下/上一首 @param end 是否当前音乐自然结束 @param state 当前音乐播放状态 */
@@ -46,19 +58,18 @@ export const useLibStore = defineStore('store-lib', () => {
     let loadIdx = -1// 加载音乐在curList中的索引
     let loadPath = ''// 加载音乐路径
     let loadMode = false// 加载音乐是否自动播放
-    if (curList.value.length === 0) {
-      // 加载当前音乐：curList为空
-      loadPath = curPath.value
-    } else {
+    // 加载当前音乐：curList为空
+    if (curList.value.length === 0) { loadPath = curPath.value }
+    else {
       const curIdx = curList.value.findIndex(item => item.path === curPath.value)
-      if (loopMode.value === 'random') {
+      if (loopMode.value === LoopMode.randLoop) {
         // 加载随机音乐：循环模式为随机播放
         const randomIdx = Math.floor(Math.random() * (curList.value.length - 1))
         loadIdx = randomIdx >= curIdx ? randomIdx + 1 : randomIdx
-      } else if (next && end && loopMode.value === 'singleLoop') {
+      } else if (next && end && loopMode.value === LoopMode.singLoop) {
         // 加载当前音乐：播放下一首，且当前音乐自然结束，且循环模式为单曲循环
         loadIdx = curIdx
-      } else if (next && (end && loopMode.value !== 'singleLoop' || !end)) {
+      } else if (next && (end && loopMode.value !== LoopMode.singLoop || !end)) {
         // 加载下一首：播放下一首，且当前音乐自然结束的情况下循环模式不为单曲循环，或当前音乐非自然结束
         loadIdx = (curIdx === -1 || curIdx === curList.value.length - 1) ? 0 : curIdx + 1
       } else if (!next) {
@@ -68,7 +79,7 @@ export const useLibStore = defineStore('store-lib', () => {
       loadPath = curList.value[loadIdx].path
       // 不自动播放：自然结束时循环模式为列表单次且加载音乐为列表第一首，或非自然结束时音乐播放状态为暂停或停止
       // 自动播放：自然结束时的其余情况，或非自然结束时音乐播放状态为播放
-      loadMode = end ? (loopMode.value === 'listOnce' ? loadIdx !== 0 : true) : (state === 'play' ? true : false)
+      loadMode = end ? (loopMode.value === LoopMode.listOnce ? loadIdx !== 0 : true) : (state === 'play' ? true : false)
     }
     curItem.value = loadIdx === -1 ? undefined : curList.value[loadIdx]
     bus.emLoadMsc(loadPath, loadMode)
@@ -95,8 +106,6 @@ export const useLibStore = defineStore('store-lib', () => {
 }, {
   persist: {
     enabled: true,
-    strategies: [
-      { storage: localStorage, paths: ['curLib', 'curItem', 'curAlbum', 'curPath', 'loopMode'] }
-    ]
+    strategies: [{ storage: localStorage, paths: ['curLib', 'curItem', 'curAlbum', 'curPath', 'loopMode'] }]
   }
 })
