@@ -11,14 +11,10 @@ const text = ref('')
 const x = ref(0)
 const y = ref(0)
 defineExpose({
-  /** 是否显示提示 */
-  show,
-  /** 提示文本 */
-  text,
-  /** 提示框x轴中心点 */
-  x,
-  /** 提示框y轴顶点 */
-  y
+  /** 是否显示提示 */ show,
+  /** 提示文本 */ text,
+  /** 提示框中心x轴 */ x,
+  /** 提示框顶部y轴 */ y
 })
 watch(show, show => {
   if (!show) return
@@ -26,31 +22,29 @@ watch(show, show => {
     if (!tooltip.value) return
     const width = tooltip.value.offsetWidth
     const height = tooltip.value.offsetHeight
-    x.value -= width / 2
-    y.value -= height + 10
-    if (x.value < 0) x.value = 0
-    else if (x.value + width > window.innerWidth) x.value = window.innerWidth - width
+    x.value = Math.max(0, Math.min(window.innerWidth - width, x.value - width / 2))
+    y.value = Math.max(0, y.value - height - 10)
   })
 })
 </script>
 
 <style scoped lang="scss">
 @use '@renderer/assets/global';
-$tooltip-height: 26px;
-
+$tip-hei: 26px;
 .KTooltip {
   @include global.k-tool-tip(fixed);
   z-index: 1;
   left: v-bind('x + "px"');
   top: v-bind('y + "px"');
-  height: $tooltip-height;
+  height: $tip-hei;
+  max-width: 100vw;
   padding: 0 8px;
+  pointer-events: none;
   opacity: 0;
   transition: opacity .2s;
-  pointer-events: none;
   &.visible { opacity: 1; }
   >.text {
-    line-height: $tooltip-height;
+    line-height: $tip-hei;
     font-size: 13px;
     white-space: nowrap;
   }
