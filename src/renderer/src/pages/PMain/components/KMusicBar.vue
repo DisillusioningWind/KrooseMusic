@@ -207,10 +207,8 @@ async function btnOpenFile() {
       flex: 1;
       display: flex;
       align-items: center;
-      >* {
-        margin-right: 8px;
-        // &:first-child { margin-left: 50px; }
-      }
+      gap: 8px;
+      padding-right: 8px;
       >button { @include svgButton(35px); }
     }
   }
