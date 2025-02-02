@@ -20,30 +20,20 @@
 <script setup lang="ts">
 import { vTooltip } from '@renderer/directives/Tooltip'
 defineProps<{
-  /** 当前目录 */
-  dir?: IDirStruc,
-  /** 当前歌曲 */
-  path?: string,
-  /** 子目录缩进，顶层不需要传入 */
-  left?: number
+  /** 当前目录 */ dir?: IDirStruc,
+  /** 当前歌曲 */ path?: string,
+  /** 子目录缩进，顶层不需要传入 */ left?: number
 }>()
 const emit = defineEmits<{
-  /** 歌曲点击 */
-  music: [value: ILibItem],
-  /** 目录点击 */
-  musics: [value: ILibItem[]]
+  /** 歌曲点击 */ music: [value: ILibItem],
+  /** 目录点击 */ musics: [value: ILibItem[]]
 }>()
 // 点击目录展开/收起
 function onDirClick(e: MouseEvent) {
   const dir = e.currentTarget as HTMLElement
   const dirList = dir.nextElementSibling as HTMLElement
-  if (dir.classList.contains('hidden')) {
-    dir.classList.remove('hidden')
-    dirList.classList.remove('hidden')
-  } else {
-    dir.classList.add('hidden')
-    dirList.classList.add('hidden')
-  }
+  dir.classList.toggle('hidden')
+  dirList.classList.toggle('hidden')
 }
 function getDirMusics(dir: IDirStruc) {
   const res = [] as ILibItem[]
