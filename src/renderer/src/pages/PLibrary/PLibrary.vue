@@ -125,6 +125,7 @@ $cont-mar-top: 14px;
       >.dirList {
         height: calc(100% - $info-hei);
         box-sizing: border-box;
+        margin-left: 10px;
         padding-bottom: $info-pad;
         @include global.k-scroll-bar(scroll);
       }

@@ -18,6 +18,7 @@ $title-height: 30px;
 $show-time: 0.4s;
 
 .PDetail {
+  z-index: 1;
   height: 100%;
   width: 100%;
   position: relative;
