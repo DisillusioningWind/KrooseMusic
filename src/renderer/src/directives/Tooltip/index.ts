@@ -12,8 +12,9 @@ function showText(el: HTMLElement, delay: number, overShow: boolean) {
   tooltipTimer = setTimeout(() => {
     const rect = el.getBoundingClientRect()
     const text = el.dataset.kTooltip || ''
-    // 当scrollWidth大于offsetWidth时，文本溢出
-    tooltipCom.show = text.length > 0 && (overShow ? el.scrollWidth > el.offsetWidth : true)
+    // 当scrollWidth大于offsetWidth或scrollHeight大于offsetHeight时，元素溢出
+    const overflow = el.scrollWidth > el.offsetWidth || el.scrollHeight > el.offsetHeight
+    tooltipCom.show = text.length > 0 && (overShow ? overflow : true)
     tooltipCom.text = text
     tooltipCom.x = rect.left + rect.width / 2
     tooltipCom.y = rect.top
