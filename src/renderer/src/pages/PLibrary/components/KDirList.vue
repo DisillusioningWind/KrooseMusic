@@ -1,16 +1,16 @@
 <template>
   <div class="KDirList" v-if="dir">
     <div class="direc" v-for="direc in dir.dirs" :key="direc.name">
-      <div class="title" @click="onDirClick">
+      <div class="title" :style="{ paddingLeft: (left||0)*20 + 'px' }" @click="onDirClick">
         <svg class="icon"><path d="m8,6 l4,4 l-4,4" /></svg>
-        <span class="name" v-tooltip.immediate.overflow="direc.name">{{ direc.name }}</span>
+        <div class="name" v-tooltip.immediate.overflow="direc.name">{{ direc.name }}</div>
         <svg class="icon" @click.stop="onDirPlayClick(direc)"><path d="m7,5.5 l0,10 l8,-5z" /></svg>
         <svg class="icon" @click.stop="onDirAddClick(direc)"><path d="m4.5,10 l12,0 m-6,-6 l0,12.5" /></svg>
       </div>
       <KDirList class="subList" :dir="direc" :path="path" :left="left?left+1:1" @music="v=>$emit('music', v)" @musics="v=>$emit('musics', v)" />
     </div>
-    <div class="music" v-for="music in dir.musics" :key="music.name" :class="{ play: music.path === path }" @click="onMusicClick(music)">
-      <span class="name" v-tooltip.immediate.overflow="music.name">{{ music.name }}</span>
+    <div class="music" v-for="music in dir.musics" :key="music.name" :class="{ play: music.path === path }" :style="{ paddingLeft: (left||0)*20 + 'px' }" @click="onMusicClick(music)">
+      <div class="name" v-tooltip.immediate.overflow="music.name">{{ music.name }}</div>
     </div>
   </div>
 </template>
@@ -51,7 +51,7 @@ $item-height: 26px;
   height: $item-height;
   display: flex;
   align-items: center;
-  &:hover { background-color: #e4e4e4; }
+  &:hover { background-color: #00000013; }
   >.name {
     width: 0;
     flex: 1;
@@ -75,7 +75,6 @@ $item-height: 26px;
     &.hidden { grid-template-rows: $item-height 0fr; }
     >.title {
       @include k-dir-item;
-      padding-left: v-bind('(left||0)*20 + "px"');
       padding-right: 5px;
       >.icon {
         $svg-size: 20px;
@@ -105,13 +104,12 @@ $item-height: 26px;
       min-height: 0;
       overflow: hidden;
       &::before {
-        z-index: 1;
         position: absolute;
         content: '';
         top: 0;
         left: v-bind('(left||0)*20-10 + "px"');
         height: 100%;
-        width: 1px;
+        width: 0.5px;
         background-color: #747474;
       }
     }
@@ -119,10 +117,8 @@ $item-height: 26px;
   // 歌曲列表
   >.music {
     @include k-dir-item;
-    box-sizing: border-box;
-    padding-left: v-bind('(left?left*20:10) + "px"');
     &.play {
-      background-color: #e4e4e4;
+      background-color: #00000013;
       color: #005a9e;
     }
   }
