@@ -7,10 +7,10 @@
         <svg class="icon" @click.stop="onDirPlayClick(direc)"><path d="m7,5.5 l0,10 l8,-5z" /></svg>
         <svg class="icon" @click.stop="onDirAddClick(direc)"><path d="m4.5,10 l12,0 m-6,-6 l0,12.5" /></svg>
       </div>
-      <KDirList class="subList" :dir="direc" :path="path" :left="left?left+1:1" @music="v=>$emit('music', v)" @musics="v=>$emit('musics', v)" />
+      <KDirList class="subdir" :dir="direc" :path="path" :left="left?left+1:1" :style="{ '--ribbon-left': (left||0)*20+10 + 'px' }" @music="v=>$emit('music', v)" @musics="v=>$emit('musics', v)" />
     </div>
     <div class="music" v-for="music in dir.musics" :key="music.name" :class="{ play: music.path === path }" :style="{ paddingLeft: (left||0)*20 + 'px' }" @click="onMusicClick(music)">
-      <div class="name" v-tooltip.immediate.overflow="music.name">{{ music.name }}</div>
+      <span class="name" v-tooltip.immediate.overflow="music.name">{{ music.name }}</span>
     </div>
   </div>
 </template>
@@ -76,6 +76,8 @@ $item-height: 26px;
     >.title {
       @include k-dir-item;
       padding-right: 5px;
+      &:hover>.icon:not(:first-child) { display: block; }
+      &.hidden>.icon:first-child { transform: rotate(0deg); }
       >.icon {
         $svg-size: 20px;
         width: $svg-size;
@@ -96,10 +98,8 @@ $item-height: 26px;
           &:active { background-color: #a0a0a0; }
         }
       }
-      &:hover>.icon:not(:first-child) { display: block; }
-      &.hidden>.icon:first-child { transform: rotate(0deg); }
     }
-    >.subList {
+    >.subdir {
       position: relative;
       min-height: 0;
       overflow: hidden;
@@ -107,9 +107,10 @@ $item-height: 26px;
         position: absolute;
         content: '';
         top: 0;
-        left: v-bind('(left||0)*20-10 + "px"');
+        left: var(--ribbon-left);
         height: 100%;
         width: 0.5px;
+        pointer-events: none;
         background-color: #747474;
       }
     }
