@@ -140,7 +140,6 @@ $trk-unuse-col: #ffffff40;
     display: v-bind('disable?"none":"block"');
     height: $btn-wid;
     width: $btn-wid;
-    box-sizing: border-box;
     margin: $btn-mar-wid;
     border: $btn-bor-wid solid $trk-use-col;
     border-radius: 50%;

@@ -16,12 +16,10 @@ const { mscPicURL, mscLyrics } = storeToRefs(useInfoStore())
 $margin-height: 12px;
 $title-height: 30px;
 $show-time: 0.4s;
-
 .PDetail {
+  position: relative;
   height: 100%;
   width: 100%;
-  position: relative;
-  box-sizing: border-box;
   padding-top: $title-height;
   background-position: 0 (-$title-height);// 背景图片从标题栏开始
   background-repeat: no-repeat;

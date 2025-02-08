@@ -1,7 +1,5 @@
 <template>
-  <div class="KTooltip" ref="tooltip" :class="{ visible: show }">
-    <span class="text">{{ text }}</span>
-  </div>
+  <div class="KTooltip" ref="tooltip" :class="{ visible: show }" :style="{ left: x + 'px', top: y + 'px' }">{{ text }}</div>
 </template>
 
 <script setup lang="ts">
@@ -11,11 +9,12 @@ const text = ref('')
 const x = ref(0)
 const y = ref(0)
 defineExpose({
-  /** 是否显示提示 */ show,
+  /** 是否显示 */ show,
   /** 提示文本 */ text,
   /** 提示框中心x轴 */ x,
   /** 提示框顶部y轴 */ y
 })
+// 确定提示框的正确位置
 watch(show, show => {
   if (!show) return
   nextTick(() => {
@@ -30,23 +29,19 @@ watch(show, show => {
 
 <style scoped lang="scss">
 @use '@renderer/assets/global';
-$tip-hei: 26px;
+$tip-hei: 28px;
 .KTooltip {
   @include global.k-tool-tip(fixed);
   z-index: 1;
-  left: v-bind('x + "px"');
-  top: v-bind('y + "px"');
   height: $tip-hei;
   max-width: 100vw;
   padding: 0 8px;
   pointer-events: none;
+  line-height: $tip-hei - 3px;
+  white-space: nowrap;
+  font-size: 13px;
   opacity: 0;
   transition: opacity .2s;
   &.visible { opacity: 1; }
-  >.text {
-    line-height: $tip-hei;
-    font-size: 13px;
-    white-space: nowrap;
-  }
 }
 </style>

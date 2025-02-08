@@ -28,7 +28,6 @@ watch(() => props.show, v => {
   // round函数消除小数，避免像素模糊，4px是试出来的
   transform: translate(round(-50%, 4px), round(-50%, 4px));
   border: none;
-  padding: 0;
   box-shadow: 0 0 20px 0 #00000030;
   opacity: 0;
   transition: all 0.2s;

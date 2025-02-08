@@ -8,7 +8,7 @@
       <KLibList class="mainList" :mode="curLib?.mode" :items="curItems" :path="curLib?.mode==='normal'?curItem?.path:curAlbum?.path" @select="onItemSelect" />
       <div class="detail" v-show="curLib?.mode==='asmr'&&curAlbum">
         <div class="info">
-          <KImage class="pic" :url="curAlbum?.pic||''" />
+          <KImage class="pic" :url="curAlbum?.pic" />
           <div class="title" v-tooltip.immediate.overflow="curAlbum?.name">{{ curAlbum?.name }}</div>
           <div class="tag">未知声优</div>
           <div class="tag">未知标签</div>
@@ -63,7 +63,6 @@ $tool-hei: 45px;
 $cont-mar-top: 14px;
 .PLibrary {
   height: 100%;
-  box-sizing: border-box;
   padding: 0 10px;
   user-select: none;
   >.tools {
@@ -87,7 +86,6 @@ $cont-mar-top: 14px;
   >.contents {
     height: calc(100% - $tool-hei - $cont-mar-top);
     margin-top: $cont-mar-top;
-    box-sizing: border-box;
     border-top: 1px solid #e5e5e5;
     display: flex;
     >.mainList { flex: 1; }
@@ -99,18 +97,13 @@ $cont-mar-top: 14px;
       $img-size: $info-hei - $info-pad * 2;
       >.info {
         height: $info-hei;
-        box-sizing: border-box;
         padding: $info-pad;
-        overflow: hidden;
         display: grid;
         grid-template-columns: $img-size 1fr;
         grid-template-rows: min-content auto 1fr;
         gap: 4px $info-pad;
-        >.pic {
-          grid-row: 1 / 4;
-          width: $img-size;
-          height: $img-size;
-        }
+        >.pic { grid-row: 1 / 4; }
+        >.tag { font-size: 15px; }
         >.title {
           font-size: 18px;
           user-select: text;
@@ -120,11 +113,9 @@ $cont-mar-top: 14px;
           line-clamp: 4;
           overflow: hidden;
         }
-        >.tag { font-size: 15px; }
       }
       >.dirList {
         height: calc(100% - $info-hei);
-        box-sizing: border-box;
         margin-left: 10px;
         padding-bottom: $info-pad;
         @include global.k-scroll-bar(scroll);

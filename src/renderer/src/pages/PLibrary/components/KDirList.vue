@@ -46,21 +46,29 @@ function onDirAddClick(_dir: IDirStruc) { /** TODO: 添加目录到播放列表 
 </script>
 
 <style scoped lang="scss">
-$item-height: 26px;
+$item-hei: 26px;
 @mixin k-dir-item {
-  height: $item-height;
+  height: $item-hei;
   display: flex;
   align-items: center;
   &:hover { background-color: #00000013; }
   >.name {
-    width: 0;
     flex: 1;
-    line-height: $item-height;
+    width: 0;
+    line-height: $item-hei;
     font-size: 14px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
   }
+}
+@mixin k-dir-icon($size: 26px) {
+  width: $size;
+  height: $size;
+  stroke: #747474;
+  stroke-width: 1.5px;
+  stroke-linejoin: round;
+  fill: none;
 }
 
 .KDirList {
@@ -70,30 +78,26 @@ $item-height: 26px;
   // 子目录列表
   >.direc {
     display: grid;
-    grid-template-rows: $item-height 1fr;
+    grid-template-rows: $item-hei 1fr;
     transition: .2s;
-    &.hidden { grid-template-rows: $item-height 0fr; }
+    &.hidden { grid-template-rows: $item-hei 0fr; }
     >.title {
       @include k-dir-item;
       padding-right: 5px;
       &:hover>.icon:not(:first-child) { display: block; }
       &.hidden>.icon:first-child { transform: rotate(0deg); }
       >.icon {
-        $svg-size: 20px;
-        width: $svg-size;
-        height: $svg-size;
-        stroke: #747474;
-        stroke-width: 1.5px;
-        stroke-linejoin: round;
-        fill: none;
+        @include k-dir-icon;
         // 展开标识
         &:first-child {
+          height: 20px;
+          width: 20px;
           transform: rotate(90deg);
           transition: .2s;
         }
         &:not(:first-child) {
-          padding: 3px;
           display: none;
+          padding: 3px;
           &:hover { background-color: #bdbdbd; }
           &:active { background-color: #a0a0a0; }
         }

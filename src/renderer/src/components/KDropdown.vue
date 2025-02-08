@@ -39,7 +39,6 @@ function onOptClick(opt: Option) {
   width: 100%;
   background-color: #ffffff;
   box-shadow: 0 0 10px #00000030;
-  box-sizing: border-box;
   border: 1px solid #e4e7ed;
   padding: 6px 0;
   // 三角箭头
@@ -52,7 +51,6 @@ function onOptClick(opt: Option) {
     left: calc(50% - $tri-half);
     width: $tri-size;
     height: $tri-size;
-    box-sizing: border-box;
     border: $tri-half solid transparent;
     border-bottom: $tri-half solid white;
   }

@@ -76,7 +76,6 @@ $left-len: 6px;
   >div {
     height: 50px;
     width: 100%;
-    box-sizing: border-box;
     border-left: $border-width solid transparent;
     user-select: none;
     display: flex;
@@ -104,7 +103,6 @@ $left-len: 6px;
       &:active { background-color: #f2f2f2; }
       %k-search-btn {
         height: 65%;
-        box-sizing: border-box;
         background-color: #fafafa;
       }
       >.input {

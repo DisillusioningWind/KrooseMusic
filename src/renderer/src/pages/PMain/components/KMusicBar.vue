@@ -126,7 +126,6 @@ async function btnOpenFile() {
 @mixin svgButton($size: 35px) {
   height: $size;
   width: $size;
-  padding: 0;
   border: none;
   border-radius: 50%;
   background-color: transparent;
@@ -168,7 +167,6 @@ async function btnOpenFile() {
   }
   .buttonRow {
     height: 90px;
-    margin: 0;
     display: flex;
     justify-items: center;
     align-items: center;
