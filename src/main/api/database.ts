@@ -57,7 +57,6 @@ const insertTableNormalLib = (libName: string) => db.prepare<ILibMusic>(`INSERT 
 const insertTableAsmrLib = (libName: string) => db.prepare<ILibAlbum>(`INSERT INTO ${libName} (name, path, pic) VALUES (@name, @path, @pic)`)
 /** 删除曲库表项 */
 const deleteTableLib = (libName: string) => db.prepare<{ path: string }>(`DELETE FROM ${libName} WHERE path = @path`)
-// 事务
 /** 创建曲库表和存储当前列表的表 */
 const transInitDB = db.transaction(() => {
   createTableLibrary().run()
@@ -77,20 +76,20 @@ const transDelLib = db.transaction((name: string) => {
 })
 // 初始化数据库
 transInitDB()
-/** 获取所有曲库 */
+/** 获取所有曲库 @returns 曲库列表 */
 export async function getLibraries() { return getAllTableLibrary().all() }
-/** 添加新曲库 @param name 曲库名 @param path 曲库路径 @param mode 曲库模式，默认为normal */
+/** 添加曲库 @param name 曲库名称 @param path 曲库路径 @param mode 曲库模式，默认为normal @returns 添加曲库ID */
 export async function addLibrary(name: string, path: string, mode: LibMode = 'normal') { return transAddLib(name, path, mode) }
-/** 删除曲库 @param name 曲库名 */
+/** 删除曲库 @param name 曲库名称 */
 export async function deleteLibrary(name: string) { return transDelLib(name) }
-/** 获取曲库所有项目 @param name 曲库名 */
+/** 获取所有项目 @param name 曲库名称 */
 export async function getItems(name: string) { return getAllTableLib(name).all() }
-/** 添加项目，调用前请先调用一遍 getDirLength，项目数据和索引由该函数提供 @param libName 曲库名 @param libMode 曲库模式 @param dirIdx 目录索引，不超过目录中目标文件数量 */
-export async function addItem(libName: string, libMode: LibMode, dirIdx: number) {
-  const item = await getDirItemData(dirIdx)
-  if (!item) { console.error('File data not found'); return }
-  if (libMode === 'normal') { insertTableNormalLib(libName).run(item as ILibMusic) }
+/** 添加项目，请先调用 getDirLength，该函数提供项目数据和索引 @param libName 曲库名称 @param libMode 曲库模式 @param itemIdx 项目索引，不超过目录总项目数量 */
+export async function addItem(libName: string, libMode: LibMode, itemIdx: number) {
+  const item = await getDirItemData(itemIdx)
+  if (!item) { console.error('File data not found') }
+  else if (libMode === 'normal') { insertTableNormalLib(libName).run(item as ILibMusic) }
   else if (libMode === 'asmr') { insertTableAsmrLib(libName).run(item as ILibAlbum) }
 }
-/** 删除项目 @param libName 曲库名 @param path 项目路径 */
+/** 删除项目 @param libName 曲库名称 @param path 项目路径 */
 export async function deleteItem(libName: string, path: string) { deleteTableLib(libName).run({ path }) }
