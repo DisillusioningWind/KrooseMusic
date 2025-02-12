@@ -27,18 +27,19 @@ const { curLibs, curLib, curItems, curItem, curAlbum, curPath, curList } = store
 const curDirec = ref<IDir>()
 const libOptions = computed(() => curLibs.value.map(lib => ({ label: lib.name, value: lib })))
 // 选择音乐时播放音乐并更新当前播放列表，选择专辑时更新当前专辑目录
-async function onItemSelect(item: ILibItem) {
+async function onItemSelect(selIdx: number) {
   if (!curLib.value) return
+  const selItem = curItems.value[selIdx]
   if (curLib.value.mode === 'normal') {
-    if (curItem.value?.path === item.path) return
-    bus.emLoadMsc(item.path)
-    curItem.value = item
+    if (curItem.value?.path === selItem.path) return
+    bus.emLoadMsc(selItem.path)
+    curItem.value = selItem
     curAlbum.value = undefined
-    curList.value = curItems.value.slice(curItems.value.findIndex(v => v.path === item.path))
+    curList.value = curItems.value.slice(selIdx)
   } else if (curLib.value.mode === 'asmr') {
-    if (curAlbum.value?.path === item.path) return
-    curAlbum.value = item as ILibAlbum
-    curDirec.value = await window.api.getDirStruc(item.path)
+    if (curAlbum.value?.path === selItem.path) return
+    curAlbum.value = selItem as ILibAlbum
+    curDirec.value = await window.api.getDirStruc(selItem.path)
   }
 }
 function onDirMusic(music: ILibItem) {
