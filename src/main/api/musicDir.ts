@@ -16,22 +16,18 @@ let dirItems: fs.Dirent[] = []
  */
 export async function getDirLength(mode: LibMode, path: string): Promise<number> {
   dirMode = mode
-  if (mode === 'normal') {
-    const items = fs.readdirSync(path, { withFileTypes: true, recursive: true })
-    dirItems = items.filter(item => item.isFile() && mscExts.includes(extname(item.name).toLowerCase()))
-  } else {
-    const items = fs.readdirSync(path, { withFileTypes: true })
-    dirItems = items.filter(item => item.isDirectory())
-  }
+  const items = fs.readdirSync(path, { withFileTypes: true, recursive: mode === 'normal' ? true : false })
+  dirItems = mode === 'normal' ? items.filter(item => item.isFile() && isMusic(item.name)) : items.filter(item => item.isDirectory())
   return dirItems.length
 }
 /**
- * 获取目录中指定索引的文件信息，不应当由渲染进程调用
+ * 获取目录中指定索引的文件信息
+ * @warning 不应当由渲染进程调用
  * @param index 文件索引
- * @returns 文件信息，包括音乐或子目录
+ * @returns 文件信息，类型为音乐或专辑
  */
-export async function getDirItemData(index: number): Promise<ILibMusic | ILibAlbum | null> {
-  if (index < 0 || index >= dirItems.length) return null
+export async function getDirItemData(index: number): Promise<ILibMusic | ILibAlbum | undefined> {
+  if (index < 0 || index >= dirItems.length) return undefined
   const item = dirItems[index]
   const path = join(item.parentPath, item.name)
   if (dirMode === 'normal') {
@@ -43,15 +39,15 @@ export async function getDirItemData(index: number): Promise<ILibMusic | ILibAlb
       artist: data.common.artist || '未知艺术家',
       duration: data.format.duration || 0
     }
-  } else {
+  } else if (dirMode === 'asmr') {
     const subs = fs.readdirSync(path, { withFileTypes: true, recursive: true })
-    const pic = subs.find(file => file.isFile() && picExts.includes(extname(file.name).toLowerCase()))
+    const pic = subs.find(file => file.isFile() && isPicture(file.name))
     return {
       name: item.name,
       path: path,
       pic: pic ? join(pic.parentPath, pic.name) : ''
     }
-  }
+  } else return undefined
 }
 /**
  * 获取当前目录结构
@@ -60,6 +56,10 @@ export async function getDirItemData(index: number): Promise<ILibMusic | ILibAlb
  */
 export async function getDirStruc(path: string): Promise<IDir | undefined> { return recurseDir(path) }
 
+/** 判断是否为音乐文件 */
+function isMusic(name: string) { return mscExts.includes(extname(name).toLowerCase()) }
+/** 判断是否为图片文件 */
+function isPicture(name: string) { return picExts.includes(extname(name).toLowerCase()) }
 /**
  * 内部递归获取目录结构
  * @param path 目录路径
@@ -73,7 +73,7 @@ function recurseDir(path: string) {
       const subdir = recurseDir(join(item.parentPath, item.name))
       if (!subdir) return
       curdir.dirs.push(subdir)
-    } else if (item.isFile() && mscExts.includes(extname(item.name).toLowerCase())) {
+    } else if (item.isFile() && isMusic(item.name)) {
       curdir.mscs.push({ name: item.name, path: join(item.parentPath, item.name) })
     }
   })
