@@ -13,7 +13,7 @@
           <div class="tag">未知声优</div>
           <div class="tag">未知标签</div>
         </div>
-        <KDirList class="dirList" :dir="dirSelect" :path="curPath" @music="onDirMusic" @musics="onDirMusics" />
+        <KDirList class="dirList" :dir="curDirec" :path="curPath" @music="onDirMusic" @musics="onDirMusics" />
       </div>
     </div>
   </div>
@@ -24,24 +24,21 @@ import { useLibStore } from '@renderer/store'
 import { vTooltip } from '@renderer/directives/Tooltip'
 import bus from '@renderer/utils/emitter'
 const { curLibs, curLib, curItems, curItem, curAlbum, curPath, curList } = storeToRefs(useLibStore())
-const dirSelect = ref<IDirStruc>()
+const curDirec = ref<IDir>()
 const libOptions = computed(() => curLibs.value.map(lib => ({ label: lib.name, value: lib })))
-
+// 选择音乐时播放音乐并更新当前播放列表，选择专辑时更新当前专辑目录
 async function onItemSelect(item: ILibItem) {
   if (!curLib.value) return
   if (curLib.value.mode === 'normal') {
     if (curItem.value?.path === item.path) return
+    bus.emLoadMsc(item.path)
     curItem.value = item
     curAlbum.value = undefined
-    bus.emLoadMsc(item.path)
-    const idx = curItems.value.findIndex(v => v.path === item.path)
-    curList.value = curItems.value.slice(idx)
+    curList.value = curItems.value.slice(curItems.value.findIndex(v => v.path === item.path))
   } else if (curLib.value.mode === 'asmr') {
     if (curAlbum.value?.path === item.path) return
     curAlbum.value = item as ILibAlbum
-    const dir = await window.api.getDirStruc(item.path)
-    if (!dir) return
-    dirSelect.value = dir
+    curDirec.value = await window.api.getDirStruc(item.path)
   }
 }
 function onDirMusic(music: ILibItem) {

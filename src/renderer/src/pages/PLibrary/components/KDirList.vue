@@ -9,7 +9,7 @@
       </div>
       <KDirList class="subdir" :dir="direc" :path="path" :left="left?left+1:1" :style="{ '--ribbon-left': (left||0)*20+10 + 'px' }" @music="v=>$emit('music', v)" @musics="v=>$emit('musics', v)" />
     </div>
-    <div class="music" v-for="music in dir.musics" :key="music.name" :class="{ play: music.path === path }" :style="{ paddingLeft: (left||0)*20 + 'px' }" @click="onMusicClick(music)">
+    <div class="music" v-for="music in dir.mscs" :key="music.name" :class="{ play: music.path === path }" :style="{ paddingLeft: (left||0)*20 + 'px' }" @click="onMusicClick(music)">
       <span class="name" v-tooltip.immediate.overflow="music.name">{{ music.name }}</span>
     </div>
   </div>
@@ -18,7 +18,7 @@
 <script setup lang="ts">
 import { vTooltip } from '@renderer/directives/Tooltip'
 defineProps<{
-  /** 当前目录 */ dir?: IDirStruc,
+  /** 当前目录 */ dir?: IDir,
   /** 当前歌曲 */ path?: string,
   /** 子目录缩进，顶层不需要传入 */ left?: number
 }>()
@@ -33,16 +33,16 @@ function onDirClick(e: MouseEvent) {
   title.classList.toggle('hidden')
   direc.classList.toggle('hidden')
 }
-function getDirMusics(dir: IDirStruc) {
+function getDirMusics(dir: IDir) {
   const res = [] as ILibItem[]
   if (dir.dirs) { for (const d of dir.dirs) { res.push(...getDirMusics(d)) } }
-  if (dir.musics) { res.push(...dir.musics) }
+  if (dir.mscs) { res.push(...dir.mscs) }
   return res
 }
 // 发射事件
 function onMusicClick(music: ILibItem) { emit('music', music) }
-function onDirPlayClick(dir: IDirStruc) { emit('musics', getDirMusics(dir)) }
-function onDirAddClick(_dir: IDirStruc) { /** TODO: 添加目录到播放列表 */ }
+function onDirPlayClick(dir: IDir) { emit('musics', getDirMusics(dir)) }
+function onDirAddClick(_dir: IDir) { /** TODO: 添加目录到播放列表 */ }
 </script>
 
 <style scoped lang="scss">

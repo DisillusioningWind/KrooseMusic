@@ -56,21 +56,26 @@ export async function getDirItemData(index: number): Promise<ILibMusic | ILibAlb
 /**
  * 获取当前目录结构
  * @param path 目录路径
- * @returns 目录结构，包括目录名、子目录和音乐
+ * @returns 目录结构，包含目录名称、子目录列表和音乐列表
  */
-export function getDirStruc(path: string) {
-  let res = { name: basename(path) } as IDirStruc
+export async function getDirStruc(path: string): Promise<IDir | undefined> { return recurseDir(path) }
+
+/**
+ * 内部递归获取目录结构
+ * @param path 目录路径
+ * @returns 目录结构，包含目录名称、子目录列表和音乐列表
+ */
+function recurseDir(path: string) {
+  const curdir = { name: basename(path), dirs: [], mscs: [] } as IDir
   const items = fs.readdirSync(path, { withFileTypes: true })
-  items.forEach(async item => {
-    if (item.isFile() && mscExts.includes(extname(item.name).toLowerCase())) {
-      if (!res.musics) res.musics = []
-      res.musics.push({ name: item.name, path: join(item.parentPath, item.name) })
-    } else if (item.isDirectory()) {
-      const dir = getDirStruc(join(item.parentPath, item.name))
-      if (!dir) return
-      if (!res.dirs) res.dirs = []
-      res.dirs.push(dir)
+  items.forEach(item => {
+    if (item.isDirectory()) {
+      const subdir = recurseDir(join(item.parentPath, item.name))
+      if (!subdir) return
+      curdir.dirs.push(subdir)
+    } else if (item.isFile() && mscExts.includes(extname(item.name).toLowerCase())) {
+      curdir.mscs.push({ name: item.name, path: join(item.parentPath, item.name) })
     }
   })
-  return (!res.dirs && !res.musics) ? null : res
+  return curdir.dirs.length || curdir.mscs.length ? curdir : undefined
 }
