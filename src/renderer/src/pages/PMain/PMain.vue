@@ -4,15 +4,10 @@
     <KNavBar />
     <RouterView />
     <PDetail />
-    <KListDrawer v-model="showDrawer" />
+    <KListDrawer />
     <KMusicBar />
   </div>
 </template>
-
-<script setup lang="ts">
-import { useUIStore } from '@renderer/store'
-const { showDrawer } = storeToRefs(useUIStore())
-</script>
 
 <style scoped lang="scss">
 @mixin k-grid-child($nth, $row, $col) {
@@ -28,7 +23,7 @@ const { showDrawer } = storeToRefs(useUIStore())
   overflow: hidden;
   display: grid;
   grid-template-rows: 30px calc(100% - 152px) 122px;
-  grid-template-columns: min-content 1fr 0px;
+  grid-template-columns: min-content 1fr 0;
   >div {
     @include k-grid-child(1, "1 / 2", "1 / 4");
     @include k-grid-child(2, "2 / 3", "1 / 2");
