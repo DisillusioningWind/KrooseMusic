@@ -1,8 +1,8 @@
 <template>
-  <div class="KNavBar" :class="expand?'expand':''">
-    <div v-for="menu in menus" :key="menu.path" :class="onMenuClass($route.fullPath, menu.path)" @click="onMenuClick(menu.path)">
+  <div class="KNavBar" :class="{ expand }">
+    <div class="nav" v-for="menu in menus" :key="menu.path" :class="onMenuClass($route.fullPath, menu.path)" @click="onMenuClick(menu.path)">
       <component class="icon" v-if="menu.path!=='/Search' || !expand" :is="menu.icon" />
-      <span class="title" v-if="menu.path!=='/Search' || !expand">{{ menu.title }}</span>
+      <span class="title" v-if="menu.title.length > 0">{{ menu.title }}</span>
       <input class="input" v-if="menu.path==='/Search' && expand" v-model="search" type="text" placeholder="搜索" spellcheck="false" />
       <div class="cancel" v-if="menu.path==='/Search' && expand && search.length > 0" @click="onCancelClick"><SVGClose /></div>
       <div class="confirm" v-if="menu.path==='/Search' && expand" @click="onSearchClick"><SVGSearch /></div>
@@ -42,71 +42,67 @@ function onMenuClick(path: string) {
   else if (path === '/Search' && !expand.value) { expand.value = true }
 }
 function onCancelClick() { search.value = '' }
-function onSearchClick() {
-  if (search.value.length > 0) { router.push('/Search') }
-}
+function onSearchClick() { if (search.value.length > 0) { router.push({ path: '/Search', query: { search: search.value } }) } }
 </script>
 
 <style scoped lang="scss">
-$border-width: 4px;
-$left-len: 6px;
-@mixin k-cutline {
-  position: relative;
-  &::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: $left-len;
-    height: 1px;
-    width: calc(100% - 2 * $left-len - $border-width);
-    background-color: #d6d6d6;
-    visibility: v-bind('expand? "visible": "hidden"');
-  }
+$sel-wid: 4px;
+$pad-left: 6px;
+@mixin k-search-btn {
+  height: 65%;
+  background-color: #fafafa;
 }
 
 .KNavBar {
   height: 100%;
   width: 48px;
   background-color: #f2f2f2;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
   transition: width .15s;
-  &.expand { width: 200px; }
-  >div {
+  &.expand {
+    width: 200px;
+    >.nav:last-child::before { visibility: visible; }
+  }
+  >.nav {
     height: 50px;
     width: 100%;
-    border-left: $border-width solid transparent;
+    border-left: $sel-wid solid transparent;
     user-select: none;
     display: flex;
     align-items: center;
-    &:hover { background-color: #dadada; }
-    &:active { background-color: #c2c2c2; }
-    &.select { border-left: 4px solid #005a9e; }
+    &:not(.search):hover { background-color: #dadada; }
+    &:not(.search):active { background-color: #c2c2c2; }
+    &.select { border-left: $sel-wid solid #005a9e; }
     >.icon {
       height: 18px;
       width: 18px;
       margin: 11px;
-      margin-right: 11px + $border-width;
+      margin-right: 11px + $sel-wid;
       flex-shrink: 0;
     }
     >.title { white-space: nowrap; }
     // 设置
     &:last-child {
       margin-top: auto;
-      @include k-cutline;
+      position: relative;
+      &::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: $pad-left;
+        height: 1px;
+        width: calc(100% - 2 * $pad-left - $sel-wid);
+        background-color: #d6d6d6;
+        visibility: hidden;
+      }
     }
     // 搜索
     &.search {
-      padding: 0 10px 0 $left-len;
-      &:hover { background-color: #f2f2f2; }
-      &:active { background-color: #f2f2f2; }
-      %k-search-btn {
-        height: 65%;
-        background-color: #fafafa;
-      }
+      padding: 0 10px 0 $pad-left;
       >.input {
-        @extend %k-search-btn;
+        @include k-search-btn;
         width: 0;
         flex: 1;
         border: 0;
@@ -115,24 +111,25 @@ $left-len: 6px;
         font-size: 15px;
       }
       >.confirm {
-        @extend %k-search-btn;
+        @include k-search-btn;
         width: 30px;
         display: flex;
         align-items: center;
         justify-content: center;
-        svg {
+        &:hover { --svg-col: #0078d7; }
+        &:active {
+          --svg-col: #fff;
+          background-color: #0078d7;
+        }
+        >svg {
           height: 60%;
           width: 50%;
-        }
-        &:hover { svg { fill: #0078d7; } }
-        &:active {
-          background-color: #0078d7;
-          svg { fill: #fff; }
+          fill: var(--svg-col, #000);
         }
       }
       >.cancel {
         @extend .confirm;
-        svg { width: 60%; }
+        >svg { width: 60%; }
       }
     }
   }

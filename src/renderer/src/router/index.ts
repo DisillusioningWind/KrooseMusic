@@ -12,22 +12,12 @@ const router = createRouter({
   routes: [{
     path: '/',
     component: PMain,
-    children: [{
-        path: 'Library',
-        component: PLibrary
-      }, {
-        path: 'Like',
-        component: PLike
-      }, {
-        path: 'List',
-        component: PList
-      }, {
-        path: 'Search',
-        component: PSearch
-      }, {
-        path: 'Setting',
-        component: PSetting
-      }
+    children: [
+      { path: 'Library', component: PLibrary },
+      { path: 'Like', component: PLike },
+      { path: 'List', component: PList },
+      { path: 'Search', component: PSearch, props: route => ({ query: route.query.search }) },
+      { path: 'Setting', component: PSetting }
     ]
   }]
 })
