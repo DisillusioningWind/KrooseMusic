@@ -2,7 +2,7 @@
   <div class="KLibList" @scroll="onScroll">
     <div class="scroll-wrap" :style="{ paddingBottom: (prop.items.length - itemStart - itemNum) * itemHeight + 'px' }">
       <div class="item" v-for="(item, idx) in itemShow" :key="item.path" :class="{ even: (itemStart + idx) % 2 === 0, select: item.path === path }"
-        :style="{ height: itemHeight + 'px' }" v-ctx-menu="itemMenu" @contextmenu="onItemCtx(idx)" @click="onItemClick(idx)">
+        :style="{ height: itemHeight + 'px' }" v-ctx-menu="itemMenu" @contextmenu="onItemCtx(idx + itemStart)" @click="onItemClick(idx + itemStart)">
         <span class="text" v-tooltip.immediate.overflow="item.name">{{ item.name + (item['ext']??'') }}</span>
         <span class="text" v-if="mode === 'normal'" v-tooltip.immediate.overflow="item['artist']">{{ item['artist'] }}</span>
         <span class="text" v-if="mode === 'normal'">{{ formatTime(item['duration'], 'mm:ss') }}</span>

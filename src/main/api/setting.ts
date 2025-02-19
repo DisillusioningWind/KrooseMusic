@@ -12,3 +12,4 @@ type StoreType = {
 }
 const setting = new Store<StoreType>()
 // TODO: 添加更多设置项
+export function getSetting() { console.log(setting) }

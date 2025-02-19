@@ -29,7 +29,7 @@ function hideText() {
  * @modifiers immediate 立即显示
  * @modifiers overflow 溢出才显示
  */
-export const vTooltip: Directive<HTMLElement, string | undefined, 'immediate' | 'overflow'> = {
+export const vTooltip: Directive<HTMLElement, string | undefined, string> = {
   mounted: (el, { modifiers, value }) => {
     const delay = modifiers.immediate ? 100 : 800
     const overShow = modifiers.overflow || false

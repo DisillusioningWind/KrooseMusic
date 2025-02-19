@@ -1,6 +1,5 @@
 import { app, BrowserWindow, session } from 'electron/main'
 import { join } from 'path'
-import { registerAPI } from './api/index.js'
 
 class MainWindow extends BrowserWindow {
   constructor() {
@@ -51,9 +50,10 @@ if (process.env.NODE_ENV === 'development') {
   app.setPath('sessionData', join(exeDir, 'data', 'sessionData'))
 }
 
-app.whenReady().then(() => {
+app.whenReady().then(async () => {
   const mainWindow = new MainWindow()
-  registerAPI(mainWindow)
+  const API = await import('./api/index.js')
+  API.registerAPI(mainWindow)
   //打包时注意删除
   if (process.env.NODE_ENV === 'development') {
     //Vue Devtools
