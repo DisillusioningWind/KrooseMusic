@@ -69,14 +69,10 @@ export const useAudioStore = defineStore('store-audio', () => {
     else audio.currentTime = time
   }
   return {
-    /** 播放状态，禁止直接更改 */
-    mscState: state,
-    /** 音量，禁止直接更改 */
-    mscVol: volume,
-    /** 总时长，只读 */
-    mscDur: duration,
-    /** 当前进度，禁止直接更改 */
-    mscTime: curtime
+    /** 播放状态，禁止直接更改 */ mscState: state,
+    /** 音量，禁止直接更改 */ mscVol: volume,
+    /** 总时长，只读 */ mscDur: duration,
+    /** 当前进度，禁止直接更改 */ mscTime: curtime
   }
 }, {
   persist: {

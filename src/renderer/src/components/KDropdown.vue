@@ -1,9 +1,8 @@
 <template>
   <Transition name="drop">
     <div v-if="show" class="KDropdown">
-      <div v-for="opt in options" :key="opt.label" :class="{ option: true, cur: opt.label === cur?.label }"
-        v-tooltip.immediate.overflow="opt.label" @click.stop="onOptClick(opt)">
-        {{ opt.label }}
+      <div v-for="opt in opts" :key="opt[label]" class="option" :class="{ cur: opt[label] === cur?.[label] }" v-tooltip.immediate.overflow="opt[label]" @click.stop="onOptClick(opt)">
+        {{ opt[label] }}
       </div>
     </div>
   </Transition>
@@ -11,10 +10,14 @@
 
 <script setup lang="ts">
 import { vTooltip } from '@renderer/directives/Tooltip'
-interface Option { label: string, value: any }
+type Option = Record<string, any>
 const show = defineModel<boolean>()// 是否显示下拉框
 const emit = defineEmits<{ change: [val: Option] }>()// 选中项改变时通知父组件
-defineProps<{ cur?: Option, options: Option[] }>()// 当前选中项和选项列表
+defineProps<{
+  /** 选中项目 */ cur?: Option,
+  /** 选项列表 */ opts: Option[],
+  /** 标签属性 */ label: string
+}>()
 // 点击选项时关闭下拉框并发射选中项改变事件
 function onOptClick(opt: Option) {
   show.value = false

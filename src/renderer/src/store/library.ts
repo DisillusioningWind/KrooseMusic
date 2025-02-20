@@ -3,18 +3,14 @@ import bus from '@renderer/utils/emitter'
 
 /** 循环模式 */
 export enum LoopMode {
-  /** 列表播放 */
-  listOnce,
-  /** 列表循环 */
-  listLoop,
-  /** 单曲循环 */
-  singLoop,
-  /** 随机播放 */
-  randLoop
+  /** 列表播放 */ listOnce,
+  /** 列表循环 */ listLoop,
+  /** 单曲循环 */ singLoop,
+  /** 随机播放 */ randLoop
 }
 /** 曲库数据 */
 export const useLibStore = defineStore('store-lib', () => {
-  const curLibs = shallowRef<ILibrary[]>([])
+  const curLibs = ref<ILibrary[]>([])
   const curItems = shallowRef<ILibItem[]>([])
   const curList = shallowRef<ILibItem[]>([])
   const curLib = ref<ILibrary>()
@@ -31,15 +27,15 @@ export const useLibStore = defineStore('store-lib', () => {
   bus.onLoopMsc((next, state) => loopMusic(next, false, state))
   bus.onLoadMsc((path) => curPath.value = path)
   bus.onUnloadMsc(() => { curPath.value = ''; curItem.value = undefined })
-  // 曲库列表变化时更新当前曲库
+  // 曲库列表变化时更新当前曲库，注意必须使用deep监听否则无法监听到曲库列表的变化
   watch(curLibs, (curLibs) => {
     // 无曲库时清空当前曲库
     if (curLibs.length === 0) { curLib.value = undefined }
     // 无当前曲库时默认选中第一个
     else if (!curLib.value) { curLib.value = curLibs[0] }
-    // 当前曲库不存在时清空当前曲库
-    else if (curLib.value) { curLib.value = curLibs.find(lib => lib.name === curLib.value?.name) }
-  })
+    // 当前曲库不存在时默认选中第一个
+    else { curLib.value = curLibs.find(lib => lib.name === curLib.value?.name) ? curLib.value : curLibs[0] }
+  }, { deep: true })
   // 当前曲库变化时更新当前曲库项目
   watch(curLib, async (curLib, lastLib) => {
     // 无当前曲库时清空当前曲库项目
@@ -84,24 +80,15 @@ export const useLibStore = defineStore('store-lib', () => {
     curItem.value = loadIdx === -1 ? undefined : curList.value[loadIdx]
     bus.emLoadMsc(loadPath, loadMode)
   }
-  // 导出
   return {
-    /** 所有曲库列表，只读 */
-    curLibs,
-    /** 当前曲库项目，只读 */
-    curItems,
-    /** 当前播放列表 */
-    curList,
-    /** 当前曲库 */
-    curLib,
-    /** 当前选中项目 */
-    curItem,
-    /** 当前选中专辑 */
-    curAlbum,
-    /** 当前音乐路径，只读 */
-    curPath,
-    /** 循环模式 */
-    loopMode
+    /** 所有曲库列表，只读 */ curLibs,
+    /** 当前曲库项目，只读 */ curItems,
+    /** 当前播放列表 */ curList,
+    /** 当前曲库 */ curLib,
+    /** 当前选中项目 */ curItem,
+    /** 当前选中专辑 */ curAlbum,
+    /** 当前音乐路径，只读 */ curPath,
+    /** 循环模式 */ loopMode
   }
 }, {
   persist: {

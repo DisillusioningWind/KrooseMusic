@@ -34,17 +34,11 @@ export const useInfoStore = defineStore('store-info', () => {
     mscLyrics.value = []
   }
   return {
-    /** 音乐路径 */
-    mscPath,
-    /** 音乐标题 */
-    mscTitle,
-    /** 音乐艺术家 */
-    mscArtist,
-    /** 音乐封面URL */
-    mscPicURL,
-    /** 音乐主色调 */
-    mscColor,
-    /** 音乐歌词 */
-    mscLyrics
+    /** 音乐路径 */ mscPath,
+    /** 音乐标题 */ mscTitle,
+    /** 音乐艺术家 */ mscArtist,
+    /** 音乐封面URL */ mscPicURL,
+    /** 音乐主色调 */ mscColor,
+    /** 音乐歌词 */ mscLyrics
   }
 })

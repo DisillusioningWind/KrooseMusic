@@ -2,7 +2,7 @@
   <div class="PLibrary">
     <div class="tools">
       <span class="libText">当前目录</span>
-      <KLibSelect class="libSelect" v-if="curLib" v-model="curLib" :options="libOptions" />
+      <KLibSelect v-if="curLib" class="libSelect" v-model="curLib" :opts="curLibs" :label="'name'"/>
     </div>
     <div class="contents">
       <KLibList class="mainList" :mode="curLib?.mode" :items="curItems" :path="curLib?.mode==='normal'?curItem?.path:curAlbum?.path" @select="onItemSelect" />
@@ -25,7 +25,6 @@ import { vTooltip } from '@renderer/directives/Tooltip'
 import bus from '@renderer/utils/emitter'
 const { curLibs, curLib, curItems, curItem, curAlbum, curPath, curList } = storeToRefs(useLibStore())
 const curDirec = ref<IDir>()
-const libOptions = computed(() => curLibs.value.map(lib => ({ label: lib.name, value: lib })))
 // 选择音乐时播放音乐并更新当前播放列表，选择专辑时更新当前专辑目录
 async function onItemSelect(selIdx: number) {
   if (!curLib.value) return
