@@ -9,6 +9,7 @@ declare module 'vue' {
   export interface GlobalComponents {
     KDetailBtn: typeof import('./../pages/PMain/components/KDetailBtn.vue')['default']
     KDialog: typeof import('./../components/KDialog.vue')['default']
+    KDirInfo: typeof import('./../pages/PLibrary/components/KDirInfo.vue')['default']
     KDirList: typeof import('./../pages/PLibrary/components/KDirList.vue')['default']
     KDrawer: typeof import('./../components/KDrawer.vue')['default']
     KDropdown: typeof import('./../components/KDropdown.vue')['default']

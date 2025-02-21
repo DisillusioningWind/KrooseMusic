@@ -1,27 +1,27 @@
 <template>
   <div class="KDirList" v-if="dir">
     <div class="direc" v-for="direc in dir.dirs" :key="direc.name">
-      <div class="title" :style="{ paddingLeft: (left||0)*20 + 'px' }" @click="onDirClick">
+      <div class="title" :style="{ paddingLeft: left*20 + 'px' }" @click="onDirClick">
         <svg class="icon"><path d="m8,6 l4,4 l-4,4" /></svg>
         <div class="name" v-tooltip.immediate.overflow="direc.name">{{ direc.name }}</div>
         <svg class="icon" @click.stop="onDirPlayClick(direc)"><path d="m7,5.5 l0,10 l8,-5z" /></svg>
         <svg class="icon" @click.stop="onDirAddClick(direc)"><path d="m4.5,10 l12,0 m-6,-6 l0,12.5" /></svg>
       </div>
-      <KDirList class="subdir" :dir="direc" :path="path" :left="left?left+1:1" :style="{ '--ribbon-left': (left||0)*20+10 + 'px' }" @music="v=>$emit('music', v)" @musics="v=>$emit('musics', v)" />
+      <KDirList class="subdir" :dir="direc" :path="path" :left="left+1" :style="{ '--rib-left': left*20+10 + 'px' }" @music="v=>$emit('music',v)" @musics="v=>$emit('musics',v)" />
     </div>
-    <div class="music" v-for="music in dir.mscs" :key="music.name" :class="{ play: music.path === path }" :style="{ paddingLeft: (left||0)*20 + 'px' }" @click="onMusicClick(music)">
-      <span class="name" v-tooltip.immediate.overflow="music.name">{{ music.name }}</span>
+    <div class="music" v-for="music in dir.mscs" :key="music.name" :class="{ play: music.path === path }" @click="onMusicClick(music)">
+      <span class="name" :style="{ paddingLeft: (left*20||10) + 'px' }" v-tooltip.immediate.overflow="music.name">{{ music.name }}</span>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { vTooltip } from '@renderer/directives/Tooltip'
-defineProps<{
+withDefaults(defineProps<{
   /** 当前目录 */ dir?: IDir,
   /** 当前歌曲 */ path?: string,
-  /** 子目录缩进，顶层不需要传入 */ left?: number
-}>()
+  /** 目录缩进 */ left?: number
+}>(), { left: 0 })
 const emit = defineEmits<{
   /** 歌曲点击 */ music: [value: ILibItem],
   /** 目录点击 */ musics: [value: ILibItem[]]
@@ -111,7 +111,7 @@ $item-hei: 26px;
         position: absolute;
         content: '';
         top: 0;
-        left: var(--ribbon-left);
+        left: var(--rib-left);
         height: 100%;
         width: 0.5px;
         pointer-events: none;
