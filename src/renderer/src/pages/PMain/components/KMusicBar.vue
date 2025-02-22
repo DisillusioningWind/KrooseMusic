@@ -1,5 +1,5 @@
 <template>
-  <div class="KMusicBar" :style="{ backgroundColor: mscColor }">
+  <div class="KMusicBar" :style="{ backgroundColor: mscColor + 'd0' }">
     <div class="sliderRow">
       <span class="time" :class="{ hide: mscUnload }">{{ formatTime(mscShowTime) }}</span>
       <KSlider :max="mscDur" :cur="mscTime" :disable="mscUnload" :format="v=>formatTime(v,'mm:ss')" @update="time=>{ mscShowTime=time }" @drag="sliderDragTime" />
@@ -153,6 +153,7 @@ $btn-hei: 90px;
 }
 
 .KMusicBar {
+  backdrop-filter: blur(30px);
   >.sliderRow {
     height: $sli-hei;
     margin: 0 12px;
