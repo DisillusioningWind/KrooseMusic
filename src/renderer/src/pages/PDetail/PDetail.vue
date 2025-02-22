@@ -1,8 +1,10 @@
 <template>
-  <div class="PDetail" :class="showDetail?'show':''">
-    <KImage class="img" :url="mscPicURL" />
-    <KLyric class="lrc" :stat="mscState" :time="mscTime" :lrcs="mscLyrics" />
-  </div>
+  <Transition name="fade">
+    <div v-show="showDetail" class="PDetail" :style="background">
+      <KImage class="img" :url="mscPicURL" />
+      <KLyric class="lrc" :stat="mscState" :time="mscTime" :lrcs="mscLyrics" />
+    </div>
+  </Transition>
 </template>
 
 <script setup lang="ts">
@@ -10,54 +12,49 @@ import { useUIStore, useAudioStore, useInfoStore } from '@renderer/store'
 const { showDetail } = storeToRefs(useUIStore())
 const { mscState, mscTime } = storeToRefs(useAudioStore())
 const { mscPicURL, mscLyrics } = storeToRefs(useInfoStore())
+const background = computed(() => ({ backgroundImage: mscPicURL.value ? `url(${mscPicURL.value})` : '' }))
 </script>
 
 <style scoped lang="scss">
-$margin-height: 12px;
-$title-height: 30px;
-$show-time: 0.4s;
+$mar-size: 12px;
+$title-hei: 30px;// 标题栏高度
+$show-time: 0.4s;// 显示时间
+.fade-enter-active, .fade-leave-active { transition: opacity $show-time; }
+.fade-enter-from, .fade-leave-to { opacity: 0; }
 .PDetail {
   position: relative;
   height: 100%;
   width: 100%;
-  padding-top: $title-height;
-  background-position: 0 (-$title-height);// 背景图片从标题栏开始
+  padding-top: $title-hei;
+  background-position: 0 (-$title-hei);// 背景图片从标题栏开始
   background-repeat: no-repeat;
   background-size: 100% auto;
-  background-image: v-bind('mscPicURL?("url(" + mscPicURL + ")"):"linear-gradient(150deg, #3b3b3b, #6b6b6b 20%, #ffffff)"');
   background-color: #ffffff;
-  opacity: 0;
-  pointer-events: none;// 不显示时不响应点击事件
-  transition: opacity $show-time;
+  background-image: linear-gradient(150deg, #3b3b3b, #6b6b6b 20%, #ffffff);
   display: grid;
   grid-template-columns: 27% 73%;
   // 模糊背景
   &::after {
     content: '';
     position: absolute;
-    top: -$title-height;
-    height: calc(100% + $title-height);
+    top: -$title-hei;
+    height: calc(100% + $title-hei);
     width: 100%;
     background-color: #0000005f;
     backdrop-filter: blur(40px);
-  }
-  &.show {
-    opacity: 1;
-    pointer-events: auto;
   }
   // 音乐图片
   .img {
     z-index: 1;
     max-height: 300px;
     max-width: 300px;
-    margin: $margin-height;
+    margin: $mar-size;
     align-self: end;
   }
   // 音乐歌词
   .lrc {
     z-index: 1;
-    height: calc(100% - 2 * $margin-height);
-    margin: $margin-height 0;
+    margin: $mar-size 0;
   }
 }
 </style>

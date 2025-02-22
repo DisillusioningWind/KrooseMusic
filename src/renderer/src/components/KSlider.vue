@@ -1,100 +1,69 @@
 <template>
   <div class="KSlider" ref="slider">
-    <div class="use"></div>
-    <div class="btn" :tip="format(cur)"></div>
+    <div class="use" :style="{ width: perUse + '%' }"></div>
+    <div class="btn" v-show="!disable" :tip="format(curVal)"></div>
     <div class="unuse"></div>
   </div>
 </template>
 
 <script setup lang="ts">
 const props = defineProps<{
-  /** 最小值，默认0 */
-  min?: number,
-  /** 最大值，默认100 */
-  max?: number,
-  /** 当前值 */
-  cur: number,
-  /** 是否禁用，默认不禁用 */
-  disable?: boolean,
-  /** 是否显示提示，默认不显示 */
-  tooltip?: boolean,
-  /** 提示格式化函数，默认显示原值 */
-  format?: (v: number) => string
+  /** 最小值，默认0 */ min?: number,
+  /** 最大值，默认100 */ max?: number,
+  /** 当前值 */ cur: number,
+  /** 是否禁用，默认不禁用 */ disable?: boolean,
+  /** 提示格式化函数，默认显示原值 */ format?: (v: number) => string
 }>()
 const emit = defineEmits<{
-  /** 当前值改变 */
-  update: [v: number],
-  /** 拖动结束 */
-  drag: [v: number]
+  /** 当前值改变 */ update: [v: number],
+  /** 拖动结束 */ drag: [v: number]
 }>()
-
 const min = computed(() => props.min || 0)
 const max = computed(() => props.max || 100)
-const cur = ref(props.cur)
-const disable = computed(() => props.disable)
-const tooltip = computed(() => props.tooltip && !props.disable) //禁用时不显示提示
-const format = computed(() => props.format || ((v:number) => v.toString()))
-const slider = ref<HTMLElement>()
-const sliderWidth = ref(1)
 const len = computed(() => max.value - min.value)
-/** 当前值占总范围百分比，分数格式 */
-const perCur = computed(() => cur.value / len.value)
-/** 已使用滑动条长度占滑动条总长百分比，百分比格式，perCur为1时，已使用滑动条右端与滑动条右端距离为按钮宽度（21px），以此换算 */
-const perUse = computed(() => ((sliderWidth.value - 21) * perCur.value) / sliderWidth.value * 100)
-/** 拖动状态，仅有滑动和拖动两个状态 */
-let state: 'drag' | 'slide' = 'slide'
-/** 滑动条总长监听器 */
-let ob = new ResizeObserver(() => { sliderWidth.value = slider.value?.offsetWidth || 1 })
-
-//监听外部传入的cur，仅当state为slide且新旧值不等时更新内部cur
-watch(() => props.cur, (newCur, oldCur) => {
-  if (state === 'slide' && newCur !== oldCur) { cur.value = newCur }
-})
-//限制内部cur范围，并通知父组件当前值已改变
-watch(cur, (newCur, oldCur) => {
-  if (newCur < min.value) { cur.value = min.value }
-  else if (newCur > max.value) { cur.value = max.value }
-  //如果新旧值相等则不通知，避免死循环
-  if (newCur === oldCur) return
-  emit('update', cur.value)
-})
-
+const disable = computed(() => props.disable)
+const format = computed(() => props.format ?? ((v: number) => v.toString()))
+const curval = ref(props.cur)// 内部当前值，由当前值决定perCur和perUse，进而决定已用长度，所以拖动时更新包裹当前值
+const curVal = computed({ get: () => curval.value, set: v => curval.value = Math.min(max.value, Math.max(min.value, v)) })// 包裹当前值，限制内部当前值在[min,max]范围内
+const slider = ref<HTMLDivElement>()// 滑动条元素
+const sliderWidth = ref(21)// 滑动条总长，最低为21px（按钮宽度）
+const perCur = computed(() => (curVal.value - min.value) / len.value)// 当前值占总值比例
+const perUse = computed(() => ((sliderWidth.value - 21) * perCur.value) / sliderWidth.value * 100)// 滑动条已用长度占总长度百分比，perCur为1时，已用部分右端与滑动条右端距离为按钮宽度
+let state: 'drag' | 'slide' = 'slide'// 拖动状态，仅有滑动和拖动两个状态
+let ob = new ResizeObserver(() => { sliderWidth.value = slider.value?.offsetWidth ?? 21 })// 滑动条总长监听器
+// 监听外部当前值，当为滑动状态时更新包裹当前值
+watch(() => props.cur, newCur => { if (state === 'slide') { curVal.value = newCur } })
+// 监听内部当前值，当值改变时更新外部当前值
+watch(curval, newCur => emit('update', newCur))
+// 监听页面鼠标移动事件及滑动条元素宽度变化
 onMounted(() => {
-  if (!slider.value) {
-    console.error('KSlider: slider is null')
-    return
-  }
-  slider.value.addEventListener('mousedown', startDrag)
+  slider.value!.addEventListener('mousedown', startDrag)
   document.addEventListener('mousemove', onDrag)
   document.addEventListener('mouseup', endDrag)
-  ob.observe(slider.value)
+  ob.observe(slider.value!)
 })
 onUnmounted(() => {
   document.removeEventListener('mousemove', onDrag)
   document.removeEventListener('mouseup', endDrag)
   ob.disconnect()
 })
-
-/** 拖动Slider时perCur的值需要计算按钮的宽度，分数格式 */
-function getPerCur(clientX: number) {
-  if (!slider.value) { return 0 }
-  else { return (clientX - slider.value.getBoundingClientRect().x - 10.5) / (slider.value.offsetWidth - 21) }
-}
+// 拖动滑动条时根据鼠标位置、滑动条位置和宽度计算当前值
+function getDragCur(clientX: number) { return slider.value ? (clientX - slider.value.getBoundingClientRect().x - 10.5) / (slider.value.offsetWidth - 21) * len.value : min.value }
 function startDrag(e: MouseEvent) {
   if (disable.value || e.button !== 0) return
   state = 'drag'
-  cur.value = getPerCur(e.clientX) * len.value
+  curVal.value = getDragCur(e.clientX)
   e.preventDefault()
 }
 function onDrag(e: MouseEvent) {
   if (state !== 'drag') return
-  cur.value = getPerCur(e.clientX) * len.value
+  curVal.value = getDragCur(e.clientX)
 }
 function endDrag(e: MouseEvent) {
   if (state !== 'drag') return
-  cur.value = getPerCur(e.clientX) * len.value
+  curVal.value = getDragCur(e.clientX)
   state = 'slide'
-  emit('drag', cur.value)
+  emit('drag', curVal.value)
 }
 </script>
 
@@ -109,7 +78,6 @@ $btn-wid: $sli-hei - 2 * $btn-mar-wid;
 $btn-hov-col: #ffffffa0;
 $trk-use-col: #ffffffff;
 $trk-unuse-col: #ffffff40;
-
 .KSlider {
   height: $sli-hei;
   width: 100%;
@@ -117,16 +85,13 @@ $trk-unuse-col: #ffffff40;
   flex: 1;
   display: flex;
   align-items: center;
-  &:hover { >.btn { border-color: $btn-hov-col; } }
-  &:active {
-    >.btn {
-      background-color: $trk-use-col;
-      &::before { opacity: v-bind('tooltip?1:0'); }
-    }
+  &:hover>.btn { border-color: $btn-hov-col; }
+  &:active>.btn {
+    background-color: $trk-use-col;
+    &::before { opacity: 1; }
   }
   >.use {
     height: $trk-hei;
-    width: v-bind('perUse+"%"');
     background-color: $trk-use-col;
   }
   >.unuse {
@@ -137,7 +102,6 @@ $trk-unuse-col: #ffffff40;
   }
   >.btn {
     position: relative;
-    display: v-bind('disable?"none":"block"');
     height: $btn-wid;
     width: $btn-wid;
     margin: $btn-mar-wid;
@@ -154,7 +118,7 @@ $trk-unuse-col: #ffffff40;
       transform: translate(-50%);
       padding: 0 8px;
       height: $tip-hei;
-      line-height: $tip-hei;
+      line-height: $tip-hei - 3px;
       content: attr(tip);
       font-size: 13px;
       font-weight: 400;

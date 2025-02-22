@@ -1,44 +1,42 @@
 <template>
-  <div class="KMusicBar">
+  <div class="KMusicBar" :style="{ backgroundColor: mscColor }">
     <div class="sliderRow">
-      <span>{{ formatTime(mscShowTime) }}</span>
-      <KSlider :max="mscDur" :cur="mscTime" :disable="mscUnload" :tooltip="true"
-        :format="v => formatTime(v, 'mm:ss')" @update="time => { mscShowTime = time }" @drag="sliderDragTime">
-      </KSlider>
-      <span>{{ formatTime(mscDur) }}</span>
+      <span class="time" :class="{ hide: mscUnload }">{{ formatTime(mscShowTime) }}</span>
+      <KSlider :max="mscDur" :cur="mscTime" :disable="mscUnload" :format="v=>formatTime(v,'mm:ss')" @update="time=>{ mscShowTime=time }" @drag="sliderDragTime" />
+      <span class="time" :class="{ hide: mscUnload }">{{ formatTime(mscDur) }}</span>
     </div>
     <div class="buttonRow">
       <div class="detailBar">
         <KDetailBtn v-show="!mscUnload" :title="mscTitle" :artist="mscArtist" :picURL="mscPicURL" :showPic="!showDetail" @click="btnChangeDetail" />
       </div>
       <div class="controlBar">
-        <button v-tooltip="(!mscUnload)?'上一首':''" @click="btnLastMusic">
+        <button class="svgBtn" :class="{ unload: mscUnload }" v-tooltip="(!mscUnload)?'上一首':''" @click="btnLastMusic">
           <svg>
             <path d="m10,9 l0,17"/>
             <path d="m25,10 l0,15 l-10,-7.5 z"/>
           </svg>
         </button>
-        <button v-tooltip="(!mscUnload)?'向前10秒':''" @click="btnFastBackward">
+        <button class="svgBtn" :class="{ unload: mscUnload }" v-tooltip="(!mscUnload)?'向前10秒':''" @click="btnFastBackward">
           <svg>
             <path d="m7.5,17.5 a 10 10 0 1 0 10,-10"/>
-            <path class="forwardPath" d="m17.5,4.5 l0,6 l-5,-3 z"/>
+            <path class="navigation" d="m17.5,4.5 l0,6 l-5,-3 z"/>
             <text x="50%" y="60%">10</text>
           </svg>
         </button>
-        <button class="playButton" v-tooltip="(!mscUnload)?(mscState==='play'?'暂停':'播放'):''" @click="btnChangeState">
+        <button class="svgBtn playBtn" :class="{ unload: mscUnload }" v-tooltip="(!mscUnload)?(mscState==='play'?'暂停':'播放'):''" @click="btnChangeState">
           <svg>
             <path v-show="mscState==='play'" d="m19,12 l0,22 m8,0 l0,-22"/>
             <path v-show="mscState!=='play'" d="m17,13.5 l0,20 l15,-10 z"/>
           </svg>
         </button>
-        <button v-tooltip="(!mscUnload)?'向后10秒':''" @click="btnFastForward">
+        <button class="svgBtn" :class="{ unload: mscUnload }" v-tooltip="(!mscUnload)?'向后10秒':''" @click="btnFastForward">
           <svg>
             <path d="m27.5,17.5 a 10 10 0 1 1 -10,-10"/>
-            <path class="forwardPath" d="m17.5,4.5 l0,6 l5,-3 z"/>
+            <path class="navigation" d="m17.5,4.5 l0,6 l5,-3 z"/>
             <text x="50%" y="60%">10</text>
           </svg>
         </button>
-        <button v-tooltip="(!mscUnload)?'下一首':''" @click="btnNextMusic">
+        <button class="svgBtn" :class="{ unload: mscUnload }" v-tooltip="(!mscUnload)?'下一首':''" @click="btnNextMusic">
           <svg>
             <path d="m10,10 l0,15 l10,-7.5 z"/>
             <path d="m25,9 l0,17"/>
@@ -46,8 +44,8 @@
         </button>
       </div>
       <div class="toolBar">
-        <KLoopBtn v-model="loopMode" />
-        <button v-tooltip="'开启静音'">
+        <KLoopBtn class="svgBtn" v-model="loopMode" />
+        <button class="svgBtn" v-tooltip="'开启静音'">
           <svg>
             <path d="m7,14.5 l0,6 l3,0 l4,4 l0,-14 l-4,4 l-3,0 z"/>
             <path d="m18,14 a 5 5 0 0 1 0,7" :visibility="mscVol==0?'hidden':'visible'"/>
@@ -58,8 +56,8 @@
             <path d="m18,21 l7,-7" :visibility="mscVol==0?'visible':'hidden'"/>
           </svg>
         </button>
-        <KSlider :cur="mscVol" :tooltip="true" :format="v => Math.floor(v).toString()" @update="sliderUpdateVol" />
-        <button v-tooltip="'正在播放'" @click.stop="btnChangeDrawer">
+        <KSlider :cur="mscVol" :format="v => Math.floor(v).toString()" @update="sliderUpdateVol" />
+        <button class="svgBtn" v-tooltip="'正在播放'" @click.stop="btnChangeDrawer">
           <svg>
             <path d="m8.5,10 l0,4 l3,-2 z" stroke-width="1px" fill="white"/>
             <path d="m14,12 l13,0" stroke-width="1px"/>
@@ -67,7 +65,7 @@
             <path d="m8,23 l19,0" stroke-width="1px"/>
           </svg>
         </button>
-        <button v-tooltip="'更多'" v-menu="mscMenu">
+        <button class="svgBtn" v-tooltip="'更多'" v-menu="mscMenu">
           <svg>
             <circle cx="32%" cy="50%" r="0.5"/>
             <circle cx="50%" cy="50%" r="0.5"/>
@@ -107,11 +105,11 @@ function sliderUpdateVol(vol: number) { bus.emChangeMscVol(vol) }
 function btnChangeDetail() { bus.emChangeDetailState() }
 function btnChangeDrawer() { bus.emChangeDrawerState() }
 // 音乐控制
-function btnChangeState() { bus.emChangeMscState() }
-function btnFastForward() { bus.emUpdateMsc(10, true) }
-function btnFastBackward() { bus.emUpdateMsc(-10, true) }
-function btnLastMusic() { bus.emLoopMsc(false, mscState.value) }
-function btnNextMusic() { bus.emLoopMsc(true, mscState.value) }
+function btnChangeState() { if (!mscUnload.value) bus.emChangeMscState() }
+function btnFastForward() { if (!mscUnload.value) bus.emUpdateMsc(10, true) }
+function btnFastBackward() { if (!mscUnload.value) bus.emUpdateMsc(-10, true) }
+function btnLastMusic() { if (!mscUnload.value) bus.emLoopMsc(false, mscState.value) }
+function btnNextMusic() { if (!mscUnload.value) bus.emLoopMsc(true, mscState.value) }
 // 文件操作
 function btnUnloadFile() { bus.emUnloadMsc() }
 async function btnOpenDir() { /** TODO */ }
@@ -123,7 +121,9 @@ async function btnOpenFile() {
 </script>
 
 <style scoped lang="scss">
-@mixin svgButton($size: 35px) {
+$sli-hei: 32px;
+$btn-hei: 90px;
+@mixin k-svg-btn($size: 35px) {
   height: $size;
   width: $size;
   border: none;
@@ -131,6 +131,9 @@ async function btnOpenFile() {
   background-color: transparent;
   &:hover { background-color: #00000030; }
   &:active { background-color: #00000050; }
+  &.unload:hover { background-color: transparent; }
+  &.unload:active { background-color: transparent; }
+  &.unload>svg { stroke: #ffffff40; }
   >svg {
     height: 100%;
     width: 100%;
@@ -138,7 +141,7 @@ async function btnOpenFile() {
     stroke-width: 1.5px;
     stroke-linejoin: bevel;
     fill: transparent;
-    text {
+    >text {
       text-anchor: middle;
       font-size: 10px;
       font-weight: 100;
@@ -150,64 +153,57 @@ async function btnOpenFile() {
 }
 
 .KMusicBar {
-  background-color: v-bind('mscColor');
-  .sliderRow {
-    height: 32px;
+  >.sliderRow {
+    height: $sli-hei;
     margin: 0 12px;
     display: flex;
     align-items: center;
+    gap: 0 22px;
     // 进度条两侧时间显示
-    >span {
+    >.time {
       color: white;
       font-size: 12px;
-      visibility: v-bind('mscUnload?"hidden":"visible"');
-      &:first-child { margin-right: 22px; }
-      &:last-child { margin-left: 22px; }
+      &.hide { visibility: hidden; }
     }
   }
-  .buttonRow {
-    height: 90px;
+  >.buttonRow {
+    height: $btn-hei;
     display: flex;
-    justify-items: center;
     align-items: center;
-    .detailBar {
+    >.detailBar {
       flex: 1;
       max-width: 31.25%;
     }
-    .controlBar {
-      flex: 1.2;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      >button {
-        @include svgButton(35px);
-        margin: 0 8px;
-        &:hover { background-color: v-bind('mscUnload?"transparent":"#00000030"'); }
-        &:active { background-color: v-bind('mscUnload?"transparent":"#00000050"'); }
-        >svg {
-          stroke: v-bind('mscUnload?"#ffffff40":"white"');
-          .forwardPath { fill: v-bind('mscUnload?"#ffffff40":"white"'); }
-        }
-      }
-      >.playButton {
-        @include svgButton(50px);
-        border: 2px solid #ffffff40;
-        &:hover { background-color: v-bind('mscUnload?"transparent":"#00000030"'); }
-        &:active {
-          background-color: transparent;
-          border-width: 2px;
-          border-color: v-bind('mscUnload?"#ffffff40":"white"');
-        }
-        >svg { stroke: v-bind('mscUnload?"#ffffff40":"white"'); }
-      }
-    }
-    .toolBar {
+    >.toolBar {
       flex: 1;
       display: flex;
       align-items: center;
       gap: 8px;
-      padding-right: 8px;
-      >button { @include svgButton(35px); }
+      >.svgBtn {
+        &:last-child { margin-right: 8px; }
+        @include k-svg-btn(35px);
+      }
+    }
+    >.controlBar {
+      flex: 1.2;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 0 16px;
+      >.svgBtn {
+        @include k-svg-btn(35px);
+        // 快进快退键的箭头fill值单独设置
+        .navigation { fill: white; }
+        &.unload .navigation { fill: #ffffff40; }
+      }
+      >.playBtn {
+        @include k-svg-btn(50px);
+        border: 2px solid #ffffff40;
+        &:active:not(.unload) {
+          background-color: transparent;
+          border-color: white;
+        }
+      }
     }
   }
 }
