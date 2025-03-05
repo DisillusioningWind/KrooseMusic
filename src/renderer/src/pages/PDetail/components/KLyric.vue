@@ -1,6 +1,6 @@
 <template>
   <div class="KLyric" ref="list" @scroll="scrolling" @scrollend="scrollend">
-    <span v-for="item, idx in lrcs" :key="item.uid" class="lrc" :class="{ active: idx === curIdx }">{{ item.lyric }}</span>
+    <span v-for="item, idx in lrcs" class="lrc" :class="{ active: idx === curIdx }">{{ item.lyric }}</span>
   </div>
 </template>
 

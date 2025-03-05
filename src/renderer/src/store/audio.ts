@@ -6,6 +6,7 @@ export const useAudioStore = defineStore('store-audio', () => {
   const audio = new Audio()
   const state = ref<AudioState>('unload')// 播放状态
   const autoplay = ref(true)// 是否自动播放
+  const mute = ref(false)// 是否静音
   const volume = ref(100)// 音量
   const duration = ref(0)// 时长
   const curtime = ref(0)// 当前进度
@@ -15,7 +16,7 @@ export const useAudioStore = defineStore('store-audio', () => {
   audio.ontimeupdate = () => { bus.emMscUpdate(audio.currentTime) }// 音乐进度更新
   watch(state, state => { bus.emMscStateChange(state); if (state === 'unload') bus.emMscUnload() })// 状态改变及音乐卸载
   watch(duration, dur => { bus.emMscDurChange(dur) })// 时长改变
-  watch(volume, vol => { audio.volume = vol * 0.01 })// 音量改变
+  watch([volume, mute], ([vol, mute]) => { audio.volume = mute ? 0 : vol * 0.01 })// 音量及静音改变
   // 监听事件
   bus.onMscLoad(loadEnd)// 音乐加载完成时决定是否自动播放
   bus.onMscEnd(stop)// 音乐结束时停止播放
@@ -25,6 +26,7 @@ export const useAudioStore = defineStore('store-audio', () => {
   bus.onUpdateMsc(changeTime)// 外部命令更新音乐进度
   bus.onChangeMscState(changeState)// 外部命令改变播放状态
   bus.onChangeMscVol(vol => { volume.value = vol })// 外部命令改变音量
+  bus.onChangeMscMute(() => { mute.value = !mute.value })// 外部命令改变静音
   // 控制方法
   function load(path: string, auto: boolean = true) {
     state.value = 'loading'
@@ -69,17 +71,18 @@ export const useAudioStore = defineStore('store-audio', () => {
     else audio.currentTime = time
   }
   return {
-    /** 播放状态，禁止直接更改 */ mscState: state,
-    /** 音量，禁止直接更改 */ mscVol: volume,
-    /** 总时长，只读 */ mscDur: duration,
-    /** 当前进度，禁止直接更改 */ mscTime: curtime
+    /** 播放状态，只读 */ mscState: state,
+    /** 当前音量，只读 */ mscVol: volume,
+    /** 是否静音，只读 */ mscMute: mute,
+    /** 音乐时长，只读 */ mscDur: duration,
+    /** 音乐进度，只读 */ mscTime: curtime
   }
 }, {
   persist: {
     enabled: true,
     strategies: [
       // 仅有音量需要持久化
-      { storage: localStorage, paths: ['mscVol'] }
+      { storage: localStorage, paths: ['mscVol', 'mscMute'] }
     ]
   }
 })

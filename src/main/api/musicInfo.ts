@@ -13,8 +13,7 @@ import * as jschardet from 'jschardet'
  */
 export async function loadMusicLyrics(path: string): Promise<ILyric[]> {
   const text = loadFileAsText(path.slice(0, path.lastIndexOf('.')) + '.lrc')
-  if (!text) return [{ time: 0, lyric: '未找到歌词文件', uid: '0' }]
-  else return formatLyrics(text)
+  return text ? formatLyrics(text) : [{ time: 0, lyric: '未找到歌词文件' }]
 }
 /**
  * 获取音乐文件的信息
@@ -41,7 +40,7 @@ function loadFileAsText(path: string) {
   } catch (err: any) {
     if (err.code === 'ENOENT') { console.error('File Not Found:', path) }
     else { console.error(err) }
-    return null
+    return undefined
   }
 }
 /**
@@ -49,26 +48,23 @@ function loadFileAsText(path: string) {
  * @param text 歌词文本
  * @returns 格式化后的歌词列表
  */
-function formatLyrics(text: string) {
-  //按行分割时注意格式为LF或CRLF的情况
+function formatLyrics(text: string): ILyric[] {
+  // 按行分割时注意格式为LF或CRLF的情况
   const lines = text.split(/\r?\n/)
-  const lyrics: ILyric[] = []
-  const reg = /^\[(\d+:\d+\.\d+)\](.*)$/
+  const regex = /^\[(?:(\d{2}):)?(\d{2}):(\d{2}(?:\.\d+)?)\](.*)$/
+  const lrcs: ILyric[] = []
   for (const line of lines) {
-    const matchs = line.match(reg)
+    const matchs = line.match(regex)
     if (matchs) {
-      const time = matchs[1]
-      const lyric = matchs[2]
-      const [min, sec] = time.split(':').map(Number)
-      const timeInSec = min * 60 + sec
-      lyrics.push({
-        time: timeInSec,
-        lyric,
-        uid: Math.random().toString().slice(-6)
-      })
+      const hou = Number(matchs[1] ?? '0')
+      const min = Number(matchs[2])
+      const sec = Number(matchs[3])
+      const time = hou * 3600 + min * 60 + sec
+      const lyric = matchs[4]
+      lrcs.push({ time, lyric })
     }
   }
-  return lyrics
+  return lrcs
 }
 /**
  * 获取图片的主色调

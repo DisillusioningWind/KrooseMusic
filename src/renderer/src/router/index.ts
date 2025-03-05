@@ -2,10 +2,10 @@ import { createRouter, createWebHashHistory } from 'vue-router'
 
 import PMain from '@renderer/pages/PMain/PMain.vue'
 import PLibrary from '@renderer/pages/PLibrary/PLibrary.vue'
-import PLike from '@renderer/pages/PLike/PLike.vue'
-import PList from '@renderer/pages/PList/PList.vue'
-import PSearch from '@renderer/pages/PSearch/PSearch.vue'
-import PSetting from '@renderer/pages/PSetting/PSetting.vue'
+const PLike = () => import('@renderer/pages/PLike/PLike.vue')
+const PList = () => import('@renderer/pages/PList/PList.vue')
+const PSearch = () => import('@renderer/pages/PSearch/PSearch.vue')
+const PSetting = () => import('@renderer/pages/PSetting/PSetting.vue')
 
 const router = createRouter({
   history: createWebHashHistory(),

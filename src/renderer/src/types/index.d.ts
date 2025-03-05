@@ -13,9 +13,8 @@ declare global {
   }
   /** 音乐歌词 */
   interface ILyric {
-    /** 时间戳 */ time: number
+    /** 时间 */ time: number
     /** 歌词 */ lyric: string
-    /** 标识 */ uid: string
   }
   /** 音乐信息 */
   interface IMusicInfo {

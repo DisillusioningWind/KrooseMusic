@@ -45,15 +45,15 @@
       </div>
       <div class="toolBar">
         <KLoopBtn class="svgBtn" v-model="loopMode" />
-        <button class="svgBtn" v-tooltip="'开启静音'">
+        <button class="svgBtn" v-tooltip="'开启静音'" @click.stop="btnChangeMute">
           <svg>
             <path d="m7,14.5 l0,6 l3,0 l4,4 l0,-14 l-4,4 l-3,0 z"/>
-            <path d="m18,14 a 5 5 0 0 1 0,7" :visibility="mscVol==0?'hidden':'visible'"/>
-            <path d="m21,11.5 a 9 9 0 0 1 0,12" :visibility="mscVol<33.3?'hidden':'visible'"/>
-            <path d="m23.5,8.5 a 13 13 0 0 1 0,18" :visibility="mscVol<66.6?'hidden':'visible'"/>
+            <path d="m18,14 a 5 5 0 0 1 0,7"       :visibility="(mscVol == 0 || mscMute)?'hidden':'visible'" />
+            <path d="m21,11.5 a 9 9 0 0 1 0,12"    :visibility="(mscVol < 33.3 || mscMute)?'hidden':'visible'" />
+            <path d="m23.5,8.5 a 13 13 0 0 1 0,18" :visibility="(mscVol < 66.6 || mscMute)?'hidden':'visible'" />
             <!-- 静音 -->
-            <path d="m18,14 l7,7" :visibility="mscVol==0?'visible':'hidden'"/>
-            <path d="m18,21 l7,-7" :visibility="mscVol==0?'visible':'hidden'"/>
+            <path d="m18,14 l7,7"  :visibility="(mscVol == 0 || mscMute)?'visible':'hidden'" />
+            <path d="m18,21 l7,-7" :visibility="(mscVol == 0 || mscMute)?'visible':'hidden'" />
           </svg>
         </button>
         <KSlider :cur="mscVol" :format="v => Math.floor(v).toString()" @update="sliderUpdateVol" />
@@ -89,7 +89,7 @@ import svgCloseFile from '@renderer/assets/icons/close.svg?component'
 // 数据
 const { loopMode } = storeToRefs(useLibStore())
 const { showDetail } = storeToRefs(useUIStore())
-const { mscState, mscVol, mscDur, mscTime } = storeToRefs(useAudioStore())
+const { mscState, mscVol, mscDur, mscTime, mscMute } = storeToRefs(useAudioStore())
 const { mscTitle, mscArtist, mscPicURL, mscColor } = storeToRefs(useInfoStore())
 const mscUnload = computed(() => mscState.value === 'unload')// 音乐未加载状态
 const mscShowTime = ref(0)// 滑动条显示进度，滑动时实际进度不改变，等松开时才改变，但是显示进度实时更新
@@ -105,6 +105,7 @@ function sliderUpdateVol(vol: number) { bus.emChangeMscVol(vol) }
 function btnChangeDetail() { bus.emChangeDetailState() }
 function btnChangeDrawer() { bus.emChangeDrawerState() }
 // 音乐控制
+function btnChangeMute() { bus.emChangeMscMute() }
 function btnChangeState() { if (!mscUnload.value) bus.emChangeMscState() }
 function btnFastForward() { if (!mscUnload.value) bus.emUpdateMsc(10, true) }
 function btnFastBackward() { if (!mscUnload.value) bus.emUpdateMsc(-10, true) }
@@ -154,6 +155,7 @@ $btn-hei: 90px;
 
 .KMusicBar {
   backdrop-filter: blur(30px);
+  z-index: 1;
   >.sliderRow {
     height: $sli-hei;
     margin: 0 12px;

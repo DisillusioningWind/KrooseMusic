@@ -8,6 +8,7 @@ type Events = {
   UnloadMusic: void
   UpdateMusic: { time: number, offset?: boolean }
   ChangeMusicState: void
+  ChangeMusicMute: void
   ChangeMusicVolume: number
   musicLoad: void
   musicUnload: void
@@ -40,6 +41,9 @@ class EventBus {
   /** 使播放器改变状态 */
   onChangeMscState(h: () => void) { this.emitter.on('ChangeMusicState', h) }
   emChangeMscState() { this.emitter.emit('ChangeMusicState') }
+  /** 使播放器改变静音 */
+  onChangeMscMute(h: () => void) { this.emitter.on('ChangeMusicMute', h) }
+  emChangeMscMute() { this.emitter.emit('ChangeMusicMute') }
   /** 使播放器改变音量 @param vol 音量 */
   onChangeMscVol(h: (vol: number) => void) { this.emitter.on('ChangeMusicVolume', h) }
   emChangeMscVol(vol: number) { this.emitter.emit('ChangeMusicVolume', vol) }

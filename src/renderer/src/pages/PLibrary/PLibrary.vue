@@ -18,8 +18,10 @@
 import { useLibStore } from '@renderer/store'
 import bus from '@renderer/utils/emitter'
 const { curLibs, curLib, curItems, curItem, curAlbum, curPath, curList } = storeToRefs(useLibStore())
-const curDirec = ref<IDir>()// 当前专辑目录
-const curSelPath = computed(() => curLib.value?.mode === 'normal' ? curItem.value?.path : curAlbum.value?.path)// 当前选中路径
+/** 当前专辑目录 */
+const curDirec = ref<IDir>()
+/** 当前选中项目路径 */
+const curSelPath = computed(() => curLib.value?.mode === 'normal' ? curItem.value?.path : curAlbum.value?.path)
 // 选择音乐时播放音乐并更新当前播放列表，选择专辑时更新当前专辑目录
 async function onItemSelect(selIdx: number) {
   if (!curLib.value) return
