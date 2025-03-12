@@ -29,9 +29,9 @@ export async function loadMusicInfo(path: string): Promise<{ tag: ICommonTagsRes
 /**
  * 读取文件内容为文本
  * @param path 文件路径
- * @returns 文件内容或null
+ * @returns 文件文本或undefined
  */
-function loadFileAsText(path: string) {
+function loadFileAsText(path: string): string | undefined {
   try {
     const buffer = fs.readFileSync(path)
     const res = jschardet.detect(buffer)
@@ -71,7 +71,7 @@ function formatLyrics(text: string): ILyric[] {
  * @param buffer 图片buffer
  * @returns 图片的主色调
  */
-async function getPictureMainColor(buffer: Uint8Array) {
+async function getPictureMainColor(buffer: Uint8Array): Promise<string> {
   const data = await Sharp(buffer).ensureAlpha().raw().toBuffer()
   const cube: number[][] = []
   const pale: { rank: number, color: Color }[] = []
@@ -88,7 +88,7 @@ async function getPictureMainColor(buffer: Uint8Array) {
  * @param buffer 图片buffer
  * @returns 图片的主色调
  */
-// async function getPictureMainColorByMap(buffer: Uint8Array) {
+// async function getPictureMainColorByMap(buffer: Uint8Array): Promise<string> {
 //   const data = await Sharp(buffer).resize(50, 50).ensureAlpha().raw().toBuffer()
 //   let maxcnt = 0
 //   let maxcol = Color('#1a5d8e').hex()
@@ -113,7 +113,7 @@ async function getPictureMainColor(buffer: Uint8Array) {
  * @param cube 颜色立方体
  * @param res 结果列表
  */
-function medianCut(cube: number[][], res: { rank: number, color: Color }[]) {
+function medianCut(cube: number[][], res: { rank: number, color: Color }[]): void {
   // 限定颜色立方体的最大尺寸
   const quality = 100
   let maxr = cube[0][0], minr = cube[0][0]

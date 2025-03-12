@@ -30,3 +30,7 @@ export function minWindow(window?: BrowserWindow) { window!.minimize() }
 export function maxWindow(window?: BrowserWindow) { window!.isMaximized() ? window!.unmaximize() : window!.maximize() }
 /** 关闭窗口 */
 export function closeWindow(window?: BrowserWindow) { window!.close() }
+/** 重载窗口 */
+export function reloadWindow(window?: BrowserWindow) { window!.reload() }
+/** 打开开发者工具 */
+export function openDevTools(window?: BrowserWindow) { window!.webContents.openDevTools() }
