@@ -109,8 +109,8 @@ function btnChangeMute() { bus.emChangeMscMute() }
 function btnChangeState() { if (!mscUnload.value) bus.emChangeMscState() }
 function btnFastForward() { if (!mscUnload.value) bus.emUpdateMsc(10, true) }
 function btnFastBackward() { if (!mscUnload.value) bus.emUpdateMsc(-10, true) }
-function btnLastMusic() { if (!mscUnload.value) bus.emLoopMsc(false, mscState.value) }
-function btnNextMusic() { if (!mscUnload.value) bus.emLoopMsc(true, mscState.value) }
+function btnLastMusic() { if (!mscUnload.value) bus.emLoopMsc(false) }
+function btnNextMusic() { if (!mscUnload.value) bus.emLoopMsc(true) }
 // 文件操作
 function btnUnloadFile() { bus.emUnloadMsc() }
 async function btnOpenDir() { /** TODO */ }

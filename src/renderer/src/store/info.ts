@@ -13,32 +13,32 @@ export const useInfoStore = defineStore('store-info', () => {
   bus.onLoadMsc(loadMusicInfo)// 加载音乐信息
   bus.onUnloadMsc(unloadMusicInfo)// 卸载音乐信息
   // 事件处理
-  async function loadMusicInfo(path: string) {
-    const lyrcRes = window.api.loadMusicLyrics(path)
-    const infoRes = window.api.loadMusicInfo(path)
-    const { tag, mainColor } = await infoRes as IMusicInfo
-    mscLyrics.value = await lyrcRes as ILyric[]
-    mscPath.value = path
-    mscTitle.value = tag.title || window.path.basename(path, window.path.extname(path))
-    mscArtist.value = tag.artist || '未知艺术家'
-    mscPicURL.value = (tag.picture) ? URL.createObjectURL(new Blob([tag.picture[0].data])) : ''
-    mscColor.value = mainColor
+  function loadMusicInfo(path: string) {
+    window.api.loadMusicLyrics(path).then(lyrics => mscLyrics.value = lyrics)
+    window.api.loadMusicInfo(path).then(({ tag, mainColor }) => {
+      mscPath.value = path
+      mscColor.value = mainColor
+      mscTitle.value = tag.title || window.path.basename(path, window.path.extname(path))
+      mscArtist.value = tag.artist || '未知艺术家'
+      if (mscPicURL.value) URL.revokeObjectURL(mscPicURL.value)
+      mscPicURL.value = tag.picture ? URL.createObjectURL(new Blob([tag.picture[0].data])) : ''
+    })
   }
   function unloadMusicInfo() {
-    mscPath.value = ''
-    mscTitle.value = ''
-    mscArtist.value = ''
     URL.revokeObjectURL(mscPicURL.value)
     mscPicURL.value = ''
-    mscColor.value = '#1a5d8e'
+    mscPath.value = ''
+    mscTitle.value = ''
     mscLyrics.value = []
+    mscArtist.value = ''
+    mscColor.value = '#1a5d8e'
   }
   return {
     /** 音乐路径 */ mscPath,
     /** 音乐标题 */ mscTitle,
+    /** 音乐歌词 */ mscLyrics,
     /** 音乐艺术家 */ mscArtist,
-    /** 音乐封面URL */ mscPicURL,
     /** 音乐主色调 */ mscColor,
-    /** 音乐歌词 */ mscLyrics
+    /** 音乐封面URL */ mscPicURL
   }
 })

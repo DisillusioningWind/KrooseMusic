@@ -3,13 +3,13 @@ import mitt from 'mitt'
 type Events = {
   ChangeDetailState: void
   ChangeDrawerState: void
-  LoopMusic: { next: boolean, state: AudioState }
+  LoopMusic: boolean
   LoadMusic: { path: string, auto?: boolean }
   UnloadMusic: void
   UpdateMusic: { time: number, offset?: boolean }
   ChangeMusicState: void
   ChangeMusicMute: void
-  ChangeMusicVolume: number
+  ChangeMusicVolume: { vol: number, offset?: boolean }
   musicLoad: void
   musicUnload: void
   musicEnd: void
@@ -26,9 +26,9 @@ class EventBus {
   /** 使抽屉状态改变 */
   onChangeDrawerState(h: () => void) { this.emitter.on('ChangeDrawerState', h) }
   emChangeDrawerState() { this.emitter.emit('ChangeDrawerState') }
-  /** 使播放器循环音乐 @param next 是否播放下/上一首 @param state 当前音乐播放状态 */
-  onLoopMsc(h: (next: boolean, state: AudioState) => void) { this.emitter.on('LoopMusic', (e) => h(e.next, e.state)) }
-  emLoopMsc(next: boolean, state: AudioState) { this.emitter.emit('LoopMusic', { next, state }) }
+  /** 使播放器循环音乐 @param next 是否下一首 */
+  onLoopMsc(h: (next: boolean) => void) { this.emitter.on('LoopMusic', h) }
+  emLoopMsc(next: boolean) { this.emitter.emit('LoopMusic', next) }
   /** 使播放器加载音乐 @param path 路径 @param auto 是否自动播放 */
   onLoadMsc(h: (path: string, auto?: boolean) => void) { this.emitter.on('LoadMusic', (e) => h(e.path, e.auto)) }
   emLoadMsc(path: string, auto?: boolean) { this.emitter.emit('LoadMusic', { path, auto }) }
@@ -44,9 +44,9 @@ class EventBus {
   /** 使播放器改变静音 */
   onChangeMscMute(h: () => void) { this.emitter.on('ChangeMusicMute', h) }
   emChangeMscMute() { this.emitter.emit('ChangeMusicMute') }
-  /** 使播放器改变音量 @param vol 音量 */
-  onChangeMscVol(h: (vol: number) => void) { this.emitter.on('ChangeMusicVolume', h) }
-  emChangeMscVol(vol: number) { this.emitter.emit('ChangeMusicVolume', vol) }
+  /** 使播放器改变音量 @param vol 音量 @param offset 是否偏移 */
+  onChangeMscVol(h: (vol: number, offset?: boolean) => void) { this.emitter.on('ChangeMusicVolume', (e) => h(e.vol, e.offset)) }
+  emChangeMscVol(vol: number, offset?: boolean) { this.emitter.emit('ChangeMusicVolume', { vol, offset }) }
   /** 播放器音乐加载完成 */
   onMscLoad(h: () => void) { this.emitter.on('musicLoad', h) }
   emMscLoad() { this.emitter.emit('musicLoad') }

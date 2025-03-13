@@ -23,9 +23,9 @@ export const useLibStore = defineStore('store-lib', () => {
     initCurLibs()
     initCurPath()
   })
-  bus.onMscEnd(loopMusic)
-  bus.onLoopMsc((next, state) => loopMusic(next, false, state))
-  bus.onLoadMsc((path) => curPath.value = path)
+  bus.onMscEnd(loopMusic)// 音乐结束时循环音乐
+  bus.onLoopMsc(next => loopMusic(next, false))// 强制循环音乐
+  bus.onLoadMsc(path => curPath.value = path)
   bus.onUnloadMsc(() => { curPath.value = ''; curItem.value = undefined })
   // 曲库列表变化时更新当前曲库，注意必须使用deep监听否则无法监听到曲库列表的变化
   watch(curLibs, (curLibs) => {
@@ -49,8 +49,8 @@ export const useLibStore = defineStore('store-lib', () => {
   function initCurLibs() { window.api.getLibraries().then(libs => curLibs.value = libs) }
   // 初始化最后播放的音乐并取消自动播放
   function initCurPath() { if (curPath.value) bus.emLoadMsc(curPath.value, false) }
-  /** 处理音乐循环 @param next 是否播放下/上一首 @param end 是否当前音乐自然结束 @param state 当前音乐播放状态 */
-  function loopMusic(next: boolean = true, end: boolean = true, state: AudioState = 'play') {
+  /** 处理音乐循环 @param next 是否播放下/上一首 @param end 是否当前音乐自然结束 */
+  function loopMusic(next: boolean = true, end: boolean = true) {
     let loadIdx = -1// 加载音乐在curList中的索引
     let loadPath = ''// 加载音乐路径
     let loadMode = false// 加载音乐是否自动播放
@@ -73,9 +73,10 @@ export const useLibStore = defineStore('store-lib', () => {
         loadIdx = curIdx === -1 ? 0 : curIdx === 0 ? curList.value.length - 1 : curIdx - 1
       }
       loadPath = curList.value[loadIdx].path
-      // 不自动播放：自然结束时循环模式为列表单次且加载音乐为列表第一首，或非自然结束时音乐播放状态为暂停或停止
-      // 自动播放：自然结束时的其余情况，或非自然结束时音乐播放状态为播放
-      loadMode = end ? (loopMode.value === LoopMode.listOnce ? loadIdx !== 0 : true) : (state === 'play' ? true : false)
+      // 音乐自然结束时：循环模式为列表单次且加载音乐为列表第一首时不自动播放，其余情况自动播放
+      // 音乐非自然结束时：音乐播放状态为播放时自动播放，否则不自动播放
+      // 注意：非自然结束时由于需要音乐播放状态信息，判断逻辑位于音频播放函数内，故此处无影响
+      loadMode = loopMode.value === LoopMode.listOnce ? loadIdx !== 0 : true
     }
     curItem.value = loadIdx === -1 ? undefined : curList.value[loadIdx]
     bus.emLoadMsc(loadPath, loadMode)
