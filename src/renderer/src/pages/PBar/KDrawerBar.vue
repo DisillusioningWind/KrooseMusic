@@ -1,5 +1,5 @@
 <template>
-  <KDrawer class="KListDrawer" v-model="showDrawer">
+  <KDrawer class="KDrawerBar" v-model="showDrawer">
     <KLibList mode="playlist" :items="curList" :path="curPath" />
   </KDrawer>
 </template>
