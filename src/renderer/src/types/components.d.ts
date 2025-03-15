@@ -32,7 +32,6 @@ declare module 'vue' {
     PLibrary: typeof import('./../pages/PLibrary/PLibrary.vue')['default']
     PLike: typeof import('./../pages/PLike/PLike.vue')['default']
     PList: typeof import('./../pages/PList/PList.vue')['default']
-    PMain: typeof import('./../pages/PMain/PMain.vue')['default']
     PSearch: typeof import('./../pages/PSearch/PSearch.vue')['default']
     PSetting: typeof import('./../pages/PSetting/PSetting.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']

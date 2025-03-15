@@ -14,7 +14,6 @@
   grid-row: #{$row};
   grid-column: #{$col};
 }
-
 .PMain {
   height: 100%;
   width: 100%;
@@ -28,5 +27,18 @@
   >.PDetail     { @include k-grid("1 / 3", "1 / 3"); }
   >.KListDrawer { @include k-grid("2 / 3", "3 / 4"); }
   >.KMusicBar   { @include k-grid("3 / 4", "1 / 4"); }
+}
+</style>
+
+<style lang="scss">
+// 设置全局样式
+html, body, #app {
+  height: 100%;
+  font-family: "Microsoft YaHei", "微软雅黑", Arial, sans-serif;
+}
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 </style>
