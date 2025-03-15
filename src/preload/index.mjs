@@ -1,5 +1,5 @@
-import { contextBridge, ipcRenderer, shell } from 'electron/renderer'
-import url from 'url'
+import { contextBridge, ipcRenderer, shell } from 'electron'
+import { pathToFileURL } from 'url'
 
 async function preloadAPI() {
   const api = {}
@@ -10,12 +10,12 @@ async function preloadAPI() {
 
 try {
   if (process.contextIsolated) {
-    contextBridge.exposeInMainWorld('shell', shell)
-    contextBridge.exposeInMainWorld('url', url)
+    contextBridge.exposeInMainWorld('she', shell)
+    contextBridge.exposeInMainWorld('url', { pathToFileURL })
     contextBridge.exposeInMainWorld('api', await preloadAPI())
   } else {
-    window.shell = shell
-    window.url = url
+    window.she = shell
+    window.url = { pathToFileURL }
     window.api = await preloadAPI()
   }
 } catch (error) {

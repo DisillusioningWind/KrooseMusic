@@ -52,7 +52,7 @@ function onScroll(e: Event) {
 function onItemClick(idx: number) { emit('select', idx) }
 function onItemCtx(idx: number) { ctxIdx = idx }
 function onItemCtxPlay() { emit('select', ctxIdx) }
-function onItemCtxOpen() { window.shell.showItemInFolder(prop.items[ctxIdx].path) }
+function onItemCtxOpen() { window.she.showItemInFolder(prop.items[ctxIdx].path) }
 </script>
 
 <style scoped lang="scss">
