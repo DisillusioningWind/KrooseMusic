@@ -19,9 +19,10 @@
 
 <script setup lang="ts">
 import { vTooltip } from '@renderer/directives/Tooltip'
+import { useLibStore } from '@renderer/store'
+import { basename } from '@renderer/utils/tools'
 import Close from '@renderer/assets/icons/close.svg?component'
 import Plus from '@renderer/assets/icons/plus.svg?component'
-import { useLibStore } from '@renderer/store'
 const { curLibs } = storeToRefs(useLibStore())
 const libAddShow = ref(false)
 const libAddNum = ref(0)
@@ -32,7 +33,7 @@ let libAddDirPath = ''
 async function onOpenAddDialog() {
   const path = await window.api.openDirectoryWindow()
   if (!path) return
-  libAddDirName = window.path.basename(path)
+  libAddDirName = basename(path)
   libAddDirPath = path
   libAddNum.value = 0
   libAddShow.value = true

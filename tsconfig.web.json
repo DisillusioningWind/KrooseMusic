@@ -8,10 +8,9 @@
   ],
   "compilerOptions": {
     "composite": true,
+    "isolatedModules": true,
     "baseUrl": ".",
     "types": ["pinia-plugin-persist"],
-    "paths": {
-      "@renderer/*": ["src/renderer/src/*"]
-    },
+    "paths": { "@renderer/*": ["src/renderer/src/*"] },
   }
 }
