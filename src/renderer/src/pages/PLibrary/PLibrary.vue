@@ -52,7 +52,7 @@ function onDirMusics(musics: ILibItem[]) {
 </script>
 
 <style scoped lang="scss">
-@use '@renderer/assets/global';
+@use '@renderer/assets/style';
 $msc-hei: 122px;// 音乐栏高度
 $tool-hei: 45px;// 工具栏高度
 $info-hei: 230px;// 信息栏高度
@@ -91,7 +91,7 @@ $cont-mar-top: 14px;// 内容区上边距
       >.dirList {
         height: calc(100% - $info-hei - $msc-hei);
         padding: 0 0 10px 10px;
-        @include global.k-scroll-bar;
+        @include style.k-scrollbar;
       }
     }
   }

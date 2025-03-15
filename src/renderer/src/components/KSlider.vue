@@ -68,7 +68,7 @@ function endDrag(e: MouseEvent) {
 </script>
 
 <style scoped lang="scss">
-@use '@renderer/assets/global';
+@use '@renderer/assets/style';
 $sli-hei: 21px;
 $trk-hei: 2px;
 $tip-hei: 28px;
@@ -111,7 +111,7 @@ $trk-unuse-col: #ffffff40;
     background-color: transparent;
     // 提示
     &::before {
-      @include global.k-tool-tip;
+      @include style.k-tooltip;
       z-index: 1; // 处于顶层
       left: 50%;
       bottom: 28px;

@@ -28,10 +28,10 @@ watch(show, show => {
 </script>
 
 <style scoped lang="scss">
-@use '@renderer/assets/global';
+@use '@renderer/assets/style';
 $tip-hei: 28px;
 .KTooltip {
-  @include global.k-tool-tip(fixed);
+  @include style.k-tooltip(fixed);
   z-index: 1;
   height: $tip-hei;
   max-width: 100vw;

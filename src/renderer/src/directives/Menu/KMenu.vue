@@ -49,13 +49,13 @@ function onClick(item: IMenuItem) {
 </script>
 
 <style scoped lang="scss">
-@use '@renderer/assets/global';
+@use '@renderer/assets/style';
 $item-height: 30px;
 $item-padding: 11px;
 $icon-size: 17px;
 
 .KMenu {
-  @include global.k-tool-tip(fixed);
+  @include style.k-tooltip(fixed);
   z-index: 1;
   left: v-bind('x + "px"');
   top: v-bind('y + "px"');

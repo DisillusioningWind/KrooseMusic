@@ -56,12 +56,12 @@ function onItemCtxOpen() { window.shell.showItemInFolder(prop.items[ctxIdx].path
 </script>
 
 <style scoped lang="scss">
-@use '@renderer/assets/global';
+@use '@renderer/assets/style';
 
 .KLibList {
   height: 100%;
   width: 100%;
-  @include global.k-scroll-bar;
+  @include style.k-scrollbar;
   >.scroll-wrap {
     >.item {
       user-select: none;
