@@ -12,7 +12,7 @@ export const useAudioStore = defineStore('store-audio', () => {
   const curtime = ref(0)// 当前进度
   // 发射事件
   audio.oncanplay = () => { if (state.value === 'loading') bus.emMscLoad() }// 音乐加载完成后发射音乐加载事件
-  audio.onended = () => { stop(); bus.emMscEnd() }// 停止播放后发射音乐结束事件
+  audio.onended = () => { state.value = 'pause'; bus.emMscEnd() }// 暂停播放后发射音乐结束事件
   audio.ontimeupdate = () => { bus.emMscUpdate(audio.currentTime) }// 音乐进度更新
   watch(state, state => { bus.emMscStateChange(state); if (state === 'unload') bus.emMscUnload() })// 状态改变及音乐卸载
   watch(duration, dur => { bus.emMscDurChange(dur) })// 时长改变
@@ -28,16 +28,17 @@ export const useAudioStore = defineStore('store-audio', () => {
   bus.onChangeMscMute(() => { mute.value = !mute.value })// 外部命令更新静音状态
   // 音乐控制
   function load(path: string, auto: boolean = true) {
-    // 播放状态为播放或暂停时，此次加载为强制切换，是否自动播放取决于播放状态，忽略auto参数
-    // 播放状态为停止时，此次加载为正常加载，是否自动播放取决于auto参数
-    autoplay.value = state.value === 'play' ? true : state.value === 'pause' ? false : auto
+    // 播放状态为播放时，无论此次加载为切歌还是点击，均自动播放，忽略auto参数
+    // 播放状态为暂停/停止/未加载时，是否自动播放取决于auto参数
+    autoplay.value = state.value === 'play' ? true : auto
     state.value = 'loading'
     audio.src = window.url.pathToFileURL(path).href
   }
   function loadEnd() {
     duration.value = audio.duration
     state.value = 'pause'
-    if (autoplay.value) play()
+    if (!autoplay.value) return
+    play()
   }
   function unload() {
     audio.src = ''
@@ -45,7 +46,7 @@ export const useAudioStore = defineStore('store-audio', () => {
     state.value = 'unload'
   }
   function play() {
-    if (state.value !== 'pause' && state.value !== 'stop') return
+    if (state.value !== 'pause') return
     audio.play()
     state.value = 'play'
   }
@@ -54,16 +55,12 @@ export const useAudioStore = defineStore('store-audio', () => {
     audio.pause()
     state.value = 'pause'
   }
-  function stop() {
-    if (state.value !== 'play' && state.value !== 'pause') return
-    audio.pause()
-    audio.currentTime = 0
-    state.value = 'stop'
-  }
   // 转换为播放或暂停状态
   function changeState() {
-    if (state.value === 'play') pause()
-    else if (state.value === 'pause' || state.value === 'stop') play()
+    switch (state.value) {
+      case 'play': pause(); break
+      case 'pause': play(); break
+    }
   }
   // 更新音乐进度，offset为是否使用偏移值
   function changeTime(time: number, offset: boolean = false) {

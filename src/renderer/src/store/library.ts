@@ -64,9 +64,9 @@ export const useLibStore = defineStore('store-lib', () => {
         loadIdx = randomIdx >= curIdx ? randomIdx + 1 : randomIdx
       } else if (next && end && loopMode.value === LoopMode.singLoop) {
         // 加载当前音乐：播放下一首，且当前音乐自然结束，且循环模式为单曲循环
-        loadIdx = curIdx
-      } else if (next && (end && loopMode.value !== LoopMode.singLoop || !end)) {
-        // 加载下一首：播放下一首，且当前音乐自然结束的情况下循环模式不为单曲循环，或当前音乐非自然结束
+        loadIdx = curIdx === -1 ? 0 : curIdx
+      } else if (next && (!end || loopMode.value !== LoopMode.singLoop)) {
+        // 加载下一首：播放下一首，且循环模式不为单曲循环，或当前音乐非自然结束
         loadIdx = (curIdx === -1 || curIdx === curList.value.length - 1) ? 0 : curIdx + 1
       } else if (!next) {
         // 加载上一首: 播放上一首
@@ -74,9 +74,10 @@ export const useLibStore = defineStore('store-lib', () => {
       }
       loadPath = curList.value[loadIdx].path
       // 音乐自然结束时：循环模式为列表单次且加载音乐为列表第一首时不自动播放，其余情况自动播放
-      // 音乐非自然结束时：音乐播放状态为播放时自动播放，否则不自动播放
-      // 注意：非自然结束时由于需要音乐播放状态信息，判断逻辑位于音频播放函数内，故此处无影响
-      loadMode = loopMode.value === LoopMode.listOnce ? loadIdx !== 0 : true
+      // 音乐非自然结束时：音乐播放状态为播放时自动播放，否则不自动播放，此处全部设置为不自动播放
+      // 注意：非自然结束且播放状态为播放时，音乐加载函数会忽略传入的自动播放参数，其余情况不自动播放
+      // 注意：此处的非自然状态不包括直接点击音乐进行播放的情况，因为此时不会触发音乐循环函数
+      loadMode = end ? (loopMode.value === LoopMode.listOnce ? loadIdx !== 0 : true) : false
     }
     curItem.value = loadIdx === -1 ? undefined : curList.value[loadIdx]
     bus.emLoadMsc(loadPath, loadMode)
