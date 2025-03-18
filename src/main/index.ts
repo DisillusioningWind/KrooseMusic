@@ -14,9 +14,9 @@ class MainWindow extends BrowserWindow {
       autoHideMenuBar: true,
       webPreferences: {
         preload: join(__dirname, preloadFilePath),
+        sandbox: false,
         contextIsolation: false,
         nodeIntegration: true,
-        sandbox: false,
         webSecurity: false,
         allowRunningInsecureContent: false
       }
@@ -29,9 +29,7 @@ class MainWindow extends BrowserWindow {
       this.loadFile(join(__dirname, rendererFilePath))
     }
     // 事件监听
-    this.on('ready-to-show', () => {
-      super.show()
-    })
+    this.on('ready-to-show', () => { super.show() })
   }
 }
 // 设置用户数据目录
@@ -48,6 +46,8 @@ if (process.env.NODE_ENV === 'development') {
 }
 // 关闭原生菜单
 Menu.setApplicationMenu(null)
+// 关闭非必要日志输出
+app.commandLine.appendSwitch('log-level', '3')
 // 当App准备好时创建窗口并注册API
 app.whenReady().then(async () => {
   const mainWindow = new MainWindow()
