@@ -1,10 +1,10 @@
 // Description: 音乐文件信息获取相关的API
 import { ICommonTagsResult, parseFile } from 'music-metadata'
-import fs from 'fs'
+import { detect } from 'jschardet'
+import { decode } from 'iconv-lite'
+import { readFile } from 'fs/promises'
 import Color from 'color'
 import Sharp from 'sharp'
-import * as iconv from 'iconv-lite'
-import * as jschardet from 'jschardet'
 
 /**
  * 读取音乐相关的歌词文件
@@ -12,8 +12,15 @@ import * as jschardet from 'jschardet'
  * @returns 歌词列表
  */
 export async function loadMusicLyrics(path: string): Promise<ILyric[]> {
-  const text = loadFileAsText(path.slice(0, path.lastIndexOf('.')) + '.lrc')
-  return text ? formatLyrics(text) : [{ time: 0, lyric: '未找到歌词文件' }]
+  const prefix = path.slice(0, path.lastIndexOf('.'))
+  let detext = await loadFile(`${prefix}.lrc`), ext: 'lrc' | 'vtt' = 'lrc'
+  if (!detext) { detext = await loadFile(`${path}.vtt`); ext = 'vtt' }
+  if (detext) {
+    return formatLyrics(detext, ext)
+  } else {
+    console.error('File Not Found:', `${prefix}.lrc`)
+    return [{ time: 0, lyric: '未找到歌词文件' }]
+  }
 }
 /**
  * 获取音乐文件的信息
@@ -29,42 +36,43 @@ export async function loadMusicInfo(path: string): Promise<{ tag: ICommonTagsRes
 /**
  * 读取文件内容为文本
  * @param path 文件路径
- * @returns 文件文本或undefined
+ * @returns 文件内容
  */
-function loadFileAsText(path: string): string | undefined {
+async function loadFile(path: string): Promise<string | undefined> {
   try {
-    const buffer = fs.readFileSync(path)
-    const res = jschardet.detect(buffer)
-    const text = iconv.decode(buffer, res.encoding)
-    return text
+    const buffer = await readFile(path)
+    const encode = detect(buffer).encoding
+    const detext = decode(buffer, encode)
+    return detext
   } catch (err: any) {
-    if (err.code === 'ENOENT') { console.error('File Not Found:', path) }
-    else { console.error(err) }
+    if (err.code !== 'ENOENT') { console.error(err) }
     return undefined
   }
 }
 /**
  * 格式化歌词文本
  * @param text 歌词文本
+ * @param ext 歌词格式，默认为lrc
  * @returns 格式化后的歌词列表
  */
-function formatLyrics(text: string): ILyric[] {
+function formatLyrics(text: string, ext: 'lrc' | 'vtt'): ILyric[] {
   // 按行分割时注意格式为LF或CRLF的情况
   const lines = text.split(/\r?\n/)
-  const regex = /^\[(?:(\d{2}):)?(\d{2}):(\d{2}(?:\.\d+)?)\](.*)$/
-  const lrcs: ILyric[] = []
-  for (const line of lines) {
-    const matchs = line.match(regex)
-    if (matchs) {
-      const hou = Number(matchs[1] ?? '0')
-      const min = Number(matchs[2])
-      const sec = Number(matchs[3])
-      const time = hou * 3600 + min * 60 + sec
-      const lyric = matchs[4]
-      lrcs.push({ time, lyric })
-    }
+  const lyrcs: ILyric[] = []
+  const lrcRegex = /^\[(?:(\d{2}):)?(\d{2}):(\d{2}(?:\.\d+)?)\](.*)$/
+  const vttRegex = /^(?:(\d{2}):)?(\d{2}):(\d{2}\.\d{3}) --> /
+  const regex = ext === 'lrc' ? lrcRegex : vttRegex
+  for (let i = 0; i < lines.length; i++) {
+    const matchs = lines[i].match(regex)
+    if (!matchs) { continue }
+    const hou = Number(matchs[1] ?? '0')
+    const min = Number(matchs[2])
+    const sec = Number(matchs[3])
+    const time = hou * 3600 + min * 60 + sec
+    const lyric = ext === 'lrc' ? matchs[4] : lines[++i]
+    lyrcs.push({ time, lyric })
   }
-  return lrcs
+  return lyrcs
 }
 /**
  * 使用中位切分算法获取图片的主色调
