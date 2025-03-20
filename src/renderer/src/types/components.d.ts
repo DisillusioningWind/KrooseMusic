@@ -11,7 +11,6 @@ declare module 'vue' {
     KDialog: typeof import('./../components/KDialog.vue')['default']
     KDirInfo: typeof import('./../pages/PLibrary/components/KDirInfo.vue')['default']
     KDirList: typeof import('./../pages/PLibrary/components/KDirList.vue')['default']
-    KDrawer: typeof import('./../components/KDrawer.vue')['default']
     KDrawerBar: typeof import('./../pages/PBar/KDrawerBar.vue')['default']
     KDropdown: typeof import('./../components/KDropdown.vue')['default']
     KImage: typeof import('./../components/KImage.vue')['default']
