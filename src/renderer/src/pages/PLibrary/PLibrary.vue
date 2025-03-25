@@ -52,20 +52,19 @@ function onDirMusics(musics: ILibItem[]) {
 </script>
 
 <style scoped lang="scss">
-@use '@renderer/assets/style';
-$msc-hei: 122px;// 音乐栏高度
+@use '@renderer/assets/var' as *;
+@use '@renderer/assets/style' as *;
 $tool-hei: 45px;// 工具栏高度
 $info-hei: 230px;// 信息栏高度
-$cont-mar-top: 14px;// 内容区上边距
+$cont-top: 14px;// 内容区上边距
 .PLibrary {
-  height: calc(100% + $msc-hei);
+  height: calc(100% + $music-hei);
   padding: 0 10px;
   user-select: none;
   >.tools {
     height: $tool-hei;
     display: flex;
     align-items: center;
-    // 当前目录
     >.libText {
       line-height: $tool-hei;
       font-size: 34px;
@@ -73,15 +72,14 @@ $cont-mar-top: 14px;// 内容区上边距
       margin-right: 15px;
       white-space: nowrap;
     }
-    // 当前目录选择
     >.libSelect {
       height: 40px;
       max-width: 200px;
     }
   }
   >.contents {
-    height: calc(100% - $tool-hei - $cont-mar-top);
-    margin-top: $cont-mar-top;
+    height: calc(100% - $tool-hei - $cont-top);
+    margin-top: $cont-top;
     border-top: 1px solid #e5e5e5;
     display: flex;
     >.mainList { flex: 1; }
@@ -89,9 +87,9 @@ $cont-mar-top: 14px;// 内容区上边距
       flex: 1.5;
       background-color: #f6f6f6;
       >.dirList {
-        height: calc(100% - $info-hei - $msc-hei);
+        height: calc(100% - $info-hei - $music-hei);
         padding: 0 0 10px 10px;
-        @include style.k-scrollbar;
+        @include k-scrollbar;
       }
     }
   }

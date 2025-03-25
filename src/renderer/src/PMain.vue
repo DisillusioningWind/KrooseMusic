@@ -10,21 +10,22 @@
 </template>
 
 <style scoped lang="scss">
-@use '@renderer/assets/style';
+@use '@renderer/assets/var' as *;
+@use '@renderer/assets/style' as *;
 
 .PMain {
   height: 100%;
   width: 100%;
   overflow: hidden;
   display: grid;
-  grid-template-rows: 30px calc(100% - 152px) 122px;
+  grid-template-rows: $title-hei calc(100% - $title-hei - $music-hei) $music-hei;
   grid-template-columns: min-content 1fr 0;
-  >.KTitleBar   { @include style.k-grid-item("1 / 2", "1 / 4"); }
-  >.KNavBar     { @include style.k-grid-item("2 / 3", "1 / 2"); }
-  >.KMainView   { @include style.k-grid-item("2 / 3", "2 / 3"); }
-  >.PDetail     { @include style.k-grid-item("1 / 3", "1 / 3"); }
-  >.KDrawerBar  { @include style.k-grid-item("2 / 3", "3 / 4"); }
-  >.KMusicBar   { @include style.k-grid-item("3 / 4", "1 / 4"); }
+  >.KTitleBar  { @include k-grid-item("1 / 2", "1 / 4"); }
+  >.KNavBar    { @include k-grid-item("2 / 3", "1 / 2"); }
+  >.KMainView  { @include k-grid-item("2 / 3", "2 / 3"); }
+  >.PDetail    { @include k-grid-item("1 / 3", "1 / 3"); }
+  >.KDrawerBar { @include k-grid-item("2 / 3", "3 / 4"); }
+  >.KMusicBar  { @include k-grid-item("3 / 4", "1 / 4"); }
 }
 </style>
 
