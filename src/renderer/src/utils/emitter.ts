@@ -3,6 +3,7 @@ import mitt from 'mitt'
 type Events = {
   ChangeDetailState: void
   ChangeDrawerState: void
+  ChangeTooltipState: { show: boolean, text?: string, x?: number, y?: number }
   LoopMusic: boolean
   LoadMusic: { path: string, auto?: boolean }
   UnloadMusic: void
@@ -26,6 +27,9 @@ class EventBus {
   /** 使抽屉状态改变 */
   onChangeDrawerState(h: () => void) { this.emitter.on('ChangeDrawerState', h) }
   emChangeDrawerState() { this.emitter.emit('ChangeDrawerState') }
+  /** 使悬停提示状态改变 @param show 是否显示 @param text 文本 @param x x坐标 @param y y坐标 */
+  onChangeTooltipState(h: (show: boolean, text?: string, x?: number, y?: number) => void) { this.emitter.on('ChangeTooltipState', e => h(e.show, e.text, e.x, e.y)) }
+  emChangeTooltipState(show: boolean, text?: string, x?: number, y?: number) { this.emitter.emit('ChangeTooltipState', { show, text, x, y }) }
   /** 使播放器循环音乐 @param next 是否下一首 */
   onLoopMsc(h: (next: boolean) => void) { this.emitter.on('LoopMusic', h) }
   emLoopMsc(next: boolean) { this.emitter.emit('LoopMusic', next) }
