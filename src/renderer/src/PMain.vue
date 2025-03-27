@@ -6,7 +6,9 @@
     <PDetail />
     <KDrawerBar />
     <KMusicBar />
+    <!-- 弹出式组件 -->
     <KTooltip />
+    <KMenu />
   </div>
 </template>
 
