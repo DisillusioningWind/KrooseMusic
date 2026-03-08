@@ -1,37 +1,10 @@
-import { app, session, BrowserWindow, Menu } from 'electron/main'
+import { app, session, Menu } from 'electron/main'
 import { join } from 'path'
+import { KMusicWindow } from './modules/KMusicWindow.js'
+import { initModules } from './modules/index.js'
+import { ModuleManager } from './modules/KModuleManager.js'
+import { KWindowControl } from './modules/KWindowControl.js'
 
-class MainWindow extends BrowserWindow {
-  constructor() {
-    const preloadFilePath = '../preload/index.mjs'
-    const rendererFilePath = '../renderer/index.html'
-    // 窗口配置
-    super({
-      width: 900,
-      height: 670,
-      frame: false,
-      show: false,
-      autoHideMenuBar: true,
-      webPreferences: {
-        preload: join(__dirname, preloadFilePath),
-        sandbox: false,
-        contextIsolation: false,
-        nodeIntegration: true,
-        webSecurity: false,
-        allowRunningInsecureContent: false
-      }
-    })
-    // 加载页面
-    if (process.env.NODE_ENV === 'development') {
-      process.env.ELECTRON_DISABLE_SECURITY_WARNINGS = 'true'
-      this.loadURL('http://localhost:5173')
-    } else {
-      this.loadFile(join(__dirname, rendererFilePath))
-    }
-    // 事件监听
-    this.on('ready-to-show', () => { super.show() })
-  }
-}
 // 设置用户数据目录
 if (process.env.NODE_ENV === 'development') {
   const appPath = app.getAppPath()
@@ -48,18 +21,19 @@ if (process.env.NODE_ENV === 'development') {
 Menu.setApplicationMenu(null)
 // 关闭非必要日志输出
 app.commandLine.appendSwitch('log-level', '3')
-// 当App准备好时创建窗口并注册API
-app.whenReady().then(async () => {
-  const mainWindow = new MainWindow()
-  const API = await import('./api/index.js')
-  API.registerAPI(mainWindow)
-  // 打包时注意删除
+// 初始化模块
+initModules()
+
+app.whenReady().then(() => {
+  const mainWindow = new KMusicWindow()
+  ModuleManager.get<KWindowControl>(KWindowControl.name).setMainWindow(mainWindow)
+
   if (process.env.NODE_ENV === 'development') {
     // Vue Devtools
-    session.defaultSession.loadExtension('C:/Users/WHR/AppData/Local/Microsoft/Edge/User Data/Default/Extensions/olofadcdnkkjdfgjcmjaadnlehnnihnl/6.6.3_0')
+    // session.defaultSession.loadExtension('C:/Users/WHR/AppData/Local/Microsoft/Edge/User Data/Default/Extensions/olofadcdnkkjdfgjcmjaadnlehnnihnl/6.6.3_0')
   }
 })
-// 关闭所有窗口时退出App
+
 app.on('window-all-closed', () => {
   app.quit()
 })

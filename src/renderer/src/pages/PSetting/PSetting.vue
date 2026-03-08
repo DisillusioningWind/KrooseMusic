@@ -31,7 +31,7 @@ let libAddDirName = ''
 let libAddDirPath = ''
 // 打开添加音乐目录对话框
 async function onOpenAddDialog() {
-  const path = await window.api.openDirectoryWindow()
+  const path = await window.api.win.openDirectoryWindow()
   if (!path) return
   libAddDirName = basename(path)
   libAddDirPath = path
@@ -40,18 +40,18 @@ async function onOpenAddDialog() {
 }
 // 确认添加音乐目录和音乐数据到数据库，同时更新curLibs
 async function onConfirmDir(mode: LibMode) {
-  const id = await window.api.addLibrary(libAddDirName, libAddDirPath, mode)
-  libAddTotal.value = await window.api.getDirLength(mode, libAddDirPath)
-  curLibs.value.push({ id, name: libAddDirName, path: libAddDirPath, mode })
+  const libID = await window.api.db.addLibrary(libAddDirName, libAddDirPath, mode)
+  libAddTotal.value = await window.api.scan.getDirLength(mode, libAddDirPath)
   console.log('音乐目录添加成功')
   for (libAddNum.value = 0; libAddNum.value < libAddTotal.value; libAddNum.value++) {
-    await window.api.addItem(libAddDirName, mode, libAddNum.value)
+    await window.api.db.addLibItem(libID, mode, libAddNum.value)
   }
+  curLibs.value.push({ id: libID, name: libAddDirName, path: libAddDirPath, mode })
   console.log('音乐目录数据添加成功')
 }
 // 删除音乐目录和音乐数据，同时更新curLibs
 async function onDeleteDir(idx: number, name: string) {
-  await window.api.deleteLibrary(name)
+  await window.api.db.delLibrary(idx)
   curLibs.value.splice(idx, 1)
   console.log('音乐目录删除成功')
 }

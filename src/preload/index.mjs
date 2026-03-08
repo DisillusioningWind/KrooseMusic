@@ -1,10 +1,15 @@
 import { contextBridge, ipcRenderer, shell } from 'electron'
 import { pathToFileURL } from 'url'
 
-async function preloadAPI() {
+async function getNewAPI() {
   const api = {}
-  const names = await ipcRenderer.invoke('getAPINames')
-  for (const name of names) { api[name] = (...args) => { return ipcRenderer.invoke(name, ...args) } }
+  const def = await ipcRenderer.invoke('getNewAPI')
+  for (const [namespace, channels] of Object.entries(def)) {
+    api[namespace] = {}
+    for (const channel of channels) {
+      api[namespace][channel] = (...args) => ipcRenderer.invoke(`${namespace}:${channel}`, ...args)
+    }
+  }
   return api
 }
 
@@ -12,11 +17,11 @@ try {
   if (process.contextIsolated) {
     contextBridge.exposeInMainWorld('she', shell)
     contextBridge.exposeInMainWorld('url', { pathToFileURL })
-    contextBridge.exposeInMainWorld('api', await preloadAPI())
+    contextBridge.exposeInMainWorld('api', await getNewAPI())
   } else {
     window.she = shell
     window.url = { pathToFileURL }
-    window.api = await preloadAPI()
+    window.api = await getNewAPI()
   }
 } catch (error) {
   console.error('preload:', error)

@@ -22,9 +22,9 @@ class KHotKey {
     hotkeys(this.keyVolDown, this.mscVolDown)
   }
   // 窗口打开开发者工具
-  winOpenDevTool() { window.api.openDevTools() }
+  winOpenDevTool() { window.api.win.openDevTools() }
   // 窗口刷新页面
-  winReload() { window.api.reloadWindow() }
+  winReload() { window.api.win.reloadWindow() }
   // 音乐播放/暂停
   mscChangeState() { bus.emChangeMscState() }
   // 音乐快进

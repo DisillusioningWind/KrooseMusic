@@ -43,10 +43,10 @@ export const useLibStore = defineStore('store-lib', () => {
     // 当前曲库无变化时不更新当前曲库项目
     else if (curLib.name === lastLib?.name) { return }
     // 当前曲库存在时更新当前曲库项目
-    else { curItems.value = await window.api.getItems(curLib.name) }
+    else { curItems.value = await window.api.db.getLibItems(curLib.id) }
   })
   // 初始化曲库表和当前曲库
-  function initCurLibs() { window.api.getLibraries().then(libs => curLibs.value = libs) }
+  function initCurLibs() { window.api.db.getLibraries().then(libs => curLibs.value = libs) }
   // 初始化最后播放的音乐并取消自动播放
   function initCurPath() { if (curPath.value) bus.emLoadMsc(curPath.value, false) }
   /** 处理音乐循环 @param next 是否播放下/上一首 @param end 是否当前音乐自然结束 */

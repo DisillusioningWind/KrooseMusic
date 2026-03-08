@@ -35,7 +35,7 @@ async function onItemSelect(selIdx: number) {
   } else if (curLib.value.mode === 'asmr') {
     if (curAlbum.value?.path === selItem.path) return
     curAlbum.value = selItem as ILibAlbum
-    curDirec.value = await window.api.getDirStruc(selItem.path)
+    curDirec.value = await window.api.scan.getDirStruc(selItem.path)
   }
 }
 function onDirMusic(music: ILibItem) {

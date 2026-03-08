@@ -15,8 +15,8 @@ export const useInfoStore = defineStore('store-info', () => {
   bus.onUnloadMsc(unloadMusicInfo)// 卸载音乐信息
   // 事件处理
   function loadMusicInfo(path: string) {
-    window.api.loadMusicLyrics(path).then(lyrics => mscLyrics.value = lyrics)
-    window.api.loadMusicInfo(path).then(({ tag, mainColor }) => {
+    window.api.info.loadMusicLyrics(path).then(lyrics => mscLyrics.value = lyrics)
+    window.api.info.loadMusicInfo(path).then(({ tag, mainColor }) => {
       mscPath.value = path
       mscColor.value = mainColor
       mscTitle.value = tag.title || basename(path)

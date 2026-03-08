@@ -115,7 +115,7 @@ function btnNextMusic() { if (!mscUnload.value) bus.emLoopMsc(true) }
 function btnUnloadFile() { bus.emUnloadMsc() }
 async function btnOpenDir() { /** TODO */ }
 async function btnOpenFile() {
-  const path = await window.api.openFileWindow()
+  const path = await window.api.win.openFileWindow()
   if (!path) return
   bus.emLoadMsc(path)
 }

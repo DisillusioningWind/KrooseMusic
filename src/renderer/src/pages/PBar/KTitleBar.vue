@@ -32,9 +32,9 @@ import { useUIStore } from '@renderer/store'
 import bus from '@renderer/utils/emitter'
 const { showDetail, navExpand } = storeToRefs(useUIStore())
 function btnChangeDetail() { bus.emChangeDetailState() }
-function btnMinWindow() { window.api.minWindow() }
-function btnMaxWindow() { window.api.maxWindow() }
-function btnCloseWindow() { window.api.closeWindow() }
+function btnMinWindow() { window.api.win.minWindow() }
+function btnMaxWindow() { window.api.win.maxWindow() }
+function btnCloseWindow() { window.api.win.closeWindow() }
 </script>
 
 <style scoped lang="scss">
