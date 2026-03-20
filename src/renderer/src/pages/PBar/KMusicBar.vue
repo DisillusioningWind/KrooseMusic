@@ -7,7 +7,7 @@
     </div>
     <div class="buttonRow">
       <div class="detailBar">
-        <KDetailBtn v-show="!mscUnload" :title="mscTitle" :artist="mscArtist" :picURL="mscPicURL" :showPic="!showDetail" @click="btnChangeDetail" />
+        <KDetailBtn v-show="!mscUnload" :title="mscTitle" :artist="mscArtist" :picURL="mscPicURL || curAlbum?.pic" :showPic="!showDetail" @click="btnChangeDetail" />
       </div>
       <div class="controlBar">
         <button class="svgBtn" :class="{ unload: mscUnload }" v-tooltip="(!mscUnload)?'上一首':''" @click="btnLastMusic">
@@ -87,7 +87,7 @@ import svgOpenDir from '@renderer/assets/icons/dir.svg?component'
 import svgOpenFile from '@renderer/assets/icons/plus.svg?component'
 import svgCloseFile from '@renderer/assets/icons/close.svg?component'
 // 数据
-const { loopMode } = storeToRefs(useLibStore())
+const { loopMode, curAlbum } = storeToRefs(useLibStore())
 const { showDetail } = storeToRefs(useUIStore())
 const { mscState, mscVol, mscDur, mscTime, mscMute } = storeToRefs(useAudioStore())
 const { mscTitle, mscArtist, mscPicURL, mscColor } = storeToRefs(useInfoStore())

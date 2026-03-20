@@ -1,17 +1,18 @@
 <template>
   <Transition name="fade">
     <div v-show="showDetail" class="PDetail" :style="background">
-      <KImage class="img" :url="mscPicURL" />
+      <KImage class="img" :url="mscPicURL || curAlbum?.pic" />
       <KLyric class="lrc" :stat="mscState" :time="mscTime" :lrcs="mscLyrics" />
     </div>
   </Transition>
 </template>
 
 <script setup lang="ts">
-import { useUIStore, useAudioStore, useInfoStore } from '@renderer/store'
+import { useUIStore, useAudioStore, useInfoStore, useLibStore } from '@renderer/store'
 const { showDetail } = storeToRefs(useUIStore())
 const { mscState, mscTime } = storeToRefs(useAudioStore())
 const { mscPicURL, mscLyrics } = storeToRefs(useInfoStore())
+const { curAlbum } = storeToRefs(useLibStore())
 const background = computed(() => ({ backgroundImage: mscPicURL.value ? `url(${mscPicURL.value})` : '' }))
 </script>
 
@@ -26,9 +27,8 @@ $show-time: 0.4s;// 显示时间
   height: 100%;
   width: 100%;
   padding-top: $title-hei;
-  background-position: 0 (-$title-hei);// 背景图片从标题栏开始
   background-repeat: no-repeat;
-  background-size: 100% auto;
+  background-size: cover;
   background-color: #ffffff;
   background-image: linear-gradient(150deg, #3b3b3b, #6b6b6b 20%, #ffffff);
   display: grid;
@@ -37,9 +37,7 @@ $show-time: 0.4s;// 显示时间
   &::after {
     content: '';
     position: absolute;
-    top: -$title-hei;
-    height: calc(100% + $title-hei);
-    width: 100%;
+    inset: 0;
     background-color: #0000005f;
     backdrop-filter: blur(40px);
   }

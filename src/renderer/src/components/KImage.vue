@@ -34,6 +34,7 @@ const valid = ref(true)
   >.pic {
     @include k-img-child;
     object-fit: cover;
+    image-rendering: crisp-edges;
   }
   >.alt {
     @include k-img-child(50%, 50%, 30%, 30%);
