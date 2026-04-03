@@ -13,6 +13,6 @@ const mods = [
 ] as const
 
 /** 新架构API */
-export type newAPI = { [M in typeof mods[number] as InstanceType<M>['namespace']]: ReturnType<InstanceType<M>['provideAPI']> }
+export type API = { [M in typeof mods[number] as InstanceType<M>['namespace']]: ReturnType<InstanceType<M>['provideAPI']> }
 /** 模块初始化 */
 export function initModules(): void { ModuleManager.init(mods) }

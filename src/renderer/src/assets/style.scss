@@ -10,10 +10,10 @@
   border-radius: 4px;
 }
 
-@mixin k-scrollbar($over: auto, $color: transparent) {
+@mixin k-scrollbar($over: auto, $color: transparent, $bottom: 0px) {
   overflow-y: $over;
   &::-webkit-scrollbar { width: 8px; }
-  &::-webkit-scrollbar-track { background-color: $color; }
+  &::-webkit-scrollbar-track { background-color: $color; margin-bottom: $bottom; }
   &::-webkit-scrollbar-thumb {
     background-color: #bababa;
     &:hover { background-color: #8c8c8c; }

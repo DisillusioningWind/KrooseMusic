@@ -34,6 +34,7 @@ const valid = ref(true)
   >.pic {
     @include k-img-child;
     object-fit: cover;
+    image-rendering: -webkit-optimize-contrast;
     image-rendering: crisp-edges;
   }
   >.alt {
