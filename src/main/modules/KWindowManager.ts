@@ -1,7 +1,8 @@
 import { dialog, BrowserWindow } from 'electron/main'
 import { KModule } from './KModule.js'
+import { KMusicWindow } from './KMusicWindow.js'
 
-export class KWindowControl extends KModule {
+export class KWindowManager extends KModule {
   readonly namespace = 'win' as const
   private mainWindow?: BrowserWindow
 
@@ -17,8 +18,8 @@ export class KWindowControl extends KModule {
     }
   }
 
-  setMainWindow(window: BrowserWindow) {
-    this.mainWindow = window
+  override onReady(): void {
+    this.mainWindow = new KMusicWindow()
   }
 
   /**

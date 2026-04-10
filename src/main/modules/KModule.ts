@@ -1,20 +1,16 @@
-import { ipcMain } from 'electron/main'
-import { ModuleManager } from './KModuleManager.js'
+import { KModuleManager } from './KModuleManager.js'
 
 /** 通用模块接口 */
 export abstract class KModule {
+  /** 命名空间，用于渲染进程调用时区分模块 */
   abstract readonly namespace: string
   /** 提供API接口 */
   abstract provideAPI(): Record<string, Function>
-  /** 注册API接口 */
-  registerAPI(): void {
-    Object.entries(this.provideAPI()).forEach(([channel, handler]) => {
-      const bindHandler = handler.bind(this)
-      ipcMain.handle(`${this.namespace}:${channel}`, (_, ...args) => bindHandler(...args))
-    })
-  }
   /** 获取依赖模块 */
-  get<T extends KModule>(Mod: new () => T): T {
-    return ModuleManager.get<T>(Mod.name)
-  }
+  getMod<T extends KModule>(Mod: new () => T): T { return KModuleManager.getMod<T>(Mod.name) }
+
+  /** APP启动时 */
+  onReady(): void {}
+  /** APP退出时 */
+  onQuit(): void {}
 }

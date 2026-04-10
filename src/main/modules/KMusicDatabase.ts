@@ -100,7 +100,7 @@ export class KMusicDatabase extends KModule {
   }
 
   private async insertTableCommonLib(libID: number, libMode: LibMode, itemIdx: number) {
-      const item = await this.get(KMusicScanner).getDirItemData(itemIdx)
+      const item = await this.getMod(KMusicScanner).getDirItemData(itemIdx)
       if (!item) { console.error('File data not found') }
       else if (libMode === 'normal') { this.insertTableNormalLib(libID, item as ILibMusic) }
       else if (libMode === 'asmr') { this.insertTableAlbumLib(libID, item as ILibAlbum) }
