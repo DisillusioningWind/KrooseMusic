@@ -3,15 +3,17 @@
 </template>
 
 <script setup lang="ts">
-import bus from '@renderer/utils/emitter'
+import { bus, Events } from '@renderer/utils/EventUtil'
+
 const tooltip = ref<HTMLDivElement>()
 const show = ref(false)// 是否显示
 const text = ref('')   // 提示文本
 const posx = ref(0)    // 提示框中心x轴
 const posy = ref(0)    // 提示框顶部y轴
+
 // 改变提示框状态，只有状态为显示时才更改文本和位置
 // 传入的cx为提示框附着组件的中心x轴，cy为附着组件的顶部y轴，所以需要根据提示框的宽度进行位置转换，同时限制提示框不超过窗口显示范围
-bus.onChangeTooltipState((cs: boolean, ct?: string, cx?: number, cy?: number) => {
+bus.on(Events.tooltipStatChange, (cs: boolean, ct?: string, cx?: number, cy?: number) => {
   show.value = cs
   if (!cs) return
   if (ct) text.value = ct

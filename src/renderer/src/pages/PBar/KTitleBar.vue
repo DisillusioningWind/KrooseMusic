@@ -29,9 +29,11 @@
 
 <script setup lang="ts">
 import { useUIStore } from '@renderer/store'
-import bus from '@renderer/utils/emitter'
-const { showDetail, navExpand } = storeToRefs(useUIStore())
-function btnChangeDetail() { bus.emChangeDetailState() }
+
+const uiStore = useUIStore()
+const { showDetail, navExpand } = storeToRefs(uiStore)
+
+function btnChangeDetail() { uiStore.switchDetailState() }
 function btnMinWindow() { window.api.win.minWindow() }
 function btnMaxWindow() { window.api.win.maxWindow() }
 function btnCloseWindow() { window.api.win.closeWindow() }

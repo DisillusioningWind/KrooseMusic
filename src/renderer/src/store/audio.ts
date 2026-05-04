@@ -1,63 +1,77 @@
 import { defineStore } from 'pinia'
-import bus from '@renderer/utils/emitter'
+import { bus, Events } from '@renderer/utils/EventUtil'
 
 /** 音乐播放控制 */
 export const useAudioStore = defineStore('store-audio', () => {
   const audio = new Audio()
-  const state = ref<AudioState>('unload')// 播放状态
-  const autoplay = ref(true)// 是否自动播放
-  const mute = ref(false)// 是否静音
-  const volume = ref(100)// 音量
-  const duration = ref(0)// 时长
-  const curtime = ref(0)// 当前进度
-  // 发射事件
-  audio.oncanplay = () => { if (state.value === 'loading') bus.emMscLoad() }// 音乐加载完成后发射音乐加载事件
-  audio.onended = () => { state.value = 'pause'; bus.emMscEnd() }// 暂停播放后发射音乐结束事件
-  audio.ontimeupdate = () => { bus.emMscUpdate(audio.currentTime) }// 音乐进度更新
-  watch(state, state => { bus.emMscStateChange(state); if (state === 'unload') bus.emMscUnload() })// 状态改变及音乐卸载
-  watch(duration, dur => { bus.emMscDurChange(dur) })// 时长改变
-  watch([volume, mute], ([vol, mute]) => { audio.volume = mute ? 0 : vol * 0.01 })// 音量及静音改变
-  // 监听事件
-  bus.onMscLoad(loadEnd)// 音乐加载完成时决定是否自动播放
-  bus.onMscUpdate(time => { curtime.value = time })// 音乐进度更新
-  bus.onLoadMsc(load)// 外部命令加载音乐
-  bus.onUnloadMsc(unload)// 外部命令卸载音乐
-  bus.onChangeMscState(changeState)// 外部命令更新播放状态
-  bus.onUpdateMsc(changeTime)// 外部命令更新音乐进度
-  bus.onChangeMscVol(changeVol)// 外部命令更新音乐音量
-  bus.onChangeMscMute(() => { mute.value = !mute.value })// 外部命令更新静音状态
+  const mscPath = ref('')
+  const mscStat = ref<AudioState>('unload') // 播放状态
+  const mscAuto = ref(true) // 是否自动播放
+  const mscMute = ref(false) // 是否静音
+  const mscVolu = ref(100) // 音量
+  const mscDura = ref(0) // 时长
+  const mscTime = ref(0) // 当前进度
+  // 事件监听
+  audio.oncanplay = () => {
+    if (mscStat.value === 'loading') {
+      loadEnd()
+      bus.emit(Events.musicLoaded, mscPath.value)
+    }
+  }
+  audio.onended = () => {
+    mscStat.value = 'pause'
+    bus.emit(Events.musicFinish)
+  }
+  audio.ontimeupdate = () => {
+    mscTime.value = audio.currentTime
+    bus.emit(Events.musicUpdate, audio.currentTime)
+  }
+  watch(mscStat, stat => {
+    bus.emit(Events.musicStatChange, stat)
+    if (stat === 'unload') {
+      bus.emit(Events.musicUnload, mscPath.value)
+    }
+  })
+  watch(mscDura, dura => {
+    bus.emit(Events.musicDuraChange, dura)
+  })
+  watch([mscVolu, mscMute], ([vol, mute]) => {
+    audio.volume = mute ? 0 : vol * 0.01
+  })
   // 音乐控制
   function load(path: string, auto: boolean = true) {
     // 播放状态为播放时，无论此次加载为切歌还是点击，均自动播放，忽略auto参数
     // 播放状态为暂停/停止/未加载时，是否自动播放取决于auto参数
-    autoplay.value = state.value === 'play' ? true : auto
-    state.value = 'loading'
+    mscAuto.value = mscStat.value === 'play' ? true : auto
+    mscStat.value = 'loading'
+    mscPath.value = path
     audio.src = window.url.pathToFileURL(path).href
   }
   function loadEnd() {
-    duration.value = audio.duration
-    state.value = 'pause'
-    if (!autoplay.value) return
+    mscDura.value = audio.duration
+    mscStat.value = 'pause'
+    if (!mscAuto.value) return
     play()
   }
   function unload() {
     audio.src = ''
-    duration.value = 0
-    state.value = 'unload'
+    mscDura.value = 0
+    mscStat.value = 'unload'
+    mscPath.value = ''
   }
   function play() {
-    if (state.value !== 'pause') return
+    if (mscStat.value !== 'pause') return
     audio.play()
-    state.value = 'play'
+    mscStat.value = 'play'
   }
   function pause() {
-    if (state.value !== 'play') return
+    if (mscStat.value !== 'play') return
     audio.pause()
-    state.value = 'pause'
+    mscStat.value = 'pause'
   }
   // 转换为播放或暂停状态
-  function changeState() {
-    switch (state.value) {
+  function changeStat() {
+    switch (mscStat.value) {
       case 'play': pause(); break
       case 'pause': play(); break
     }
@@ -67,15 +81,26 @@ export const useAudioStore = defineStore('store-audio', () => {
     audio.currentTime = time + (offset ? audio.currentTime : 0)
   }
   // 更新音乐音量，offset为是否使用偏移值
-  function changeVol(vol: number, offset: boolean = false) {
-    volume.value = Math.min(100, Math.max(0, vol + (offset ? volume.value : 0)))
+  function changeVolu(vol: number, offset: boolean = false) {
+    mscVolu.value = Math.min(100, Math.max(0, vol + (offset ? mscVolu.value : 0)))
+  }
+  function changeMute() {
+    mscMute.value = !mscMute.value
   }
   return {
-    /** 播放状态，只读 */ mscState: state,
-    /** 当前音量，只读 */ mscVol: volume,
-    /** 是否静音，只读 */ mscMute: mute,
-    /** 音乐时长，只读 */ mscDur: duration,
-    /** 音乐进度，只读 */ mscTime: curtime
+    /** 播放状态 */ mscState: mscStat,
+    /** 当前音量 */ mscVol: mscVolu,
+    /** 是否静音 */ mscMute: mscMute,
+    /** 音乐时长 */ mscDur: mscDura,
+    /** 音乐进度 */ mscTime: mscTime,
+    load,
+    unload,
+    play,
+    pause,
+    changeStat,
+    changeTime,
+    changeVolu,
+    changeMute
   }
 }, {
   persist: {

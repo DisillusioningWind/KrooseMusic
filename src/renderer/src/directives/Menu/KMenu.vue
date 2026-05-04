@@ -8,21 +8,24 @@
 </template>
 
 <script setup lang="ts">
-import bus from '@renderer/utils/emitter'
+import { bus, Events } from '@renderer/utils/EventUtil'
+
 const menu = ref<HTMLDivElement>()
 const show = ref(false)
 const posx = ref(0)
 const posy = ref(0)
 const items = shallowRef<IMenuItem[]>([])
+
 onMounted(() => {
   document.addEventListener('click', onCloseMenu, true)
   document.addEventListener('contextmenu', onCloseMenu, true)
-  bus.onChangeMenuState(onOpenMenu)
+  bus.on(Events.menuStatChange, onOpenMenu)
 })
 onUnmounted(() => {
   document.removeEventListener('click', onCloseMenu, true)
   document.removeEventListener('contextmenu', onCloseMenu, true)
 })
+
 // 根据鼠标坐标计算菜单弹出位置并显示
 function onOpenMenu(ci: IMenuItem[], cx: number, cy: number) {
   items.value = ci

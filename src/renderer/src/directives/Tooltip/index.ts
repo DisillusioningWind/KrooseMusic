@@ -1,6 +1,8 @@
-import type { Directive } from "vue"
-import bus from '@renderer/utils/emitter'
+import type { Directive } from 'vue'
+import { bus, Events } from '@renderer/utils/EventUtil'
+
 let tooltipTimer: NodeJS.Timeout | undefined
+
 function showTooltip(el: HTMLElement, delay: number, overshow: boolean) {
   tooltipTimer = setTimeout(() => {
     const rect = el.getBoundingClientRect()
@@ -10,12 +12,12 @@ function showTooltip(el: HTMLElement, delay: number, overshow: boolean) {
     // 当scrollWidth大于offsetWidth或scrollHeight大于offsetHeight时，元素溢出
     const overflow = el.scrollWidth > el.offsetWidth || el.scrollHeight > el.offsetHeight
     const show = text.length > 0 && (!overshow || overflow)
-    bus.emChangeTooltipState(show, text, posx, posy)
+    bus.emit(Events.tooltipStatChange, show, text, posx, posy)
   }, delay)
 }
 function hideTooltip() {
   clearTimeout(tooltipTimer)
-  bus.emChangeTooltipState(false)
+  bus.emit(Events.tooltipStatChange, false)
 }
 /**
  * 悬停提示

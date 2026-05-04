@@ -16,19 +16,22 @@
 
 <script setup lang="ts">
 import { useLibStore } from '@renderer/store'
-import bus from '@renderer/utils/emitter'
+import { useAudioStore } from '@renderer/store'
+
 const { curLibs, curLib, curItems, curItem, curAlbum, curPath, curList } = storeToRefs(useLibStore())
+const audioStore = useAudioStore()
 /** 当前专辑目录 */
 const curDirec = ref<IDir>()
 /** 当前选中项目路径 */
 const curSelPath = computed(() => curLib.value?.mode === 'normal' ? curItem.value?.path : curAlbum.value?.path)
+
 // 选择音乐时播放音乐并更新当前播放列表，选择专辑时更新当前专辑目录
 async function onItemSelect(selIdx: number) {
   if (!curLib.value) return
   const selItem = curItems.value[selIdx]
   if (curLib.value.mode === 'normal') {
     if (curItem.value?.path === selItem.path) return
-    bus.emLoadMsc(selItem.path)
+    audioStore.load(selItem.path)
     curItem.value = selItem
     curAlbum.value = undefined
     curList.value = curItems.value.slice(selIdx)
@@ -40,12 +43,12 @@ async function onItemSelect(selIdx: number) {
 }
 function onDirMusic(music: ILibItem) {
   if (curPath.value === music.path) return
-  bus.emLoadMsc(music.path)
+  audioStore.load(music.path)
   curItem.value = music
   curList.value = [music]
 }
 function onDirMusics(musics: ILibItem[]) {
-  bus.emLoadMsc(musics[0].path)
+  audioStore.load(musics[0].path)
   curItem.value = musics[0]
   curList.value = musics
 }

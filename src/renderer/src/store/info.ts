@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { basename } from '@renderer/utils/tools'
-import bus from '@renderer/utils/emitter'
+import { bus, Events } from '@renderer/utils/EventUtil'
 
 /** 当前音乐信息 */
 export const useInfoStore = defineStore('store-info', () => {
@@ -11,8 +11,8 @@ export const useInfoStore = defineStore('store-info', () => {
   const mscColor = ref('#1a5d8e')
   const mscLyrics = shallowRef<ILyric[]>([])
   // 监听事件
-  bus.onLoadMsc(loadMusicInfo)// 加载音乐信息
-  bus.onUnloadMsc(unloadMusicInfo)// 卸载音乐信息
+  bus.on(Events.musicLoaded, loadMusicInfo)// 加载音乐信息
+  bus.on(Events.musicUnload, unloadMusicInfo)// 卸载音乐信息
   // 事件处理
   function loadMusicInfo(path: string) {
     window.api.info.loadMusicLyrics(path).then(lyrics => mscLyrics.value = lyrics)
@@ -22,6 +22,7 @@ export const useInfoStore = defineStore('store-info', () => {
       mscTitle.value = tag.title || basename(path)
       mscArtist.value = tag.artist || '未知艺术家'
       if (mscPicURL.value) URL.revokeObjectURL(mscPicURL.value)
+      // @ts-ignore
       mscPicURL.value = tag.picture ? URL.createObjectURL(new Blob([tag.picture[0].data])) : ''
     })
   }

@@ -26,6 +26,8 @@
 
 <script setup lang="ts">
 import { vTooltip } from '@renderer/directives/Tooltip'
+import { LoopMode } from '@renderer/types/Enum'
+
 const mode = defineModel<LoopMode>({ required: true })
 const list = [ '列表播放', '列表循环', '单曲循环', '随机播放' ]
 function onClick() { mode.value = (mode.value + 1) % list.length as LoopMode }

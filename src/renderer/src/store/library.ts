@@ -1,13 +1,8 @@
 import { defineStore } from 'pinia'
-import bus from '@renderer/utils/emitter'
+import { LoopMode } from '@renderer/types/Enum'
+import { bus, Events } from '@renderer/utils/EventUtil'
+import { useAudioStore } from '@renderer/store/audio'
 
-/** 循环模式 */
-export enum LoopMode {
-  /** 列表播放 */ listOnce,
-  /** 列表循环 */ listLoop,
-  /** 单曲循环 */ singLoop,
-  /** 随机播放 */ randLoop
-}
 /** 曲库数据 */
 export const useLibStore = defineStore('store-lib', () => {
   const curLibs = ref<ILibrary[]>([])
@@ -23,10 +18,9 @@ export const useLibStore = defineStore('store-lib', () => {
     initCurLibs()
     initCurPath()
   })
-  bus.onMscEnd(loopMusic)// 音乐结束时循环音乐
-  bus.onLoopMsc(next => loopMusic(next, false))// 强制循环音乐
-  bus.onLoadMsc(path => curPath.value = path)
-  bus.onUnloadMsc(() => { curPath.value = ''; curItem.value = undefined })
+  bus.on(Events.musicFinish, loopMusic)
+  bus.on(Events.musicLoaded, path => curPath.value = path)
+  bus.on(Events.musicUnload, () => { curPath.value = ''; curItem.value = undefined })
   // 曲库列表变化时更新当前曲库，注意必须使用deep监听否则无法监听到曲库列表的变化
   watch(curLibs, (curLibs) => {
     // 无曲库时清空当前曲库
@@ -41,14 +35,21 @@ export const useLibStore = defineStore('store-lib', () => {
     // 无当前曲库时清空当前曲库项目
     if (!curLib) { curItems.value = [] }
     // 当前曲库无变化时不更新当前曲库项目
-    else if (curLib.name === lastLib?.name) { return }
+    else if (curLib.id === lastLib?.id) { return }
     // 当前曲库存在时更新当前曲库项目
     else { curItems.value = await window.api.db.getLibItems(curLib.id) }
   })
   // 初始化曲库表和当前曲库
-  function initCurLibs() { window.api.db.getLibraries().then(libs => curLibs.value = libs) }
+  function initCurLibs() {
+    window.api.db.getLibraries().then(libs => curLibs.value = libs)
+  }
   // 初始化最后播放的音乐并取消自动播放
-  function initCurPath() { if (curPath.value) bus.emLoadMsc(curPath.value, false) }
+  function initCurPath() {
+    const audioStore = useAudioStore()
+    if (curPath.value) {
+      audioStore.load(curPath.value, false)
+    }
+  }
   /** 处理音乐循环 @param next 是否播放下/上一首 @param end 是否当前音乐自然结束 */
   function loopMusic(next: boolean = true, end: boolean = true) {
     let loadIdx = -1// 加载音乐在curList中的索引
@@ -80,7 +81,8 @@ export const useLibStore = defineStore('store-lib', () => {
       loadMode = end ? (loopMode.value === LoopMode.listOnce ? loadIdx !== 0 : true) : false
     }
     curItem.value = loadIdx === -1 ? undefined : curList.value[loadIdx]
-    bus.emLoadMsc(loadPath, loadMode)
+    const audioStore = useAudioStore()
+    audioStore.load(loadPath, loadMode)
   }
   return {
     /** 所有曲库列表，只读 */ curLibs,
@@ -90,7 +92,9 @@ export const useLibStore = defineStore('store-lib', () => {
     /** 当前选中项目 */ curItem,
     /** 当前选中专辑 */ curAlbum,
     /** 当前音乐路径，只读 */ curPath,
-    /** 循环模式 */ loopMode
+    /** 循环模式 */ loopMode,
+    /** 处理音乐循环 @param next 是否播放下/上一首 @param end 是否当前音乐自然结束 */
+    loopMusic
   }
 }, {
   persist: {

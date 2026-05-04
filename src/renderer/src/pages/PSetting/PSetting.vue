@@ -8,7 +8,7 @@
           <span v-tooltip.immediate.overflow="lib.path">{{ lib.path }}</span>
           <span>模式</span>
           <span>{{ lib.mode==='normal'?'普通':'ASMR' }}</span>
-          <button @click="onDeleteDir(idx, lib.name)"><Close /></button>
+          <button @click="onDeleteDir(lib.id, lib.name)"><Close /></button>
         </div>
         <div class="AddDiv" @click="onOpenAddDialog"><Plus /></div>
         <KLibDialog v-model="libAddShow" :path="libAddDirPath" :num="libAddNum" :total="libAddTotal" @confirm="onConfirmDir" />

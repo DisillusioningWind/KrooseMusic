@@ -15,6 +15,7 @@
 import { formatTime } from '@renderer/utils/tools'
 import { vTooltip } from '@renderer/directives/Tooltip'
 import { vCtxMenu } from '@renderer/directives/Menu'
+
 const prop = defineProps<{
   /** 列表项目 */ items: ILibItem[],
   /** 列表模式 */ mode?: ListMode,
@@ -41,6 +42,7 @@ const itemMenu = [
   { label: '在文件资源管理器中显示', action: onItemCtxOpen },
 ]
 let ctxIdx: number = 0 // 右键点击的项目
+
 watch(() => prop.items, async () => {
   itemStaCpt.value = 0
   // 强制浏览器刷新渲染，否则滚动条高度不变

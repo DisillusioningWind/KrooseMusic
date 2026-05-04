@@ -4,7 +4,7 @@ declare global {
   type LibMode = 'normal' | 'asmr'
   type ListMode = LibMode | 'playlist'
   type AudioState = 'unload' | 'loading' | 'play' | 'pause'
-  enum LoopMode { listOnce, listLoop, singLoop, randLoop }
+
   /** 菜单项 */
   interface IMenuItem {
     /** 图标 */ icon?: FunctionalComponent<SVGAttributes, {}, any, {}>

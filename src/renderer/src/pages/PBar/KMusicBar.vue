@@ -78,18 +78,20 @@
 </template>
 
 <script setup lang="ts">
+import svgOpenDir from '@renderer/assets/icons/dir.svg?component'
+import svgOpenFile from '@renderer/assets/icons/plus.svg?component'
+import svgCloseFile from '@renderer/assets/icons/close.svg?component'
 import { useLibStore, useUIStore, useAudioStore, useInfoStore } from '@renderer/store'
 import { vTooltip } from '@renderer/directives/Tooltip'
 import { vMenu } from '@renderer/directives/Menu'
 import { formatTime } from '@renderer/utils/tools'
-import bus from '@renderer/utils/emitter'
-import svgOpenDir from '@renderer/assets/icons/dir.svg?component'
-import svgOpenFile from '@renderer/assets/icons/plus.svg?component'
-import svgCloseFile from '@renderer/assets/icons/close.svg?component'
-// 数据
-const { loopMode, curAlbum } = storeToRefs(useLibStore())
-const { showDetail } = storeToRefs(useUIStore())
-const { mscState, mscVol, mscDur, mscTime, mscMute } = storeToRefs(useAudioStore())
+
+const audStore = useAudioStore()
+const libStore = useLibStore()
+const uiStore = useUIStore()
+const { loopMode, curAlbum } = storeToRefs(libStore)
+const { showDetail } = storeToRefs(uiStore)
+const { mscState, mscVol, mscDur, mscTime, mscMute } = storeToRefs(audStore)
 const { mscTitle, mscArtist, mscPicURL, mscColor } = storeToRefs(useInfoStore())
 const mscUnload = computed(() => mscState.value === 'unload')// 音乐未加载状态
 const mscShowTime = ref(0)// 滑动条显示进度，滑动时实际进度不改变，等松开时才改变，但是显示进度实时更新
@@ -98,26 +100,27 @@ const mscMenu = [
   { label: '打开文件', icon: svgOpenFile, action: btnOpenFile },
   { label: '卸载文件', icon: svgCloseFile, action: btnUnloadFile }
 ]
+
 // 滑动条控制
-function sliderDragTime(time: number) { bus.emUpdateMsc(time) }
-function sliderUpdateVol(vol: number) { bus.emChangeMscVol(vol) }
+function sliderDragTime(time: number) { audStore.changeTime(time) }
+function sliderUpdateVol(vol: number) { audStore.changeVolu(vol) }
 // UI控制
-function btnChangeDetail() { bus.emChangeDetailState() }
-function btnChangeDrawer() { bus.emChangeDrawerState() }
+function btnChangeDetail() { uiStore.switchDetailState() }
+function btnChangeDrawer() { uiStore.switchDrawerState() }
 // 音乐控制
-function btnChangeMute() { bus.emChangeMscMute() }
-function btnChangeState() { if (!mscUnload.value) bus.emChangeMscState() }
-function btnFastForward() { if (!mscUnload.value) bus.emUpdateMsc(10, true) }
-function btnFastBackward() { if (!mscUnload.value) bus.emUpdateMsc(-10, true) }
-function btnLastMusic() { if (!mscUnload.value) bus.emLoopMsc(false) }
-function btnNextMusic() { if (!mscUnload.value) bus.emLoopMsc(true) }
+function btnChangeMute() { audStore.changeMute() }
+function btnChangeState() { if (!mscUnload.value) audStore.changeStat() }
+function btnFastForward() { if (!mscUnload.value) audStore.changeTime(10, true) }
+function btnFastBackward() { if (!mscUnload.value) audStore.changeTime(-10, true) }
+function btnLastMusic() { if (!mscUnload.value) libStore.loopMusic(false, false) }
+function btnNextMusic() { if (!mscUnload.value) libStore.loopMusic(true, false) }
 // 文件操作
-function btnUnloadFile() { bus.emUnloadMsc() }
+function btnUnloadFile() { audStore.unload() }
 async function btnOpenDir() { /** TODO */ }
 async function btnOpenFile() {
   const path = await window.api.win.openFileWindow()
   if (!path) return
-  bus.emLoadMsc(path)
+  audStore.load(path)
 }
 </script>
 

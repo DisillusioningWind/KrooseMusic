@@ -1,15 +1,17 @@
 import { Directive } from 'vue'
-import bus from '@renderer/utils/emitter'
+import { bus, Events } from '@renderer/utils/EventUtil'
+
 // 阻止原生事件并传递鼠标坐标
 function showMenu(ev: MouseEvent, items: IMenuItem[]) {
   ev.preventDefault()
   ev.stopPropagation()
-  bus.emChangeMenuState(items, ev.clientX, ev.clientY)
+  bus.emit(Events.menuStatChange, items, ev.clientX, ev.clientY)
 }
 function prevMenu(ev: MouseEvent) {
   ev.preventDefault()
   ev.stopPropagation()
 }
+
 /** 点击菜单 */
 export const vMenu: Directive<HTMLElement, IMenuItem[]> = { mounted: (el, { value }) => el.addEventListener('click', ev => showMenu(ev, value)) }
 /** 右键菜单 */
