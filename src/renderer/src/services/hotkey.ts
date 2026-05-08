@@ -1,42 +1,55 @@
 import hotkeys from 'hotkeys-js'
-// import bus from '@renderer/utils/emitter'
+import { useAudioStore } from '@renderer/store/audio'
 
 class KHotKey {
-  private keyOpenDevTool = 'f12'
-  private keyReload = 'f5'
-  private keyChangeState = 'space'
-  private keyFastForward = 'right'
-  private keyFastBackward = 'left'
-  private keyMute = 'ctrl+m'
-  private keyVolUp = 'up'
-  private keyVolDown = 'down'
-  // 绑定快捷键
-  // constructor() {
-  //   hotkeys(this.keyOpenDevTool, this.winOpenDevTool)
-  //   hotkeys(this.keyReload, this.winReload)
-  //   hotkeys(this.keyChangeState, this.mscChangeState)
-  //   hotkeys(this.keyFastForward, this.mscFastForward)
-  //   hotkeys(this.keyFastBackward, this.mscFastBackward)
-  //   hotkeys(this.keyMute, this.mscMute)
-  //   hotkeys(this.keyVolUp, this.mscVolUp)
-  //   hotkeys(this.keyVolDown, this.mscVolDown)
-  // }
-  // // 窗口打开开发者工具
-  // winOpenDevTool() { window.api.win.openDevTools() }
-  // // 窗口刷新页面
-  // winReload() { window.api.win.reloadWindow() }
-  // // 音乐播放/暂停
-  // mscChangeState() { bus.emChangeMscState() }
-  // // 音乐快进
-  // mscFastForward() { bus.emUpdateMsc(10, true) }
-  // // 音乐快退
-  // mscFastBackward() { bus.emUpdateMsc(-10, true) }
-  // // 音乐静音
-  // mscMute() { bus.emChangeMscMute() }
-  // // 音乐提高音量
-  // mscVolUp() { bus.emChangeMscVol(5, true) }
-  // // 音乐降低音量
-  // mscVolDown() { bus.emChangeMscVol(-5, true) }
+  private hotKeyMaps = new Map<() => void, string>()
+
+  constructor() {
+    this.hotKeyMaps.set(this.winOpenDevTool, 'f12')
+    this.hotKeyMaps.set(this.winReload, 'f5')
+    this.hotKeyMaps.set(this.mscChangeState, 'space')
+    this.hotKeyMaps.set(this.mscFastForward, 'right')
+    this.hotKeyMaps.set(this.mscFastBackward, 'left')
+    this.hotKeyMaps.set(this.mscMute, 'ctrl+m')
+    this.hotKeyMaps.set(this.mscVolUp, 'up')
+    this.hotKeyMaps.set(this.mscVolDown, 'down')
+    // 绑定快捷键
+    this.hotKeyMaps.forEach((key, func) => {
+      hotkeys(key, func)
+    })
+  }
+  // 窗口打开开发者工具
+  winOpenDevTool() {
+    window.api.win.openDevTools()
+  }
+  // 窗口刷新页面
+  winReload() {
+    window.api.win.reloadWindow()
+  }
+  // 音乐播放/暂停
+  mscChangeState() {
+    useAudioStore().changeStat()
+  }
+  // 音乐快进
+  mscFastForward() {
+    useAudioStore().changeTime(10, true)
+  }
+  // 音乐快退
+  mscFastBackward() {
+    useAudioStore().changeTime(-10, true)
+  }
+  // 音乐静音
+  mscMute() {
+    useAudioStore().changeMute()
+  }
+  // 音乐提高音量
+  mscVolUp() {
+    useAudioStore().changeVolu(5, true)
+  }
+  // 音乐降低音量
+  mscVolDown() {
+    useAudioStore().changeVolu(-5, true)
+  }
 }
 
 export function createHotKey() {
