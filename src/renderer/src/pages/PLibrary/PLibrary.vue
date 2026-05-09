@@ -6,51 +6,65 @@
     </div>
     <div class="contents">
       <KLibList class="mainList" :mode="curLib?.mode" :items="curItems" :path="curSelPath" @select="onItemSelect" />
-      <div class="detail" v-show="curLib?.mode === 'asmr' && curAlbum">
-        <KDirInfo :alb="curAlbum" />
-        <KDirList class="dirList" :dir="curDirec" :path="curPath" @music="onDirMusic" @musics="onDirMusics" />
+      <div class="detail" v-show="curLib?.mode === 'asmr' && selectAlbum">
+        <KDirInfo :alb="selectAlbum" />
+        <KDirList class="dirList" :dir="curDirec" :path="playMusic?.path" @music="onDirMusic" @musics="onDirMusics" />
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { useLibStore } from '@renderer/store'
-import { useAudioStore } from '@renderer/store'
+import { getLibraryManager, getAudioManager, getSessionManager } from '@renderer/store'
 
-const { curLibs, curLib, curItems, curItem, curAlbum, curPath, curList } = storeToRefs(useLibStore())
-const audioStore = useAudioStore()
+const audioManager = getAudioManager()
+const sessionManager = getSessionManager()
+const { curLibs, curLib, curItems } = storeToRefs(getLibraryManager())
+const { playMusic, playAlbum } = storeToRefs(sessionManager)
+const selectAlbum = ref<ILibAlbum>()
 /** 当前专辑目录 */
 const curDirec = ref<IDir>()
 /** 当前选中项目路径 */
-const curSelPath = computed(() => curLib.value?.mode === 'normal' ? curItem.value?.path : curAlbum.value?.path)
+const curSelPath = computed(() => curLib.value?.mode === 'normal' ? playMusic.value?.path : playAlbum.value?.path)
 
 // 选择音乐时播放音乐并更新当前播放列表，选择专辑时更新当前专辑目录
-async function onItemSelect(selIdx: number) {
-  if (!curLib.value) return
-  const selItem = curItems.value[selIdx]
+async function onItemSelect(idx: number) {
+  if (!curLib.value) {
+    return
+  }
+
+  const selectItem = curItems.value[idx]
+
   if (curLib.value.mode === 'normal') {
-    if (curItem.value?.path === selItem.path) return
-    audioStore.load(selItem.path)
-    curItem.value = selItem
-    curAlbum.value = undefined
-    curList.value = curItems.value.slice(selIdx)
+    if (playMusic.value?.path === selectItem.path) {
+      return
+    }
+
+    playMusic.value = selectItem
+    selectAlbum.value = undefined
+    sessionManager.updatePlayQueue(curItems.value.slice(idx))
+    audioManager.load(selectItem.path)
   } else if (curLib.value.mode === 'asmr') {
-    if (curAlbum.value?.path === selItem.path) return
-    curAlbum.value = selItem as ILibAlbum
-    curDirec.value = await window.api.scan.getDirStruc(selItem.path)
+    if (selectAlbum.value?.path === selectItem.path) {
+      return
+    }
+
+    selectAlbum.value = selectItem as ILibAlbum
+    curDirec.value = await window.api.scan.getDirStruc(selectItem.path)
   }
 }
 function onDirMusic(music: ILibItem) {
-  if (curPath.value === music.path) return
-  audioStore.load(music.path)
-  curItem.value = music
-  curList.value = [music]
+  if (playMusic.value?.path === music.path) {
+    return
+  }
+  playAlbum.value = selectAlbum.value
+  sessionManager.updatePlayQueue([music])
+  audioManager.load(music.path)
 }
 function onDirMusics(musics: ILibItem[]) {
-  audioStore.load(musics[0].path)
-  curItem.value = musics[0]
-  curList.value = musics
+  playAlbum.value = selectAlbum.value
+  sessionManager.updatePlayQueue(musics)
+  audioManager.load(musics[0].path)
 }
 </script>
 

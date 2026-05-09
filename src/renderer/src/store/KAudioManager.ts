@@ -1,8 +1,8 @@
 import { defineStore } from 'pinia'
 import { bus, Events } from '@renderer/utils/EventUtil'
 
-/** 音乐播放控制 */
-export const useAudioStore = defineStore('store-audio', () => {
+/** 音频播放管理 */
+export const getAudioManager = defineStore('store-audio', () => {
   const audio = new Audio()
   const mscPath = ref('')
   const mscStat = ref<AudioState>('unload') // 播放状态
@@ -40,11 +40,9 @@ export const useAudioStore = defineStore('store-audio', () => {
   })
   // 音乐控制
   function load(path: string, auto: boolean = true) {
-    // 播放状态为播放时，无论此次加载为切歌还是点击，均自动播放，忽略auto参数
-    // 播放状态为暂停/停止/未加载时，是否自动播放取决于auto参数
-    mscAuto.value = mscStat.value === 'play' ? true : auto
-    mscStat.value = 'loading'
     mscPath.value = path
+    mscAuto.value = auto
+    mscStat.value = 'loading'
     audio.src = window.url.pathToFileURL(path).href
   }
   function loadEnd() {

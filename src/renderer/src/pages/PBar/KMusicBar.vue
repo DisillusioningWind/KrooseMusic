@@ -7,7 +7,7 @@
     </div>
     <div class="buttonRow">
       <div class="detailBar">
-        <KDetailBtn v-show="!mscUnload" :title="mscTitle" :artist="mscArtist" :picURL="mscPicURL || curAlbum?.pic" :showPic="!showDetail" @click="btnChangeDetail" />
+        <KDetailBtn v-show="!mscUnload" :title="mscTitle" :artist="mscArtist" :picURL="mscPicURL" :showPic="!showDetail" @click="btnChangeDetail" />
       </div>
       <div class="controlBar">
         <button class="svgBtn" :class="{ unload: mscUnload }" v-tooltip="(!mscUnload)?'上一首':''" @click="btnLastMusic">
@@ -81,17 +81,17 @@
 import svgOpenDir from '@renderer/assets/icons/dir.svg?component'
 import svgOpenFile from '@renderer/assets/icons/plus.svg?component'
 import svgCloseFile from '@renderer/assets/icons/close.svg?component'
-import { useLibStore, useUIStore, useAudioStore, useInfoStore } from '@renderer/store'
+import { useUIStore, getAudioManager, useInfoStore, getSessionManager } from '@renderer/store'
 import { vTooltip } from '@renderer/directives/Tooltip'
 import { vMenu } from '@renderer/directives/Menu'
-import { formatTime } from '@renderer/utils/tools'
+import { basename, formatTime } from '@renderer/utils/tools'
 
-const audStore = useAudioStore()
-const libStore = useLibStore()
 const uiStore = useUIStore()
-const { loopMode, curAlbum } = storeToRefs(libStore)
+const audioManager = getAudioManager()
+const sessionManager = getSessionManager()
 const { showDetail } = storeToRefs(uiStore)
-const { mscState, mscVol, mscDur, mscTime, mscMute } = storeToRefs(audStore)
+const { mscState, mscVol, mscDur, mscTime, mscMute } = storeToRefs(audioManager)
+const { loopMode } = storeToRefs(sessionManager)
 const { mscTitle, mscArtist, mscPicURL, mscColor } = storeToRefs(useInfoStore())
 const mscUnload = computed(() => mscState.value === 'unload')// 音乐未加载状态
 const mscShowTime = ref(0)// 滑动条显示进度，滑动时实际进度不改变，等松开时才改变，但是显示进度实时更新
@@ -102,25 +102,26 @@ const mscMenu = [
 ]
 
 // 滑动条控制
-function sliderDragTime(time: number) { audStore.changeTime(time) }
-function sliderUpdateVol(vol: number) { audStore.changeVolu(vol) }
+function sliderDragTime(time: number) { audioManager.changeTime(time) }
+function sliderUpdateVol(vol: number) { audioManager.changeVolu(vol) }
 // UI控制
 function btnChangeDetail() { uiStore.switchDetailState() }
 function btnChangeDrawer() { uiStore.switchDrawerState() }
 // 音乐控制
-function btnChangeMute() { audStore.changeMute() }
-function btnChangeState() { if (!mscUnload.value) audStore.changeStat() }
-function btnFastForward() { if (!mscUnload.value) audStore.changeTime(10, true) }
-function btnFastBackward() { if (!mscUnload.value) audStore.changeTime(-10, true) }
-function btnLastMusic() { if (!mscUnload.value) libStore.loopMusic(false, false) }
-function btnNextMusic() { if (!mscUnload.value) libStore.loopMusic(true, false) }
+function btnChangeMute() { audioManager.changeMute() }
+function btnChangeState() { if (!mscUnload.value) audioManager.changeStat() }
+function btnFastForward() { if (!mscUnload.value) audioManager.changeTime(10, true) }
+function btnFastBackward() { if (!mscUnload.value) audioManager.changeTime(-10, true) }
+function btnLastMusic() { if (!mscUnload.value) sessionManager.loopPlayQueue(false, false) }
+function btnNextMusic() { if (!mscUnload.value) sessionManager.loopPlayQueue(true, false) }
 // 文件操作
-function btnUnloadFile() { audStore.unload() }
+function btnUnloadFile() { audioManager.unload() }
 async function btnOpenDir() { /** TODO */ }
 async function btnOpenFile() {
   const path = await window.api.win.openFileWindow()
   if (!path) return
-  audStore.load(path)
+  sessionManager.updatePlayQueue([ { name: basename(path), path } ])
+  audioManager.load(path)
 }
 </script>
 

@@ -1,18 +1,17 @@
 <template>
   <Transition name="fade">
     <div v-show="showDetail" class="PDetail" :style="background">
-      <KImage class="img" :url="mscPicURL || curAlbum?.pic" />
+      <KImage class="img" :url="mscPicURL" />
       <KLyric class="lrc" :stat="mscState" :time="mscTime" :lrcs="mscLyrics" />
     </div>
   </Transition>
 </template>
 
 <script setup lang="ts">
-import { useUIStore, useAudioStore, useInfoStore, useLibStore } from '@renderer/store'
+import { useUIStore, getAudioManager, useInfoStore } from '@renderer/store'
 const { showDetail } = storeToRefs(useUIStore())
-const { mscState, mscTime } = storeToRefs(useAudioStore())
+const { mscState, mscTime } = storeToRefs(getAudioManager())
 const { mscPicURL, mscLyrics } = storeToRefs(useInfoStore())
-const { curAlbum } = storeToRefs(useLibStore())
 const background = computed(() => ({ backgroundImage: mscPicURL.value ? `url(${mscPicURL.value})` : '' }))
 </script>
 

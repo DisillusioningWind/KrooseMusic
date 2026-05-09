@@ -1,14 +1,14 @@
 <template>
   <div class="KDrawerBar" ref="drawer" :class="{ show: showDrawer }">
-    <KLibList mode="playlist" :items="curList" :path="curPath" />
+    <KLibList mode="playlist" :items="playQueue" :path="playMusic?.path" />
   </div>
 </template>
 
 <script setup lang="ts">
 import { useUIStore } from '@renderer/store'
-import { useLibStore } from '@renderer/store'
+import { getSessionManager } from '@renderer/store'
 const { showDrawer } = storeToRefs(useUIStore())
-const { curList, curPath } = storeToRefs(useLibStore())
+const { playMusic, playQueue } = storeToRefs(getSessionManager())
 const drawer = ref<HTMLDivElement>()
 onMounted(() => { document.addEventListener('click', onDocClick) })
 onUnmounted(() => { document.removeEventListener('click', onDocClick) })

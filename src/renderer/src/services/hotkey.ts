@@ -1,5 +1,5 @@
 import hotkeys from 'hotkeys-js'
-import { useAudioStore } from '@renderer/store/audio'
+import { getAudioManager } from '@renderer/store/KAudioManager'
 
 class KHotKey {
   private hotKeyMaps = new Map<() => void, string>()
@@ -28,27 +28,27 @@ class KHotKey {
   }
   // 音乐播放/暂停
   mscChangeState() {
-    useAudioStore().changeStat()
+    getAudioManager().changeStat()
   }
   // 音乐快进
   mscFastForward() {
-    useAudioStore().changeTime(10, true)
+    getAudioManager().changeTime(10, true)
   }
   // 音乐快退
   mscFastBackward() {
-    useAudioStore().changeTime(-10, true)
+    getAudioManager().changeTime(-10, true)
   }
   // 音乐静音
   mscMute() {
-    useAudioStore().changeMute()
+    getAudioManager().changeMute()
   }
   // 音乐提高音量
   mscVolUp() {
-    useAudioStore().changeVolu(5, true)
+    getAudioManager().changeVolu(5, true)
   }
   // 音乐降低音量
   mscVolDown() {
-    useAudioStore().changeVolu(-5, true)
+    getAudioManager().changeVolu(-5, true)
   }
 }
 

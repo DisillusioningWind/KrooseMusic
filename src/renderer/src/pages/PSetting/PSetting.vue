@@ -3,12 +3,12 @@
     <p class="PTitle">设置</p>
     <KSetting title="音乐目录">
       <div class="Library">
-        <div v-for="lib, idx in curLibs" :key="lib.id">
+        <div v-for="lib in curLibs" :key="lib.id">
           <span v-tooltip.immediate.overflow="lib.name">{{ lib.name }}</span>
           <span v-tooltip.immediate.overflow="lib.path">{{ lib.path }}</span>
           <span>模式</span>
           <span>{{ lib.mode==='normal'?'普通':'ASMR' }}</span>
-          <button @click="onDeleteDir(lib.id, lib.name)"><Close /></button>
+          <button @click="onDeleteDir(lib.id)"><Close /></button>
         </div>
         <div class="AddDiv" @click="onOpenAddDialog"><Plus /></div>
         <KLibDialog v-model="libAddShow" :path="libAddDirPath" :num="libAddNum" :total="libAddTotal" @confirm="onConfirmDir" />
@@ -18,17 +18,20 @@
 </template>
 
 <script setup lang="ts">
-import { vTooltip } from '@renderer/directives/Tooltip'
-import { useLibStore } from '@renderer/store'
-import { basename } from '@renderer/utils/tools'
 import Close from '@renderer/assets/icons/close.svg?component'
 import Plus from '@renderer/assets/icons/plus.svg?component'
-const { curLibs } = storeToRefs(useLibStore())
+import { vTooltip } from '@renderer/directives/Tooltip'
+import { getLibraryManager } from '@renderer/store'
+import { basename } from '@renderer/utils/tools'
+
+const libStore = getLibraryManager()
+const { curLibs } = storeToRefs(libStore)
 const libAddShow = ref(false)
 const libAddNum = ref(0)
 const libAddTotal = ref(10)
 let libAddDirName = ''
 let libAddDirPath = ''
+
 // 打开添加音乐目录对话框
 async function onOpenAddDialog() {
   const path = await window.api.win.openDirectoryWindow()
@@ -50,10 +53,8 @@ async function onConfirmDir(mode: LibMode) {
   console.log('音乐目录数据添加成功')
 }
 // 删除音乐目录和音乐数据，同时更新curLibs
-async function onDeleteDir(idx: number, name: string) {
-  await window.api.db.delLibrary(idx)
-  curLibs.value.splice(idx, 1)
-  console.log('音乐目录删除成功')
+function onDeleteDir(libID: number) {
+  libStore.deleteLib(libID)
 }
 </script>
 
