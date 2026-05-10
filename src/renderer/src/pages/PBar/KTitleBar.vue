@@ -1,7 +1,7 @@
 <template>
   <div class="KTitleBar">
-    <button class="bak" :class="{ detail: showDetail, expand: !showDetail&&navExpand }" @click="btnChangeDetail">
-      <span class="txt" v-show="navExpand&&!showDetail">Kroose 音乐</span>
+    <button class="bak" :class="{ detail: showDetail, expand: expandNavi && !showDetail }" @click="btnChangeDetail">
+      <span class="txt" v-show="expandNavi && !showDetail">Kroose 音乐</span>
       <svg class="ico" v-show="showDetail" height="100%" width="100%">
         <line x1="34%" y1="50%" x2="62%" y2="50%" />
         <line x1="34%" y1="50%" x2="46%" y2="34%" />
@@ -28,12 +28,12 @@
 </template>
 
 <script setup lang="ts">
-import { useUIStore } from '@renderer/store'
+import { getUIManager } from '@renderer/store'
 
-const uiStore = useUIStore()
-const { showDetail, navExpand } = storeToRefs(uiStore)
+const uiManager = getUIManager()
+const { showDetail, expandNavi } = storeToRefs(uiManager)
 
-function btnChangeDetail() { uiStore.switchDetailState() }
+function btnChangeDetail() { uiManager.switchDetailState() }
 function btnMinWindow() { window.api.win.minWindow() }
 function btnMaxWindow() { window.api.win.maxWindow() }
 function btnCloseWindow() { window.api.win.closeWindow() }

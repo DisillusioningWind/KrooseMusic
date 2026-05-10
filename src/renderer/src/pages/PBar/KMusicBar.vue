@@ -81,18 +81,18 @@
 import svgOpenDir from '@renderer/assets/icons/dir.svg?component'
 import svgOpenFile from '@renderer/assets/icons/plus.svg?component'
 import svgCloseFile from '@renderer/assets/icons/close.svg?component'
-import { useUIStore, getAudioManager, useInfoStore, getSessionManager } from '@renderer/store'
+import { getUIManager, getAudioManager, getInfoManager, getSessionManager } from '@renderer/store'
 import { vTooltip } from '@renderer/directives/Tooltip'
 import { vMenu } from '@renderer/directives/Menu'
 import { basename, formatTime } from '@renderer/utils/tools'
 
-const uiStore = useUIStore()
+const uiManager = getUIManager()
 const audioManager = getAudioManager()
 const sessionManager = getSessionManager()
-const { showDetail } = storeToRefs(uiStore)
+const { showDetail } = storeToRefs(uiManager)
 const { mscState, mscVol, mscDur, mscTime, mscMute } = storeToRefs(audioManager)
 const { loopMode } = storeToRefs(sessionManager)
-const { mscTitle, mscArtist, mscPicURL, mscColor } = storeToRefs(useInfoStore())
+const { mscTitle, mscArtist, mscPicURL, mscColor } = storeToRefs(getInfoManager())
 const mscUnload = computed(() => mscState.value === 'unload')// 音乐未加载状态
 const mscShowTime = ref(0)// 滑动条显示进度，滑动时实际进度不改变，等松开时才改变，但是显示进度实时更新
 const mscMenu = [
@@ -105,8 +105,8 @@ const mscMenu = [
 function sliderDragTime(time: number) { audioManager.changeTime(time) }
 function sliderUpdateVol(vol: number) { audioManager.changeVolu(vol) }
 // UI控制
-function btnChangeDetail() { uiStore.switchDetailState() }
-function btnChangeDrawer() { uiStore.switchDrawerState() }
+function btnChangeDetail() { uiManager.switchDetailState() }
+function btnChangeDrawer() { uiManager.switchDrawerState() }
 // 音乐控制
 function btnChangeMute() { audioManager.changeMute() }
 function btnChangeState() { if (!mscUnload.value) audioManager.changeStat() }

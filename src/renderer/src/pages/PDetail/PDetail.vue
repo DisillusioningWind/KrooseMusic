@@ -8,10 +8,11 @@
 </template>
 
 <script setup lang="ts">
-import { useUIStore, getAudioManager, useInfoStore } from '@renderer/store'
-const { showDetail } = storeToRefs(useUIStore())
+import { getUIManager, getAudioManager, getInfoManager } from '@renderer/store'
+
+const { showDetail } = storeToRefs(getUIManager())
 const { mscState, mscTime } = storeToRefs(getAudioManager())
-const { mscPicURL, mscLyrics } = storeToRefs(useInfoStore())
+const { mscPicURL, mscLyrics } = storeToRefs(getInfoManager())
 const background = computed(() => ({ backgroundImage: mscPicURL.value ? `url(${mscPicURL.value})` : '' }))
 </script>
 

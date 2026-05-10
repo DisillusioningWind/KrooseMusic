@@ -1,5 +1,5 @@
-export { useUIStore } from '@renderer/store/interface'
-export { useInfoStore } from '@renderer/store/info'
+export { getUIManager } from '@renderer/store/KUIManager'
+export { getInfoManager } from '@renderer/store/KInfoManager'
 export { getAudioManager } from '@renderer/store/KAudioManager'
 export { getLibraryManager } from '@renderer/store/KLibraryManager'
 export { getSessionManager } from '@renderer/store/KSessionManager'

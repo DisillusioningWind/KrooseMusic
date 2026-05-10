@@ -5,13 +5,15 @@
 </template>
 
 <script setup lang="ts">
-import { useUIStore } from '@renderer/store'
-import { getSessionManager } from '@renderer/store'
-const { showDrawer } = storeToRefs(useUIStore())
-const { playMusic, playQueue } = storeToRefs(getSessionManager())
+import { getUIManager, getSessionManager } from '@renderer/store'
+
 const drawer = ref<HTMLDivElement>()
+const { showDrawer } = storeToRefs(getUIManager())
+const { playMusic, playQueue } = storeToRefs(getSessionManager())
+
 onMounted(() => { document.addEventListener('click', onDocClick) })
 onUnmounted(() => { document.removeEventListener('click', onDocClick) })
+
 function onDocClick(e: MouseEvent) {
   if (!drawer.value || !showDrawer.value) return
   showDrawer.value = drawer.value.contains(e.target as Node)

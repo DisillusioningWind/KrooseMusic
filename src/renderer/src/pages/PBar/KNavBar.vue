@@ -1,17 +1,16 @@
 <template>
-  <div class="KNavBar" :class="{ expand }">
+  <div class="KNavBar" :class="{ expand: expandNavi }">
     <div class="nav" v-for="menu in menus" :key="menu.path" :class="onMenuClass($route.fullPath, menu.path)" @click="onMenuClick(menu.path)">
-      <component class="icon" v-if="menu.path!=='/Search' || !expand" :is="menu.icon" />
+      <component class="icon" v-if="menu.path!=='/Search' || !expandNavi" :is="menu.icon" />
       <span class="title" v-if="menu.title.length > 0">{{ menu.title }}</span>
-      <input class="input" v-if="menu.path==='/Search' && expand" v-model="search" type="text" placeholder="搜索" spellcheck="false" />
-      <div class="cancel" v-if="menu.path==='/Search' && expand && search.length > 0" @click="onCancelClick"><SVGClose /></div>
-      <div class="confirm" v-if="menu.path==='/Search' && expand" @click="onSearchClick"><SVGSearch /></div>
+      <input class="input" v-if="menu.path==='/Search' && expandNavi" v-model="search" type="text" placeholder="搜索" spellcheck="false" />
+      <div class="cancel" v-if="menu.path==='/Search' && expandNavi && search.length > 0" @click="onCancelClick"><SVGClose /></div>
+      <div class="confirm" v-if="menu.path==='/Search' && expandNavi" @click="onSearchClick"><SVGSearch /></div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { useUIStore } from '@renderer/store'
 import router from '@renderer/router'
 import SVGMax from '@renderer/assets/icons/max.svg?component'
 import SVGSearch from '@renderer/assets/icons/search.svg?component'
@@ -20,8 +19,10 @@ import SVGMusic from '@renderer/assets/icons/music.svg?component'
 import SVGLike from '@renderer/assets/icons/like.svg?component'
 import SVGPlayList from '@renderer/assets/icons/playList.svg?component'
 import SVGSetting from '@renderer/assets/icons/setting.svg?component'
-const { navExpand: expand } = storeToRefs(useUIStore())
-const search = ref('')
+import { getUIManager } from '@renderer/store'
+
+const uiManager = getUIManager()
+const { expandNavi } = storeToRefs(uiManager)
 const menus = [
   { path: '/Max', title: '', icon: SVGMax },
   { path: '/Search', title: '', icon: SVGSearch},
@@ -30,19 +31,35 @@ const menus = [
   { path: '/List', title: '播放列表', icon: SVGPlayList },
   { path: '/Setting', title: '设置', icon: SVGSetting }
 ]
-onMounted(() => { onMenuClick('/Library') }) // 默认路径
+const search = ref('')
+
+// 默认路径
+onMounted(() => { onMenuClick('/Library') })
+
 function onMenuClass(routePath: string, menuPath: string) {
-  if (menuPath !== '/Search' && menuPath === routePath) { return 'select' }
-  else if (menuPath === '/Search' && expand.value) { return 'search' }
-  else { return '' }
+  if (menuPath !== '/Search' && menuPath === routePath) {
+    return 'select'
+  } else if (menuPath === '/Search' && expandNavi.value) {
+    return 'search'
+  } else {
+    return ''
+  }
 }
 function onMenuClick(path: string) {
-  if (path === '/Max') { expand.value = !expand.value }
-  else if (path !== '/Search') { router.push(path) }
-  else if (path === '/Search' && !expand.value) { expand.value = true }
+  if (path === '/Max' || (path === '/Search' && !expandNavi.value)) {
+    uiManager.switchNavBarState()
+  } else if (path !== '/Search') {
+    router.push(path)
+  }
 }
-function onCancelClick() { search.value = '' }
-function onSearchClick() { if (search.value.length > 0) { router.push({ path: '/Search', query: { search: search.value } }) } }
+function onCancelClick() {
+  search.value = ''
+}
+function onSearchClick() {
+  if (search.value.length > 0) {
+    router.push({ path: '/Search', query: { search: search.value } })
+  }
+}
 </script>
 
 <style scoped lang="scss">
