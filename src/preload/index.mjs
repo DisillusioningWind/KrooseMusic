@@ -1,4 +1,4 @@
-import { contextBridge, ipcRenderer, shell } from 'electron'
+import { contextBridge, ipcRenderer } from 'electron'
 import { pathToFileURL } from 'url'
 
 async function getAllAPI() {
@@ -15,11 +15,9 @@ async function getAllAPI() {
 
 try {
   if (process.contextIsolated) {
-    contextBridge.exposeInMainWorld('she', shell)
     contextBridge.exposeInMainWorld('url', { pathToFileURL })
     contextBridge.exposeInMainWorld('api', await getAllAPI())
   } else {
-    window.she = shell
     window.url = { pathToFileURL }
     window.api = await getAllAPI()
   }

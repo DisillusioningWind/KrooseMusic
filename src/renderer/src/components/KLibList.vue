@@ -21,7 +21,7 @@ const prop = defineProps<{
   /** 列表模式 */ mode?: ListMode,
   /** 选中路径 */ path?: string
 }>()
-const emit = defineEmits<{ select: [value: number] }>() // 项目选中事件，传递选中的索引
+const emit = defineEmits<{ select: [value: number], play: [value: number] }>()
 const list = ref<HTMLElement>() // 列表元素
 const listIsShow = ref(true)
 const listHeight = ref(0) // 动态列表高度
@@ -67,8 +67,8 @@ function onListScroll(e: Event) {
 }
 function onItemClick(idx: number) { emit('select', idx) }
 function onItemCtx(idx: number) { ctxIdx = idx }
-function onItemCtxPlay() { emit('select', ctxIdx) }
-function onItemCtxOpen() { window.she.showItemInFolder(prop.items[ctxIdx].path) }
+function onItemCtxPlay() { emit('play', ctxIdx) }
+function onItemCtxOpen() { window.api.scan.showItemInFolder(prop.items[ctxIdx].path) }
 </script>
 
 <style scoped lang="scss">

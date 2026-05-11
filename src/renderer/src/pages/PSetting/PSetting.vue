@@ -41,7 +41,7 @@ async function onOpenAddDialog() {
   libAddNum.value = 0
   libAddShow.value = true
 }
-// 确认添加音乐目录和音乐数据到数据库，同时更新curLibs
+// 添加曲库
 async function onConfirmDir(mode: LibMode) {
   const libID = await window.api.db.addLibrary(libAddDirName, libAddDirPath, mode)
   libAddTotal.value = await window.api.scan.getDirLength(mode, libAddDirPath)
@@ -52,7 +52,7 @@ async function onConfirmDir(mode: LibMode) {
   curLibs.value.push({ id: libID, name: libAddDirName, path: libAddDirPath, mode })
   console.log('音乐目录数据添加成功')
 }
-// 删除音乐目录和音乐数据，同时更新curLibs
+// 删除曲库
 function onDeleteDir(libID: number) {
   libStore.deleteLib(libID)
 }

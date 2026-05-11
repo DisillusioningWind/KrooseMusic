@@ -5,7 +5,7 @@
       <KLibSelect class="libSelect" v-model="curLib" :opts="curLibs" :label="'name'" />
     </div>
     <div class="contents">
-      <KLibList class="mainList" :mode="curLib?.mode" :items="curItems" :path="curSelPath" @select="onItemSelect" />
+      <KLibList class="mainList" :mode="curLib?.mode" :items="curItems" :path="curSelPath" @select="onItemSelect" @play="onItemPlay" />
       <div class="detail" v-show="curLib?.mode === 'asmr' && selectAlbum">
         <KDirInfo :alb="selectAlbum" />
         <KDirList class="dirList" :dir="curDirec" :path="playMusic?.path" @music="onDirMusic" @musics="onDirMusics" />
@@ -41,7 +41,6 @@ async function onItemSelect(idx: number) {
     }
 
     playMusic.value = selectItem
-    selectAlbum.value = undefined
     sessionManager.updatePlayQueue(curItems.value.slice(idx))
     audioManager.load(selectItem.path)
   } else if (curLib.value.mode === 'asmr') {
@@ -51,6 +50,27 @@ async function onItemSelect(idx: number) {
 
     selectAlbum.value = selectItem as ILibAlbum
     curDirec.value = await window.api.scan.getDirStruc(selectItem.path)
+  }
+}
+async function onItemPlay(idx: number) {
+  if (!curLib.value) {
+    return
+  }
+
+  const selectItem = curItems.value[idx]
+
+  if (curLib.value.mode === 'normal') {
+    playMusic.value = selectItem
+    sessionManager.updatePlayQueue([selectItem])
+    audioManager.load(selectItem.path)
+  } else if (curLib.value.mode === 'asmr') {
+    selectAlbum.value = selectItem as ILibAlbum
+    curDirec.value = await window.api.scan.getDirStruc(selectItem.path)
+    if (curDirec.value === undefined) {
+      console.error(`onItemPlay failed: cannot find curDirec, curDirec.path=${selectItem.path}`)
+      return
+    }
+    onDirMusics(curDirec.value.mscs)
   }
 }
 function onDirMusic(music: ILibItem) {

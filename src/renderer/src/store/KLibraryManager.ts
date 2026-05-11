@@ -7,7 +7,6 @@ export const getLibraryManager = defineStore('store-library', () => {
   const curLib = ref<ILibrary>()
   const curItems = shallowRef<ILibItem[]>([])
 
-  // 初始化当前曲库
   onMounted(() => { initCurLibs() })
 
   // 曲库列表变化时更新当前曲库，注意必须使用deep监听否则无法监听到曲库列表的变化
@@ -29,9 +28,16 @@ export const getLibraryManager = defineStore('store-library', () => {
     else { curItems.value = await window.api.db.getLibItems(curLib.id) }
   })
 
-  // 初始化曲库表和当前曲库
-  function initCurLibs() {
-    window.api.db.getLibraries().then(libs => curLibs.value = libs)
+  // 初始化曲库
+  async function initCurLibs() {
+    curLibs.value = await window.api.db.getLibraries()
+  }
+  // 创建曲库
+  async function createLib(libName: string, libPath: string, libMode: LibMode) {
+    // todo 更好的实现
+    const libID = await window.api.db.addLibrary(libName, libPath, libMode)
+    curLibs.value.push({ id: libID, mode: libMode, name: libName, path: libPath })
+    console.info(`createLib succes: libID=${libID}`)
   }
   // 删除曲库
   async function deleteLib(libID: number) {
@@ -39,11 +45,12 @@ export const getLibraryManager = defineStore('store-library', () => {
     const libIdx = curLibs.value.findIndex(lib => lib.id === libID)
     if (libIdx !== -1) {
       curLibs.value.splice(libIdx, 1)
-      console.log(`deleteLib succed: libID=${libID}`)
+      console.log(`deleteLib succes: libID=${libID}`)
     } else {
       console.log(`deleteLib failed: cannot find lib, libID=${libID}`)
     }
   }
+
   return {
     /** 所有曲库列表 */
     curLibs,
@@ -51,6 +58,8 @@ export const getLibraryManager = defineStore('store-library', () => {
     curItems,
     /** 当前曲库 */
     curLib,
+    /** 创面曲库 @param mode 曲库模式 */
+    createLib,
     /** 删除曲库 @param libID 曲库ID */
     deleteLib,
   }

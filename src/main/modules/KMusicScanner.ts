@@ -1,7 +1,8 @@
+import { shell } from 'electron'
 import { parseFile } from 'music-metadata'
 import { basename, extname, join } from 'path'
-import { KModule } from './KModule.js'
 import { Dirent, readdirSync } from 'fs'
+import { KModule } from './KModule.js'
 
 const MSC_EXTS = ['.mp3', '.flac', '.wav']
 const PIC_EXTS = ['.jpg', '.jpeg', '.png', '.webp']
@@ -14,7 +15,8 @@ export class KMusicScanner extends KModule {
   provideAPI() {
     return {
       getDirLength: this.getDirLength,
-      getDirStruc: this.getDirStruc
+      getDirStruc: this.getDirStruc,
+      showItemInFolder: shell.showItemInFolder
     }
   }
 
