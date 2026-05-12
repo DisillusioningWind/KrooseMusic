@@ -5,7 +5,7 @@
       <KLibSelect class="libSelect" v-model="curLib" :opts="curLibs" :label="'name'" />
     </div>
     <div class="contents">
-      <KLibList class="mainList" :mode="curLib?.mode" :items="curItems" :path="curSelPath" @select="onItemSelect" @play="onItemPlay" />
+      <KLibList class="mainList" :mode="curLib?.mode" :items="curItems" :path="curSelPath" :bottom="parseInt(style.musicHei)" @select="onItemSelect" @play="onItemPlay" />
       <div class="detail" v-show="curLib?.mode === 'asmr' && selectAlbum">
         <KDirInfo :alb="selectAlbum" />
         <KDirList class="dirList" :dir="curDirec" :path="playMusic?.path" @music="onDirMusic" @musics="onDirMusics" />
@@ -15,6 +15,7 @@
 </template>
 
 <script setup lang="ts">
+import style from '@renderer/assets/var.module.scss'
 import { getLibraryManager, getAudioManager, getSessionManager } from '@renderer/store'
 
 const audioManager = getAudioManager()
@@ -89,7 +90,7 @@ function onDirMusics(musics: ILibItem[]) {
 </script>
 
 <style scoped lang="scss">
-@use '@renderer/assets/var' as *;
+@use '@renderer/assets/var.module' as *;
 @use '@renderer/assets/style' as *;
 $tool-hei: 45px;// 工具栏高度
 $info-hei: 230px;// 信息栏高度

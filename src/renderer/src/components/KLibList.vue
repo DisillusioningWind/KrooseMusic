@@ -1,6 +1,6 @@
 <template>
-  <div class="KLibList" ref="list" @scroll="onListScroll" v-if="listIsShow">
-    <div class="scroll-wrap" :style="{ paddingBottom: Math.max(0, prop.items.length - itemStaCpt - itemNumber) * itemHeight + 122 + 'px' }">
+  <div class="KLibList" ref="list" @scroll="onListScroll" v-if="listIsShow" :style="{ '--list-bottom': listBottom + 'px' }">
+    <div class="scroll-wrap" :style="{ paddingBottom: Math.max(0, prop.items.length - itemStaCpt - itemNumber) * itemHeight + listBottom + 'px' }">
       <div class="item" v-for="(item, idx) in itemShowList" :key="item.path" :class="{ even: (itemStaCpt + idx) % 2 === 0, select: item.path === path }"
         :style="{ height: itemHeight + 'px' }" v-ctx-menu="itemMenu" @contextmenu="onItemCtx(idx + itemStaCpt)" @click="onItemClick(idx + itemStaCpt)">
         <span class="text" v-tooltip.immediate.overflow="item.name">{{ item.name + (item['ext'] ?? '') }}</span>
@@ -19,12 +19,14 @@ import { vCtxMenu } from '@renderer/directives/Menu'
 const prop = defineProps<{
   /** 列表项目 */ items: ILibItem[],
   /** 列表模式 */ mode?: ListMode,
-  /** 选中路径 */ path?: string
+  /** 选中路径 */ path?: string,
+  /** 底部边距 */ bottom?: number
 }>()
 const emit = defineEmits<{ select: [value: number], play: [value: number] }>()
 const list = ref<HTMLElement>() // 列表元素
 const listIsShow = ref(true)
 const listHeight = ref(0) // 动态列表高度
+const listBottom = computed(() => prop.bottom ?? 0) //列表底部边距
 const itemHeight = 40 // 列表项高度
 const itemNumber = computed(() => Math.floor(listHeight.value / itemHeight) + 1) // 虚拟列表显示的数量至少覆盖列表高度
 const itemStaRef = ref(0) // 虚拟列表加载的起始位置
@@ -73,12 +75,11 @@ function onItemCtxOpen() { window.api.scan.showItemInFolder(prop.items[ctxIdx].p
 
 <style scoped lang="scss">
 @use '@renderer/assets/style';
-@use '@renderer/assets/var';
 
 .KLibList {
   height: 100%;
   width: 100%;
-  @include style.k-scrollbar(auto, transparent, var.$music-hei);
+  @include style.k-scrollbar(auto, transparent, var(--list-bottom));
   >.scroll-wrap {
     >.item {
       user-select: none;

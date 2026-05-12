@@ -13,7 +13,7 @@
 </template>
 
 <style scoped lang="scss">
-@use '@renderer/assets/var' as *;
+@use '@renderer/assets/var.module' as *;
 @use '@renderer/assets/style' as *;
 .PMain {
   height: 100%;
