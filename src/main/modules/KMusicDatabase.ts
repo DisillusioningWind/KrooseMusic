@@ -35,6 +35,7 @@ export class KMusicDatabase extends KModule {
       getLibItems: this.getAllTableCommonLib,
       addLibItem: this.insertTableCommonLib,
       delLibItem: this.deleteTableCommonLib,
+      searchLibItems: this.searchTableCommonLib,
     }
   }
 
@@ -128,6 +129,11 @@ export class KMusicDatabase extends KModule {
 
   private getAllTableCommonLib(libID: number) {
     return this.db.prepare<[], ILibItem>(`SELECT * FROM "${libID}"`).all()
+  }
+
+  private searchTableCommonLib(libID: number, keyword: string) {
+    const likeword = `%${keyword}%`
+    return this.db.prepare<{ keyword: string }, ILibItem>(`SELECT * FROM "${libID}" WHERE name LIKE @keyword`).all({ keyword: likeword })
   }
 
   // ========== 事务 ==========
