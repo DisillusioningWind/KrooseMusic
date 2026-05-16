@@ -7,7 +7,7 @@ export const getLibraryManager = defineStore('store-library', () => {
   const curLib = ref<ILibrary>()
   const curItems = shallowRef<ILibItem[]>([])
 
-  onMounted(() => { initCurLibs() })
+  onMounted(() => { importLibs() })
 
   // 曲库列表变化时更新当前曲库，注意必须使用deep监听否则无法监听到曲库列表的变化
   watch(curLibs, (curLibs) => {
@@ -16,7 +16,7 @@ export const getLibraryManager = defineStore('store-library', () => {
     // 无当前曲库时默认选中第一个
     else if (!curLib.value) { curLib.value = curLibs[0] }
     // 当前曲库不存在时默认选中第一个
-    else { curLib.value = curLibs.find(lib => lib.name === curLib.value?.name) ? curLib.value : curLibs[0] }
+    else { curLib.value = curLibs.find(lib => lib.id === curLib.value?.id) ? curLib.value : curLibs[0] }
   }, { deep: true })
   // 当前曲库变化时更新当前曲库项目
   watch(curLib, async (curLib, lastLib) => {
@@ -28,22 +28,21 @@ export const getLibraryManager = defineStore('store-library', () => {
     else { curItems.value = await window.api.db.getLibItems(curLib.id) }
   })
 
-  // 初始化曲库
-  async function initCurLibs() {
+  // 导入曲库
+  async function importLibs() {
     curLibs.value = await window.api.db.getLibraries()
   }
   // 创建曲库
   async function createLib(libName: string, libPath: string, libMode: LibMode) {
-    // todo 更好的实现
     const libID = await window.api.db.addLibrary(libName, libPath, libMode)
     curLibs.value.push({ id: libID, mode: libMode, name: libName, path: libPath })
     console.info(`createLib succes: libID=${libID}`)
   }
   // 删除曲库
   async function deleteLib(libID: number) {
-    await window.api.db.delLibrary(libID)
     const libIdx = curLibs.value.findIndex(lib => lib.id === libID)
     if (libIdx !== -1) {
+      await window.api.db.delLibrary(libID)
       curLibs.value.splice(libIdx, 1)
       console.log(`deleteLib succes: libID=${libID}`)
     } else {
@@ -58,7 +57,7 @@ export const getLibraryManager = defineStore('store-library', () => {
     curItems,
     /** 当前曲库 */
     curLib,
-    /** 创面曲库 @param mode 曲库模式 */
+    /** 创面曲库 @param libName 曲库名称 @param libPath 曲库路径 @param libMode 曲库模式 */
     createLib,
     /** 删除曲库 @param libID 曲库ID */
     deleteLib,

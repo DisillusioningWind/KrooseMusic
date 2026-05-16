@@ -24,8 +24,8 @@ import { vTooltip } from '@renderer/directives/Tooltip'
 import { getLibraryManager } from '@renderer/store'
 import { basename } from '@renderer/utils/tools'
 
-const libStore = getLibraryManager()
-const { curLibs } = storeToRefs(libStore)
+const libManager = getLibraryManager()
+const { curLibs } = storeToRefs(libManager)
 const libAddShow = ref(false)
 const libAddNum = ref(0)
 const libAddTotal = ref(10)
@@ -43,18 +43,11 @@ async function onOpenAddDialog() {
 }
 // 添加曲库
 async function onConfirmDir(mode: LibMode) {
-  const libID = await window.api.db.addLibrary(libAddDirName, libAddDirPath, mode)
-  libAddTotal.value = await window.api.scan.getDirLength(mode, libAddDirPath)
-  console.log('音乐目录添加成功')
-  for (libAddNum.value = 0; libAddNum.value < libAddTotal.value; libAddNum.value++) {
-    await window.api.db.addLibItem(libID, mode, libAddNum.value)
-  }
-  curLibs.value.push({ id: libID, name: libAddDirName, path: libAddDirPath, mode })
-  console.log('音乐目录数据添加成功')
+  libManager.createLib(libAddDirName, libAddDirPath, mode)
 }
 // 删除曲库
 function onDeleteDir(libID: number) {
-  libStore.deleteLib(libID)
+  libManager.deleteLib(libID)
 }
 </script>
 

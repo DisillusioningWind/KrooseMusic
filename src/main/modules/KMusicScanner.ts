@@ -1,7 +1,8 @@
 import { shell } from 'electron'
 import { parseFile } from 'music-metadata'
 import { basename, extname, join } from 'path'
-import { Dirent, readdirSync } from 'fs'
+import { readdirSync } from 'fs'
+import { readdir } from 'fs/promises'
 import { KModule } from './KModule.js'
 
 const MSC_EXTS = ['.mp3', '.flac', '.wav']
@@ -9,58 +10,64 @@ const PIC_EXTS = ['.jpg', '.jpeg', '.png', '.webp']
 
 export class KMusicScanner extends KModule {
   readonly namespace = 'scan' as const
-  private mode: LibMode = 'normal'
-  private items: Dirent[] = []
 
   provideAPI() {
     return {
-      getDirLength: this.getDirLength,
       getDirStruc: this.getDirStruc,
       showItemInFolder: shell.showItemInFolder
     }
   }
 
   /**
-   * 获取目录中目标文件数量
-   * @param mode 目录模式
+   * 获取目录中所有目标文件
    * @param path 目录路径
-   * @returns 目标文件数量，包括音乐文件或子目录
+   * @param mode 目录模式
+   * @returns 目标文件数组
    */
-  async getDirLength(mode: LibMode, path: string): Promise<number> {
-    this.mode = mode
-    const items = readdirSync(path, { withFileTypes: true, recursive: mode === 'normal' ? true : false })
-    this.items = mode === 'normal' ? items.filter(item => item.isFile() && isMusic(item.name)) : items.filter(item => item.isDirectory())
-    return this.items.length
+  async getDirItems(path: string, mode: LibMode) {
+    if (mode === 'normal') {
+      return this.getDirMusics(path)
+    } else if (mode === 'asmr') {
+      return this.getDirAlbums(path)
+    } else {
+      throw new Error('mode not define')
+    }
   }
 
-  /**
-   * 获取目录中指定索引的文件信息
-   * @warning 不应当由渲染进程调用
-   * @param index 文件索引
-   * @returns 文件信息，类型为音乐或专辑
-   */
-  async getDirItemData(index: number): Promise<ILibMusic | ILibAlbum | undefined> {
-    if (index < 0 || index >= this.items.length) return undefined
-    const item = this.items[index]
-    const path = join(item.parentPath, item.name)
-    if (this.mode === 'normal') {
-      const data = await parseFile(path)
-      return {
-        name: data.common.title || basename(item.name, extname(item.name)),
-        path: path,
-        ext: extname(item.name),
-        artist: data.common.artist || '未知艺术家',
-        duration: data.format.duration || 0
-      }
-    } else if (this.mode === 'asmr') {
-      const subs = readdirSync(path, { withFileTypes: true, recursive: true })
-      const pic = subs.find(file => file.isFile() && isPicture(file.name))
-      return {
-        name: item.name,
-        path: path,
-        pic: pic ? join(pic.parentPath, pic.name) : ''
-      }
-    } else return undefined
+  async getDirMusics(path: string): Promise<ILibMusic[]> {
+    const dirEntrys = await readdir(path, { withFileTypes: true, recursive: true })
+    const dirMusics = dirEntrys.filter(entry => entry.isFile() && isMusic(entry.name))
+    const libMusics = await Promise.all(dirMusics.map(async music => {
+      const mscPath = join(music.parentPath, music.name)
+      const mscExtn = extname(music.name)
+      const mscData = await parseFile(mscPath)
+      const mscItem = {
+        name: mscData.common.title || basename(music.name, mscExtn),
+        path: mscPath,
+        ext: mscExtn,
+        artist: mscData.common.artist || '未知艺术家',
+        duration: mscData.format.duration || 0
+      } as ILibMusic
+      return mscItem
+    }))
+    return libMusics
+  }
+
+  async getDirAlbums(path: string): Promise<ILibAlbum[]> {
+    const dirEntrys = await readdir(path, { withFileTypes: true, recursive: false })
+    const dirAlbums = dirEntrys.filter(entry => entry.isDirectory())
+    const libAlbums = await Promise.all(dirAlbums.map(async album => {
+      const albPath = join(album.parentPath, album.name)
+      const albEnts = await readdir(albPath, { withFileTypes: true, recursive: true })
+      const albPict = albEnts.find(albEnt => albEnt.isFile() && isPicture(albEnt.name))
+      const albItem = {
+        name: album.name,
+        path: albPath,
+        pic: albPict ? join(albPict.parentPath, albPict.name) : ''
+      } as ILibAlbum
+      return albItem
+    }))
+    return libAlbums
   }
 
   /**

@@ -100,11 +100,12 @@ export class KMusicDatabase extends KModule {
     return this.db.prepare<ILibAlbum>(`INSERT INTO "${libID}" (name, path, pic) VALUES (@name, @path, @pic)`).run(item)
   }
 
-  private async insertTableCommonLib(libID: number, libMode: LibMode, itemIdx: number) {
-    const item = await this.getMod(KMusicScanner).getDirItemData(itemIdx)
-    if (!item) { console.error('File data not found') }
-    else if (libMode === 'normal') { this.insertTableNormalLib(libID, item as ILibMusic) }
-    else if (libMode === 'asmr') { this.insertTableAlbumLib(libID, item as ILibAlbum) }
+  private async insertTableCommonLib(libID: number, libMode: LibMode, item: ILibItem) {
+    if (libMode === 'normal') {
+      this.insertTableNormalLib(libID, item as ILibMusic)
+    } else if (libMode === 'asmr') {
+      this.insertTableAlbumLib(libID, item as ILibAlbum)
+    }
   }
 
   // ========== 删除 ==========
@@ -147,14 +148,16 @@ export class KMusicDatabase extends KModule {
   }
 
   /** 添加总库表项和对应的表 */
-  private transCreateCommonLib(name: string, path: string, mode: LibMode) {
-    return this.db.transaction((name: string, path: string, mode: LibMode) => {
-      const { lastInsertRowid } = this.insertTableLibrary(name, path, mode)
-      const libID = Number(lastInsertRowid)
-      if (mode === 'normal') { this.createTableNormalLib(libID) }
-      else if (mode === 'asmr') { this.createTableAlbumLib(libID) }
-      return libID
-    })(name, path, mode)
+  private async transCreateCommonLib(name: string, path: string, mode: LibMode) {
+    const libRes = this.insertTableLibrary(name, path, mode)
+    const libID = Number(libRes.lastInsertRowid)
+    if (mode === 'normal') { this.createTableNormalLib(libID) }
+    else if (mode === 'asmr') { this.createTableAlbumLib(libID) }
+    const libItems = await this.getMod(KMusicScanner).getDirItems(path, mode)
+    for (const libItem of libItems) {
+      await this.insertTableCommonLib(libID, mode, libItem)
+    }
+    return libID
   }
 
   /** 删除总库表项和对应的表 */
