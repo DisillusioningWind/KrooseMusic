@@ -1,7 +1,9 @@
+.DS_Store
+.vscode
+.reasonix
 node_modules
 dist
 out
-.DS_Store
-.vscode
 *.log*
 Data
+reasonix.toml

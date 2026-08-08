@@ -4,19 +4,13 @@ import { basename, extname, join } from 'path'
 import { readdirSync } from 'fs'
 import { readdir } from 'fs/promises'
 import { KModule } from './KModule.js'
+import { IPC } from '../utils/ipc.js'
 
 const MSC_EXTS = ['.mp3', '.flac', '.wav']
 const PIC_EXTS = ['.jpg', '.jpeg', '.png', '.webp']
 
 export class KMusicScanner extends KModule {
   readonly namespace = 'scan' as const
-
-  provideAPI() {
-    return {
-      getDirStruc: this.getDirStruc,
-      showItemInFolder: shell.showItemInFolder
-    }
-  }
 
   /**
    * 获取目录中所有目标文件
@@ -75,6 +69,7 @@ export class KMusicScanner extends KModule {
    * @param path 目录路径
    * @returns 目录结构，包含目录名称、子目录列表和音乐列表
    */
+  @IPC()
   async getDirStruc(path: string): Promise<IDir | undefined> { return this.recurseDir(path) }
 
   /**
@@ -95,6 +90,14 @@ export class KMusicScanner extends KModule {
       }
     })
     return curdir.dirs.length || curdir.mscs.length ? curdir : undefined
+  }
+  /**
+   * 在文件资源管理器中显示指定项目
+   * @param path 文件路径
+   */
+  @IPC()
+  showItemInFolder(path: string): void {
+    shell.showItemInFolder(path)
   }
 }
 

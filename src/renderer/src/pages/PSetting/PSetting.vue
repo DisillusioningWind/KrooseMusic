@@ -23,6 +23,7 @@ import Plus from '@renderer/assets/icons/plus.svg?component'
 import { vTooltip } from '@renderer/directives/Tooltip'
 import { getLibraryManager } from '@renderer/store'
 import { basename } from '@renderer/utils/tools'
+import type { IpcRendererEvent } from 'electron'
 
 const libManager = getLibraryManager()
 const { curLibs } = storeToRefs(libManager)
@@ -32,6 +33,18 @@ const libAddTotal = ref(10)
 let libAddDirName = ''
 let libAddDirPath = ''
 
+onMounted(() => {
+  window.api.db.onTransCreateCommonLib(onLibProgress)
+})
+onUnmounted(() => {
+  window.api.db.offTransCreateCommonLib(onLibProgress)
+})
+
+// 曲库导入进度
+function onLibProgress(_: IpcRendererEvent, inserted: number, total: number) {
+  libAddNum.value = inserted
+  libAddTotal.value = total
+}
 // 打开添加音乐目录对话框
 async function onOpenAddDialog() {
   const path = await window.api.win.openDirectoryWindow()

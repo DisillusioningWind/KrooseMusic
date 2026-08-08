@@ -22,8 +22,7 @@ export const getInfoManager = defineStore('store-info', () => {
       mscTitle.value = tag.title || basename(path)
       mscArtist.value = tag.artist || '未知艺术家'
       mscPicURL.value && URL.revokeObjectURL(mscPicURL.value)
-      // @ts-expect-error
-      mscPicURL.value = tag.picture ? URL.createObjectURL(new Blob([tag.picture[0].data])) : ''
+      mscPicURL.value = tag.picture ? URL.createObjectURL(new Blob([tag.picture[0].data as unknown as BlobPart])) : ''
     })
   }
   function unloadMusicInfo() {

@@ -1,4 +1,4 @@
-import type { API } from '../main/modules/index.ts'
+import type { API } from './ipc.gen'
 import { pathToFileURL } from 'url'
 
 declare global {

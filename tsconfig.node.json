@@ -12,5 +12,7 @@
     "types": ["electron-vite/node"],
     "module": "node16",
     "moduleResolution": "node16",
+    "experimentalDecorators": true,
+    "noUnusedLocals": false,
   }
 }

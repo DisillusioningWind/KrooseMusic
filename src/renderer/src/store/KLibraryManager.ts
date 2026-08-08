@@ -1,5 +1,4 @@
 import { defineStore } from 'pinia'
-import { bus, Events } from '@renderer/utils/EventUtil'
 
 /** 数据库管理 */
 export const getLibraryManager = defineStore('store-library', () => {

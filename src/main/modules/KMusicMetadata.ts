@@ -5,24 +5,19 @@ import { detect } from 'jschardet'
 import { decode } from 'iconv-lite'
 import { readFile } from 'fs/promises'
 import { KModule } from './KModule.js'
+import { IPC } from '../utils/ipc.js'
 
 /** 音乐文件信息模块 */
 export class KMusicMetadata extends KModule {
   readonly namespace = 'info' as const
-
-  provideAPI() {
-    return {
-      loadMusicLyrics: this.loadMusicLyrics,
-      loadMusicInfo: this.loadMusicInfo
-    }
-  }
 
   /**
    * 读取音乐相关的歌词文件
    * @param path 音乐文件路径
    * @returns 歌词列表
    */
-  private async loadMusicLyrics(path: string): Promise<ILyric[]> {
+  @IPC()
+  async loadMusicLyrics(path: string): Promise<ILyric[]> {
     const prefix = path.slice(0, path.lastIndexOf('.'))
     let detext = await this.loadFile(`${prefix}.lrc`), ext: 'lrc' | 'vtt' = 'lrc'
     if (!detext) { detext = await this.loadFile(`${path}.vtt`); ext = 'vtt' }
@@ -39,7 +34,8 @@ export class KMusicMetadata extends KModule {
    * @param path 音乐文件路径
    * @returns 音乐文件信息，包括标签和图片主色调
    */
-  private async loadMusicInfo(path: string): Promise<{ tag: ICommonTagsResult; mainColor: string }> {
+  @IPC()
+  async loadMusicInfo(path: string): Promise<{ tag: ICommonTagsResult; mainColor: string }> {
     const tag = (await parseFile(path)).common
     const mainColor = tag.picture ? await this.getPictureMainColor(tag.picture[0].data) : '#1a5d8e'
     return { tag, mainColor }

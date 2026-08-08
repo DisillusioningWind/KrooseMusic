@@ -12,7 +12,5 @@ const mods = [
   KWindowManager
 ] as const
 
-/** 新架构API */
-export type API = { [M in typeof mods[number] as InstanceType<M>['namespace']]: ReturnType<InstanceType<M>['provideAPI']> }
 /** 模块初始化 */
 export function initModules(): void { KModuleManager.init(mods) }

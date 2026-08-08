@@ -2,8 +2,16 @@ import Database from 'better-sqlite3'
 import { app } from 'electron/main'
 import { dirname, join } from 'path'
 import { existsSync, mkdirSync } from 'fs'
+import { IPC } from '../utils/ipc.js'
 import { KModule } from './KModule.js'
+import { KWindowManager } from './KWindowManager.js'
 import { KMusicScanner } from './KMusicScanner.js'
+
+/** 数据库模块事件组 */
+interface Events {
+  /** 曲库导入进度事件 @param inserted 已插入数量 @param total 总数量 */
+  transCreateCommonLib: (inserted: number, total: number) => void
+}
 
 /** 数据库模块 */
 export class KMusicDatabase extends KModule {
@@ -23,20 +31,6 @@ export class KMusicDatabase extends KModule {
     this.db = new Database(this.dbPath)
     this.db.pragma('journal_mode = WAL')
     this.transCreateLibrary()
-  }
-
-  // ========== 接口 ==========
-
-  provideAPI() {
-    return {
-      getLibraries: this.getAllTableLibrary,
-      addLibrary: this.transCreateCommonLib,
-      delLibrary: this.transDeleteCommonLib,
-      getLibItems: this.getAllTableCommonLib,
-      addLibItem: this.insertTableCommonLib,
-      delLibItem: this.deleteTableCommonLib,
-      searchLibItems: this.searchTableCommonLib,
-    }
   }
 
   // ========== 创建 ==========
@@ -110,7 +104,8 @@ export class KMusicDatabase extends KModule {
     return this.db.prepare<ILibAlbum>(`INSERT INTO "${libID}" (name, path, pic) VALUES (@name, @path, @pic)`).run(item)
   }
 
-  private async insertTableCommonLib(libID: number, libMode: LibMode, item: ILibItem) {
+  @IPC()
+  async addLibItem(libID: number, libMode: LibMode, item: ILibItem) {
     if (libMode === 'normal') {
       this.insertTableNormalLib(libID, item as ILibMusic)
     } else if (libMode === 'asmr') {
@@ -122,11 +117,13 @@ export class KMusicDatabase extends KModule {
 
   // ========== 删除 ==========
 
-  private deleteTableLibrary(libID: number) {
+  @IPC()
+  delLibrary(libID: number) {
     return this.db.prepare<{ libID: number }>('DELETE FROM library WHERE id = @libID').run({ libID })
   }
 
-  private deleteTableCommonLib(libID: number, itemID: number) {
+  @IPC()
+  delLibItem(libID: number, itemID: number) {
     return this.db.prepare<{ itemID: number }>(`DELETE FROM "${libID}" WHERE id = @libID`).run({ itemID })
   }
 
@@ -136,15 +133,18 @@ export class KMusicDatabase extends KModule {
 
   // ========== 查询 ==========
 
-  private async getAllTableLibrary() {
+  @IPC()
+  async getLibraries() {
     return this.db.prepare<[], ILibrary>('SELECT * FROM library').all()
   }
 
-  private getAllTableCommonLib(libID: number) {
+  @IPC()
+  getLibItems(libID: number) {
     return this.db.prepare<[], ILibItem>(`SELECT * FROM "${libID}"`).all()
   }
 
-  private searchTableCommonLib(libID: number, keyword: string) {
+  @IPC()
+  searchLibItems(libID: number, keyword: string) {
     const likeword = `%${keyword}%`
     return this.db.prepare<{ keyword: string }, ILibItem>(`SELECT * FROM "${libID}" WHERE name LIKE @keyword`).all({ keyword: likeword })
   }
@@ -160,7 +160,8 @@ export class KMusicDatabase extends KModule {
   }
 
   /** 添加总库表项和对应的表 */
-  private async transCreateCommonLib(name: string, path: string, mode: LibMode) {
+  @IPC()
+  async addLibrary(name: string, path: string, mode: LibMode) {
     // 插入总库表
     const libRes = this.insertTableLibrary(name, path, mode)
     const libID = Number(libRes.lastInsertRowid)
@@ -168,8 +169,11 @@ export class KMusicDatabase extends KModule {
     this.createTableCommonLib(libID, mode)
     // 插入曲库表
     const libItems = await this.getMod(KMusicScanner).getDirItems(path, mode)
-    for (const libItem of libItems) {
-      await this.insertTableCommonLib(libID, mode, libItem)
+    const libTotal = libItems.length
+    for (let libIdx = 0; libIdx < libTotal; libIdx++) {
+      await this.addLibItem(libID, mode, libItems[libIdx])
+      // 每次插入后发送进度事件
+      this.getMod(KWindowManager).sendToRenderer<Events>({ channel: 'transCreateCommonLib', data: [libIdx + 1, libTotal] })
     }
     return libID
   }
@@ -177,7 +181,7 @@ export class KMusicDatabase extends KModule {
   /** 删除总库表项和对应的表 */
   private transDeleteCommonLib(libID: number) {
     return this.db.transaction((libID: number) => {
-      this.deleteTableLibrary(libID)
+      this.delLibrary(libID)
       this.dropTableCommonLib(libID)
     })(libID)
   }
