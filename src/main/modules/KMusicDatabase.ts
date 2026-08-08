@@ -86,6 +86,16 @@ export class KMusicDatabase extends KModule {
     ).run()
   }
 
+  private createTableCommonLib(libID: number, libMode: LibMode) {
+    if (libMode === 'normal') {
+      this.createTableNormalLib(libID)
+    } else if (libMode === 'asmr') {
+      this.createTableAlbumLib(libID)
+    } else {
+      throw new Error('mode not define')
+    }
+  }
+
   // ========== 增加 ==========
 
   private insertTableLibrary(name: string, path: string, mode: LibMode) {
@@ -105,6 +115,8 @@ export class KMusicDatabase extends KModule {
       this.insertTableNormalLib(libID, item as ILibMusic)
     } else if (libMode === 'asmr') {
       this.insertTableAlbumLib(libID, item as ILibAlbum)
+    } else {
+      throw new Error('mode not define')
     }
   }
 
@@ -149,10 +161,12 @@ export class KMusicDatabase extends KModule {
 
   /** 添加总库表项和对应的表 */
   private async transCreateCommonLib(name: string, path: string, mode: LibMode) {
+    // 插入总库表
     const libRes = this.insertTableLibrary(name, path, mode)
     const libID = Number(libRes.lastInsertRowid)
-    if (mode === 'normal') { this.createTableNormalLib(libID) }
-    else if (mode === 'asmr') { this.createTableAlbumLib(libID) }
+    // 创建曲库表
+    this.createTableCommonLib(libID, mode)
+    // 插入曲库表
     const libItems = await this.getMod(KMusicScanner).getDirItems(path, mode)
     for (const libItem of libItems) {
       await this.insertTableCommonLib(libID, mode, libItem)
